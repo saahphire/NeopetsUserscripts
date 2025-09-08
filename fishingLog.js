@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Fishing Log
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.1
+// @version      1.0.2
 // @description  Logs your pets' fishing
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
