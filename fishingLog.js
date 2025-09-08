@@ -333,7 +333,7 @@ const initFormatting = async (formattingId) => {
     const input = document.getElementById(`fishing-log-${formattingId}`);
     input.value = await retrieve(formattingId);
     input.onchange = async () => {
-        await store(formattingId, input.value);
+        await store(input.value, formattingId);
         update();
     }
 }
