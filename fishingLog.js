@@ -86,7 +86,7 @@ const retrieveId = async () => parseInt(await GM.getValue("fishing-log-id", 1)) 
 
 const usedId = async () => GM.setValue("fishing-log-id", await retrieveId());
 
-const store = (data, id) => GM.setValue(`fishing-log-${id}`, data);
+const store = (id, data) => GM.setValue(`fishing-log-${id}`, data);
 
 const retrieve = (id) => GM.getValue(`fishing-log-${id}`, defaultValues[id]);
 
@@ -333,7 +333,7 @@ const initFormatting = async (formattingId) => {
     const input = document.getElementById(`fishing-log-${formattingId}`);
     input.value = await retrieve(formattingId);
     input.onchange = async () => {
-        await store(input.value, formattingId);
+        await store(formattingId, input.value);
         update();
     }
 }
