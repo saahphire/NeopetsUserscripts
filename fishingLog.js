@@ -179,7 +179,7 @@ const saveAction = async (pet, actionId, detail, category, time, id=undefined) =
         a: actionId ?? '',
         d: detail ?? '',
         c: category ?? '',
-        t: time ?? (new Date()).getTime(),
+        t: (time ? new Date(time) : new Date()).getTime(),
         id: id ?? await retrieveId()
     }
     await storeLog(id ? editAction(id, entry, log) : addAction(entry, log));
@@ -286,7 +286,8 @@ const onToggleMode = (e) => {
 }
 
 const onSubmit = async (e) => {
-    const inputs = dataTreatment.map(([inputName, _]) => document.getElementById(`fishing-log-manual-${inputName}`)?.value);
+    const inputs = dataTreatment.slice(0, -2).map(([inputName, _]) => document.getElementById(`fishing-log-manual-${inputName}`).value);
+    inputs.push((new Date(document.getElementById("fishing-log-manual-time").value)).getTime());
     if(e.target.classList.contains("is-edit")) inputs.push(parseInt(document.getElementById('fishing-log-manual-id').value));
     saveAction(...inputs);
     const buttonText = e.target.textContent;
@@ -301,9 +302,10 @@ const onIdChange = async (e) => {
     if(!entry) e.target.classList.add("invalid");
     else {
         e.target.classList.remove("invalid");
-        dataTreatment.forEach(([inputName, _]) => {
+        dataTreatment.slice(0, -2).forEach(([inputName, _]) => {
             document.getElementById(`fishing-log-manual-${inputName}`).value = entry[inputName[0]]
         });
+        document.getElementById(`fishing-log-manual-time`).value = (new Date(entry.t)).toISOString().slice(0, 16);
     }
 }
 
