@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Fishing Log
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.3
+// @version      1.0.4
 // @description  Logs your pets' fishing
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -47,7 +47,7 @@
 ☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆
 */
 
-const activateSep2025Challenge = false;
+const activateSep2025Challenge = true;
 const timeFormatSettings = {
     // Possible values: pretty much any language. en-US, with the default values, looks like 'Sep 2, 08:04 PM'. en-UK looks like '2 Sept, 20:04'
     locale: "en-US",
@@ -286,7 +286,7 @@ const onToggleMode = (e) => {
 }
 
 const onSubmit = async (e) => {
-    const inputs = dataTreatment.map(([inputName, _]) => document.getElementById(`fishing-log-manual-${inputName}`).value);
+    const inputs = dataTreatment.map(([inputName, _]) => document.getElementById(`fishing-log-manual-${inputName}`)?.value);
     if(e.target.classList.contains("is-edit")) inputs.push(parseInt(document.getElementById('fishing-log-manual-id').value));
     saveAction(...inputs);
     const buttonText = e.target.textContent;
@@ -615,8 +615,8 @@ const html = `
             <input type="datetime-local" id="fishing-log-manual-time">
             <label for="fishing-log-manual-pet">Pet</label>
             <input type="text" id="fishing-log-manual-pet">
-            <label for="fishing-log-manual-action">Action</label>
-            <select id="fishing-log-manual-action"><option value="${fishingPoints.map(([actionName, _], i) => i + '">' + actionName).join('</option>\n<option value="')}"></option></select>
+            ${activateSep2025Challenge ? '<label for="fishing-log-manual-action">Action</label>' : ''}
+            ${activateSep2025Challenge ? '<select id="fishing-log-manual-action"><option value="' + fishingPoints.map(([actionName, _], i) => i + '">' + actionName).join('</option>\n<option value="') + '"></option></select>' : ''}
             <label for="fishing-log-manual-details">Details</label>
             <input type="text" id="fishing-log-manual-details">
             <button id="fishing-log-manual-submit" type="button">Add Entry</button>
