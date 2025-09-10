@@ -278,7 +278,7 @@ const onToggleMode = (e) => {
         inputOrLabel.classList.toggle("hidden");
     });
     document.querySelectorAll(".mode-toggle .add, .mode-toggle .edit").forEach(label => label.classList.toggle("active"));
-    document.querySelectorAll(".fishing-log legend, .fishing-log button").forEach(txt => {
+    document.querySelectorAll(".fishing-log-manual legend, .fishing-log-manual button").forEach(txt => {
         txt.textContent = txt.textContent.replace(add ? "Add" : "Edit", add ? "Edit": "Add");
         txt.classList.toggle("is-edit");
     });
