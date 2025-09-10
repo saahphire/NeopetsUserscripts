@@ -617,6 +617,8 @@ const html = `
             <input type="text" id="fishing-log-manual-pet">
             ${activateSep2025Challenge ? '<label for="fishing-log-manual-action">Action</label>' : ''}
             ${activateSep2025Challenge ? '<select id="fishing-log-manual-action"><option value="' + fishingPoints.map(([actionName, _], i) => i + '">' + actionName).join('</option>\n<option value="') + '"></option></select>' : ''}
+            <label for="fishing-log-manual-category">Category</label>
+            <input type="text" id="fishing-log-manual-category">
             <label for="fishing-log-manual-details">Details</label>
             <input type="text" id="fishing-log-manual-details">
             <button id="fishing-log-manual-submit" type="button">Add Entry</button>
