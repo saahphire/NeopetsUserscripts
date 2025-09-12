@@ -1,13 +1,13 @@
 // ==UserScript==
 // @name         Neopets: Avatars in Reverse Order
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.0
+// @version      1.0.1
 // @description  Reorders avatars in the Neoboards preference page to most recent first
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
 // @downloadURL  https://github.com/saahphire/NeopetsUserscripts/blob/main/avatarsInReverseOrder.js
 // @updateURL    https://github.com/saahphire/NeopetsUserscripts/blob/main/avatarsInReverseOrder.js
-// @match        *://*.neopets.com/settings/neoboards/
+// @match        *://*.neopets.com/settings/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=neopets.com
 // @license      The Unlicense
 // ==/UserScript==
