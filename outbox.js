@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Outbox (Sent NeoMail)
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.0
+// @version      1.0.1
 // @description  Saves the last 100 sent neomails in an Outbox
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -31,14 +31,17 @@ class Outbox {
 
     async add() {
         const timestamp = new Date().getTime();
-        const nickname = document.querySelector('input[name="recipient"] ~ span').textContent;
+        const nickname = document.querySelector('input[name="recipient"] ~ span')?.textContent;
         const username = document.querySelector('input[name="recipient"]').value;
         const subject = document.querySelector('input[name="subject"]').value;
-        const replyElement = document.querySelector('td[bgcolor="#DEDEDE"]')?.cloneNode(true);
-        replyElement.querySelector("input").remove();
-        const reply = replyElement.innerHTML;
         const body = document.getElementById("message_body").value;
-        this.messages.push(new Message(timestamp, nickname, username, subject, body, reply));
+        const replyElement = document.querySelector('td[bgcolor="#DEDEDE"]')?.cloneNode(true);
+        if (replyElement) {
+            replyElement.querySelector("input").remove();
+            const reply = replyElement.innerHTML;
+            this.messages.push(new Message(timestamp, nickname, username, subject, body, reply));
+        }
+        else this.messages.push(new Message(timestamp, nickname, username, subject, body));
         this.save();
     }
 }
@@ -62,7 +65,7 @@ class Message {
         tr.dataset.timestamp = this.timestamp;
         tr.innerHTML = `
         <td class="outbox--timestamp">${(new Date(this.timestamp)).toLocaleString(navigator.language, {dateStyle: "short", timeStyle: "short"})}</td>
-        <td class="outbox--recipient">${this.nickname}<br>[<a href="https://www.neopets.com/userlookup.phtml?user=${this.username}">${this.username}</a>]</td>
+        <td class="outbox--recipient">${this.nickname ? this.nickname + '<br>[' : ''}<a href="https://www.neopets.com/userlookup.phtml?user=${this.username}">${this.username}</a>${this.nickname ? ']' : ''}</td>
         <td class="outbox--subject">${this.subject}</td>
         `;
         tr.onclick = () => this.toggle(tr);
@@ -166,6 +169,9 @@ const css = `<style>
 }
 .outbox--list td, .outbox--list th {
   padding: 3px;
+}
+.outbox--timestamp {
+  line-height: 2.5;
 }
 .neomail-outbox-date {
   width: 130px;
