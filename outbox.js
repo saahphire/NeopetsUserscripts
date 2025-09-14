@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Outbox (Sent NeoMail)
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.2
+// @version      1.0.3
 // @description  Saves the last 100 sent neomails in an Outbox
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
