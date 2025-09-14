@@ -113,7 +113,7 @@ class Message {
 class UI {
     constructor(outbox) {
         this.anchor = document.createElement("a");
-        this.anchor.classList.add("outbox--fake-link");
+        this.anchor.href = "#";
         this.anchor.onclick = () => this.open(outbox);
         this.anchor.textContent = "Outbox";
     }
@@ -147,10 +147,6 @@ class UI {
 }
 
 const css = `<style>
-.outbox--fake-link {
-  color: ${window.getComputedStyle(document.querySelector('a[href="/diary.phtml"]')).color};
-  cursor: pointer;
-}
 .outbox--list {
   width: 100%;
   border: 1px solid #000000;
