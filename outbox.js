@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Outbox (Sent NeoMail)
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.1
+// @version      1.0.2
 // @description  Saves the last 100 sent neomails in an Outbox
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -34,7 +34,7 @@ class Outbox {
         const nickname = document.querySelector('input[name="recipient"] ~ span')?.textContent;
         const username = document.querySelector('input[name="recipient"]').value;
         const subject = document.querySelector('input[name="subject"]').value;
-        const body = document.getElementById("message_body").value;
+        const body = document.getElementById("message_body").value ?? document.getElementById("message_body").contentDocument.body.innerText.replaceAll(/\n\n/g, "\n");
         const replyElement = document.querySelector('td[bgcolor="#DEDEDE"]')?.cloneNode(true);
         if (replyElement) {
             replyElement.querySelector("input").remove();
@@ -79,11 +79,11 @@ class Message {
         const tbody = document.createElement("tbody");
         table.appendChild(tbody);
         tbody.innerHTML = `
-        <tr><td>To:</td><td>[<a href="https://www.neopets.com/userlookup.phtml?user=${this.username}">${this.username}</a>] ${this.nickname}</td></tr>
+        <tr><td>To:</td><td>[<a href="https://www.neopets.com/userlookup.phtml?user=${this.username}">${this.username}</a>] ${this.nickname ?? ''}</td></tr>
         <tr><td>Sent:</td><td>${(new Date(this.timestamp)).toLocaleString(navigator.language, {dateStyle: "short", timeStyle: "short"})}</td></tr>
         <tr><td>Subject:</td><td>${this.subject}</td>
         ${this.reply ? '<tr><td>' + this.username + ' wrote:</td><td>' + this.reply + '</td></tr>' : ''}
-        <tr><td>Message:</td><td>${this.body}</td></tr>
+        <tr><td>Message:</td><td>${this.body.replaceAll("\n", "<br>")}</td></tr>
         `;
         return table;
     }
@@ -221,6 +221,6 @@ const css = `<style>
     const ui = new UI(outbox);
     ui.appendAnchor();
     document.querySelector(".content input[type='submit']")?.addEventListener("click", () => {
-        outbox.add()
+        outbox.add();
     });
 })();
