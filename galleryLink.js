@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Neopets: Gallery Link on Shops Menu
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.0
-// @description  Moves your battle pet(s) to the top in the status page of training schools
+// @version      1.0.1
+// @description  Adds a Gallery link to the Shop menu
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
 // @downloadURL  https://github.com/saahphire/NeopetsUserscripts/blob/main/galleryLink.js
@@ -17,7 +17,7 @@
 ☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆
     This script does the following:
     1. Adds a Gallery link to the Shops menu in the classic Neopets layout
-    2. Adds a Galleyr link to the Shop menu in the 2020 layout
+    2. Adds a Gallery link to the Shop menu in the 2020 layout
     3. Allows you to change which gallery page it links to by changing galleryLink
     Note that some userscript writers use relative (/gallery) links instead of absolute (https://neopets.com/gallery)
     links. And then they all get broken in the NC Mall. Don't do that. Just use absolute.
