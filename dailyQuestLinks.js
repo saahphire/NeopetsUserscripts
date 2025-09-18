@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Daily Quest Links
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.0
+// @version      1.1.0
 // @description  Adds links to quickly complete daily quests
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -59,19 +59,21 @@ const makeLink = (quest) => {
   }
 };
 
-const makeInterval = () => {
-  const interval = setInterval(() => {
-    const quests = document.querySelectorAll(".ql-task-description");
-    if (quests.length < 1) return;
-    quests.forEach((quest) => makeLink(quest));
-    clearInterval(interval);
-  }, 100);
-};
+const onRightPage = () => {
+}
 
 (function () {
   "use strict";
-  makeInterval();
-  document
-    .getElementsByClassName("tab-2")[0]
-    .addEventListener("click", () => makeInterval());
+    let wrongPage = true;
+    setInterval(() => {
+      const quests = document.querySelectorAll(".ql-task-description");
+      if (!document.querySelector(".tab-2.tab-active") || quests.length < 1) {
+        wrongPage = true;
+        return;
+      }
+      if(wrongPage) {
+        wrongPage = false;
+        quests.forEach((quest) => makeLink(quest));
+      }
+    }, 100);
 })();
