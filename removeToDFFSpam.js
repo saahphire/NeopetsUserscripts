@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Remove Tales of Dacardia and Faerie Fragments Spam
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.0
+// @version      1.1.0
 // @description  Automatically deletes neomail about Tales of Dacardia and Faerie Fragments rewards
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -19,10 +19,13 @@
     This script does the following:
     1. Detects neomail about Tales of Dacardia and Faerie Fragments rewards
     2. Selects all fitting neomail once you open your inbox
-    3. Deletes that neomail
-    The page refreshes when that neomail is deleted. This only works on one page at a time.
-    Use this with caution. If you're worried about the auto delete part, comment out the last line by adding //
-    in front of it, like so: // sel.form.submit();
+    3. Focuses the "Go!" button so they'll be deleted as soon as you press Enter
+    This only works on one page at a time.
+    The last step can be problematic for accessibility. If you don't wish to autofocus, comment out the last line
+    by adding a // in front of it, like so:
+    // sel.nextElementSibling.focus();
+
+    ✦ ⌇ saahphire
 ☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆
 ..................................................................................................................
 •:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•:•:•:•:•:•:•:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•.•:•:•:•:•:•:•:•:•.•:•:•.•:•.••:•.•
@@ -36,5 +39,5 @@
     filtered.forEach(tr => {tr.querySelector("input[type='checkbox']").checked = true});
     const sel = document.querySelector("[name='action']");
     sel.selectedIndex = [...sel.options].findIndex(opt => opt.value == "Delete Messages");
-    sel.form.submit();
+    sel.nextElementSibling.focus();
 })();
