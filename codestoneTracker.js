@@ -2,7 +2,7 @@
 // @name         Neopets: Codestone Tracker
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
 // @version      1.1.0
-// @description  Moves your battle pet(s) to the top in the status page of training schools
+// @description  Lets you retrieve codestones from the training page
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
 // @downloadURL  https://github.com/saahphire/NeopetsUserscripts/blob/main/codestoneTracker.js
