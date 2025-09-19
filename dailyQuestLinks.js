@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Daily Quest Links
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.1.0
+// @version      1.2.0
 // @description  Adds links to quickly complete daily quests
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -19,6 +19,9 @@
     Once you click "Purchase Items", you'll buy an Icy Snowball for 5NP. If you have to buy more than one item,
     a link to the General Store will be next to that one. You may buy a Blue Short Hair Brush for 50 NP there.
     Enjoy! Like all of my scripts, this is Unlicensed.
+
+    Thank you Panda Crab for your help with waitForLogToLoad! I literally couldn't have done it without you!
+
     ✦ ⌇ saahphire
 ☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆
 ..................................................................................................................
@@ -59,21 +62,26 @@ const makeLink = (quest) => {
   }
 };
 
-const onRightPage = () => {
+function waitForLogToLoad(callback) {
+  const selector = "#QuestLogStreakName"; //if this element is ready, the entire log should be ready
+  const container = document.querySelector("#QuestLogContent"); //this appears immediately but has no children/content
+  function tryRun() {
+    const el = document.querySelector(selector);
+    if (el && !el.dataset.processed) {
+      el.dataset.processed = "true";
+      callback();
+    }
+  }
+  tryRun();
+  const observer = new MutationObserver(() => {
+    tryRun();
+  });
+  observer.observe(container, { childList: true, subtree: true });
 }
+
+const processQuestLog = () => document.querySelectorAll(".ql-task-description").forEach((quest) => makeLink(quest));
 
 (function () {
   "use strict";
-    let wrongPage = true;
-    setInterval(() => {
-      const quests = document.querySelectorAll(".ql-task-description");
-      if (!document.querySelector(".tab-2.tab-active") || quests.length < 1) {
-        wrongPage = true;
-        return;
-      }
-      if(wrongPage) {
-        wrongPage = false;
-        quests.forEach((quest) => makeLink(quest));
-      }
-    }, 100);
+    waitForLogToLoad(processQuestLog); //processQuestLog is another function defined elsewhere
 })();
