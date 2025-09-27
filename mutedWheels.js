@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Muted Wheels
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.0
+// @version      1.0.1
 // @description  Mutes all wheels
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -13,7 +13,7 @@
 // @match        *://*.neopets.com/medieval/knowledge*
 // @match        *://*.neopets.com/prehistoric/mediocrity*
 // @match        *://*.neopets.com/halloween/wheel*
-// @match        *://*.neopets.com/prehistoric/monotony
+// @match        *://*.neopets.com/prehistoric/monotony*
 // @match        *://*.neopets.com/premium/wheel*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=neopets.com
 // @license      The Unlicense
