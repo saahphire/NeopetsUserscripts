@@ -1,16 +1,18 @@
 // ==UserScript==
 // @name         Neopets: Improve Page Titles
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.0
+// @version      1.0.1
 // @description  Removes "Neopets - " from the start of a tab/window's title and renames a few titles
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
+// @homepage     https://github.com/saahphire/NeopetsUserscripts
 // @downloadURL  https://github.com/saahphire/NeopetsUserscripts/blob/main/improvePageTitles.js
 // @updateURL    https://github.com/saahphire/NeopetsUserscripts/blob/main/improvePageTitles.js
 // @match        *://*.neopets.com/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=neopets.com
 // @license      The Unlicense
 // ==/UserScript==
+
 /*
 •:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•:•:•:•:•:•:•:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•.•:•:•:•:•:•:•
 .............................................................................................
@@ -34,7 +36,7 @@
 */
 const getPages = () => {
     const activePage = document.getElementsByClassName("boardPageButton-active");
-    if (!activePage) return '';
+    if (!activePage || activePage.length == 0) return '';
     const currentPage = activePage[0].textContent;
     const pages = document.getElementsByClassName("boardPageButton");
     const lastPage = pages[pages.length - 2].textContent;
