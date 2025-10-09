@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Bigger SVG on page
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.0
+// @version      1.0.1
 // @description  Resizes customization SVGs so they're 1920px wide/high when you see them in their own page. That way you can save a bigger version.
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
