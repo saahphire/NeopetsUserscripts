@@ -7,7 +7,7 @@
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
 // @downloadURL  https://github.com/saahphire/NeopetsUserscripts/blob/main/biggerSVG.js
 // @updateURL    https://github.com/saahphire/NeopetsUserscripts/blob/main/biggerSVG.js
-// @match        *://images.neopets.com/*.svg
+// @match        *://images.neopets.com/*.svg*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=neopets.com
 // @license      The Unlicense
 // ==/UserScript==
