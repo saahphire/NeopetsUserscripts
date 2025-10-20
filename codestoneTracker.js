@@ -2,9 +2,10 @@
 // @name         Neopets: Codestone Tracker
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
 // @version      1.1.0
-// @description  Lets you retrieve codestones from the training page
+// @description  Moves your battle pet(s) to the top in the status page of training schools
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
+// @homepage     https://github.com/saahphire/NeopetsUserscripts
 // @downloadURL  https://github.com/saahphire/NeopetsUserscripts/blob/main/codestoneTracker.js
 // @updateURL    https://github.com/saahphire/NeopetsUserscripts/blob/main/codestoneTracker.js
 // @match        *://*.neopets.com/island/training.phtml?type=status
@@ -17,6 +18,7 @@
 // @grant        GM.getValue
 // @license      The Unlicense
 // ==/UserScript==
+
 /*
 •:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•:•:•:•:•:•:•:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•.•:•:•:•:•:•:•:•:•.•:•:•.•:•.••:•.•
 ..................................................................................................................
@@ -228,17 +230,18 @@ const removeOneFromStorage = async (itemName) => {
 * @param link {Element} The anchor element that should be edited to reflect the request's result
 */
 const removeCodestone = (itemId, itemName, pin, link) => {
+    link.textContent = "⌛ " + link.textContent;
     const url = `https://www.neopets.com/process_safetydeposit.phtml?offset=0&remove_one_object=${itemId}&obj_name=&category=2&pin=${pin}`;
     fetch(url, {
         method: 'GET'
-    }).then(response => {
+    }).then(() => {
         removeOneFromStorage(itemName);
-        link.innerText = `✔️ ${link.innerText}`;
+        link.innerText = link.innerText.replace("⌛", "✔️");
         link.style.textDecoration = "line-through";
         link.removeAttribute("href");
     }).catch(error => {
         console.error("Something went wrong! " + error);
-        link.innerText = `✖️ ${link.innerText}`;
+        link.innerText = link.innerText.replace("⌛", "✖️");
     });
 }
 
@@ -254,7 +257,10 @@ const makeLink = (codestoneElement, isSDB, itemId) => {
     a.appendChild(codestoneElement);
     const foundPin = getPin();
     if(iWantToRemoveCodestonesFromMySDBWithAClick && isSDB && typeof foundPin === 'string') {
-        a.onclick = () => removeCodestone(itemId, codestoneElement.innerText, foundPin, a);
+        a.onclick = (e) => {
+            e.preventDefault();
+            removeCodestone(itemId, codestoneElement.innerText, foundPin, a)
+        };
         a.href = "#";
     }
     else {
@@ -317,7 +323,6 @@ const onQuickStock = async () => {
     const storage = await getStoredCodestones();
     const allExistingCodestones = getExistingCodestones();
     document.querySelector("input[type='submit']").addEventListener("click", () => {
-        const count = 0;
         const rows = document.querySelectorAll("input[name='buyitem'] ~ table tr:has(input[type='hidden'])");
         const limit = Math.min(70, rows.length);
         for(let i = 0; i < limit; i++) {
