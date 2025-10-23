@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Remove Premium Reminders
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.0
+// @version      1.1.0
 // @description  Removes all the little "Hey if you have premium you can get X!" things. Doesn't touch actual ads.
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -17,6 +17,8 @@
 // @match        *://*.neopets.com/shops/wizard.phtml*
 // @match        *://*.neopets.com/trudys_surprise.phtml
 // @match        *://*.neopets.com/gallery/gallery_user_cats.phtml
+// @match        *://*.neopets.com/faerieland/darkfaerie.phtml
+// @match        *://*.neopets.com/medieval/earthfaerie.phtml
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=neopets.com
 // @license      The Unlicense
 // ==/UserScript==
@@ -41,6 +43,7 @@
     - Streak save ticket button when you haven't missed a day in your daily quests.
     - Extra gallery categories.
     - The premium NeoBoard has been removed.
+    - Illusen and Jhudora
 
     It does not remove Premium reminders for:
     - Actual ads. Get an adblocker.
