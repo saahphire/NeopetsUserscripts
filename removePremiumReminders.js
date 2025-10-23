@@ -17,8 +17,8 @@
 // @match        *://*.neopets.com/shops/wizard.phtml*
 // @match        *://*.neopets.com/trudys_surprise.phtml
 // @match        *://*.neopets.com/gallery/gallery_user_cats.phtml
-// @match        *://*.neopets.com/faerieland/darkfaerie.phtml
-// @match        *://*.neopets.com/medieval/earthfaerie.phtml
+// @match        *://*.neopets.com/faerieland/darkfaerie.phtml*
+// @match        *://*.neopets.com/medieval/earthfaerie.phtml*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=neopets.com
 // @license      The Unlicense
 // ==/UserScript==
@@ -42,8 +42,8 @@
     - Streak save ticket button when you haven't missed a day in Trudy's Surprise.
     - Streak save ticket button when you haven't missed a day in your daily quests.
     - Extra gallery categories.
+    - Illusen and Jhudora.
     - The premium NeoBoard has been removed.
-    - Illusen and Jhudora
 
     It does not remove Premium reminders for:
     - Actual ads. Get an adblocker.
