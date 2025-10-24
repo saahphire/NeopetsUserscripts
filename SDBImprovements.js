@@ -6,8 +6,8 @@
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
 // @homepage     https://github.com/saahphire/NeopetsUserscripts
-// @downloadURL  https://github.com/saahphire/NeopetsUserscripts/blob/testing/SDBImprovements.js
-// @updateURL    https://github.com/saahphire/NeopetsUserscripts/blob/testing/SDBImprovements.js
+// @downloadURL  https://github.com/saahphire/NeopetsUserscripts/blob/main/SDBImprovements.js
+// @updateURL    https://github.com/saahphire/NeopetsUserscripts/blob/main/SDBImprovements.js
 // @match        *://*.neopets.com/safetydeposit.phtml*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=neopets.com
 // @license      The Unlicense
