@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Codestone Tracker
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.1.0
+// @version      2.0.0
 // @description  Tracks your codestones, removes them with a click on the training page, adds a link to SW for the ones you don't have yet
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -64,93 +64,29 @@ const iWantToRemoveCodestonesFromMySDBWithAClick = true;
 const pin = '0000';
 
 /**
-* The language Neopets is in. Case sensitive. For Portuguese and Spanish, if your Quick Stock shows the letter í instead of �, add an _ok to your language's name.
-* @constant {('english' | 'nederlands' | 'portugues' | 'portugues_ok' | 'deutsch' | 'francais' | 'italiano' | 'espanol' | 'espanol_ok')}
-* @default
-*/
-const locale = 'english';
-
-/**
 * Turns debug mode on or off. In debug mode, your codestone storage will be printed on the console on every page refresh.
 * @constant {boolean}
 * @default
 */
-const isDebug = false;
+const isDebug = true;
 
 /*
 ☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆
-             Localization
+             Migration
 ☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆
 */
 
 /**
-* All existing codestones except for Main.
-* @constant {string[]}
+* Migrates your storage from version 1.x to version 2.x. You can delete this (and its call) after visiting your SDB, quick stock, or either schoopl once.
 */
-const codestoneNames = ['Mau', 'Tai-Kai', 'Lu', 'Vo', 'Eo', 'Zei', 'Orn', 'Mar', 'Bri', 'Mag', 'Vux', 'Cui', 'Kew', 'Sho', 'Zed'];
-
-/**
-* Strings used in the Quick Sort and SDB pages.
-* @constant {boolean}
-* @default
-*/
-const localize = {
-    english: {
-        prefix: '',
-        suffix: ' Codestone',
-        main: 'Main Codestone'
-    },
-    nederlands: {
-        prefix: '',
-        suffix: ' Codesteen',
-        main: 'Main Codesteen'
-    },
-    portugues: {
-        prefix: 'Pedra M�stica de ',
-        suffix: '',
-        main: 'Pedra M�stica Principal'
-    },
-    portugues_ok: {
-        prefix: 'Pedra Mística de ',
-        suffix: '',
-        main: 'Pedra Mística Principal'
-    },
-    deutsch: {
-        prefix: '',
-        suffix: '-Codestein',
-        main: 'Main-Codestein'
-    },
-    francais: {
-        prefix: 'Codestone ',
-        suffix: '',
-        main: 'Codestone Principale'
-    },
-    italiano: {
-        prefix: 'Sassocodice ',
-        suffix: '',
-        main: 'Sassocodice Principale'
-    },
-    espanol: {
-        prefix: 'Piedra m�stica de ',
-        suffix: '',
-        main: 'Piedra m�stica principal'
-    },
-    espanol_ok: {
-        prefix: 'Piedra m�stica de ',
-        suffix: '',
-        main: 'Piedra m�stica principal'
-    }
-};
-
-/**
-* Retrieves a list with the full names of every codestone in the game, in your language.
-* @returns {string[]}
-*/
-const getExistingCodestones = () => {
-    const i18n = localize[locale];
-    const res = codestoneNames.map(name => `${i18n.prefix}${name}${i18n.suffix}`);
-    res.push(i18n.main);
-    return res;
+const migrateToV2 = async () => {
+    const oldStorage = await GM.getValue("saahphire-codestone-tracker");
+    if(!oldStorage) return;
+    const newStorage = Object.values(JSON.parse(oldStorage)).map(entry => {
+        const id = parseInt(entry.id);
+        return (id < 22208) ? [id - 7457, parseInt(entry.qty)] : [id - 22197, parseInt(entry.qty)];
+    }).reduce((agg, [id, qty]) => {agg[id] = qty;return agg;}, new Array(17));
+    await GM.setValue("codestones", newStorage);
 }
 
 /*
@@ -184,36 +120,55 @@ const addPinField = () => {
 
 /*
 ☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆
+             Utility
+☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆
+*/
+
+/**
+* Takes an image's URL and retrieves the codestone's ID from within
+* @returns {number}
+*/
+const getIndexFromImageUrl = (imageUrl) => parseInt(imageUrl.match(/codestone(\d+)/)[1]);
+
+/**
+* Takes a codestone's index (from 1 to 16) and returns its item id.
+* @returns {number}
+*/
+const getIdFromIndex = (index) => index < 22208 ? index + 7457 : index + 22197;
+
+/*
+☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆
                Storage
 ☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆
 */
 
 /**
 * Retrieves stored data about your codestones
-* @returns {Object.<string, {id: number, qty: number}>}
+* @returns {Array<number>}
 */
 const getStoredCodestones = async () => {
-    return JSON.parse(await GM.getValue("saahphire-codestone-tracker", "{}"));
+    return await GM.getValue("codestones");
 }
 
 /**
 * Saves data about your codestones
-* @param codestones {Object.<string, {id: number, qty: number}>} The data to be saved
+* @param codestones {Array<number>} The data to be saved
 */
 const setStoredCodestones = (codestones) => {
-    GM.setValue("saahphire-codestone-tracker", JSON.stringify(codestones));
+    GM.setValue("codestones", codestones);
 }
 
 /**
 * Adjusts the quantity of a given codestone in your saved data by reducing it by one
-* @param itemName {string} The codestone's name
+* @param imageUrl {string} The codestone's image URL
 * @returns {number} The new quantity
 */
-const removeOneFromStorage = async (itemName) => {
+const removeOneFromStorage = async (imageUrl) => {
+    const index = getIndexFromImageUrl(imageUrl);
     const storage = await getStoredCodestones();
-    storage[itemName].qty--;
+    storage[index]--;
     setStoredCodestones(storage);
-    return storage[itemName].qty;
+    return storage[index];
 }
 
 /*
@@ -223,35 +178,52 @@ const removeOneFromStorage = async (itemName) => {
 */
 
 /**
+* Edits a given anchor to communicate a successful action
+* @param anchor {Element} The anchor element that should be edited to reflect success
+*/
+const communicateSuccess = (anchor) => {
+    anchor.textContent = anchor.textContent.replace("⌛", "✔️");
+    anchor.style.textDecoration = "line-through";
+    anchor.removeAttribute("href");
+}
+
+/**
+* Edits a given anchor to communicate a failed action and logs its error in the console
+* @param anchor {Element} The anchor element that should be edited to reflect failure
+* @param error {string} The error that should be logged
+*/
+const communicateFailure = (anchor, error) => {
+    console.error("Something went wrong! " + error);
+    anchor.textContent = anchor.textContent.replace("⌛", "✖️");
+}
+
+/**
 * Retrieves a given codestone from your SDB
-* @param itemId {string} The codestone's item ID
+* @param itemIndex {number} The codestone's index within image numbers and our storage
 * @param itemName {string} The codestone's name
 * @param pin {string} Your pin
-* @param link {Element} The anchor element that should be edited to reflect the request's result
+* @param anchor {Element} The anchor element that should be edited to reflect the request's result
 */
-const removeCodestone = (itemId, itemName, pin, link) => {
-    link.textContent = "⌛ " + link.textContent;
+const removeCodestone = async (itemIndex, pin, anchor) => {
+    anchor.textContent = "⌛ " + anchor.textContent;
+    const itemId = getIdFromIndex(itemIndex);
     const url = `https://www.neopets.com/process_safetydeposit.phtml?offset=0&remove_one_object=${itemId}&obj_name=&category=2&pin=${pin}`;
-    fetch(url, {
-        method: 'GET'
-    }).then(() => {
-        removeOneFromStorage(itemName);
-        link.innerText = link.innerText.replace("⌛", "✔️");
-        link.style.textDecoration = "line-through";
-        link.removeAttribute("href");
-    }).catch(error => {
-        console.error("Something went wrong! " + error);
-        link.innerText = link.innerText.replace("⌛", "✖️");
-    });
+    try {
+        await fetch(url);
+        removeOneFromStorage(itemIndex);
+        communicateSuccess(anchor);
+    } catch (e) {
+        communicateFailure(anchor, e)
+    }
 }
 
 /**
 * Adds a link to the appropriate place (or an event listener) to each codestone name
 * @param codestoneElement {Element} The bold element containing the codestone's name
 * @param isSDB {boolean} Whether this should link to an SDB action (on true) or the Shop Wizard (on false)
-* @param itemId {string} The codestone's item ID
+* @param itemIndex {number} The codestone's index within image numbers and our storage
 */
-const makeLink = (codestoneElement, isSDB, itemId) => {
+const makeLink = (codestoneElement, isSDB, itemIndex) => {
     const a = document.createElement("a");
     codestoneElement.insertAdjacentElement("beforeBegin", a);
     a.appendChild(codestoneElement);
@@ -259,12 +231,12 @@ const makeLink = (codestoneElement, isSDB, itemId) => {
     if(iWantToRemoveCodestonesFromMySDBWithAClick && isSDB && typeof foundPin === 'string') {
         a.onclick = (e) => {
             e.preventDefault();
-            removeCodestone(itemId, codestoneElement.innerText, foundPin, a)
+            removeCodestone(itemIndex, foundPin, a)
         };
         a.href = "#";
     }
     else {
-        a.href = `https://www.neopets.com/${isSDB ? 'safetydeposit.phtml?obj_name' : 'shops/wizard.phtml?string'}=${codestoneElement.innerText.replace(" ", "+")}`;
+        a.href = `https://www.neopets.com/${isSDB ? 'safetydeposit.phtml?obj_name' : 'shops/wizard.phtml?string'}=${codestoneElement.textContent.replace(" ", "+")}`;
         a.target = "_blank";
     }
 }
@@ -285,18 +257,20 @@ const addSDBLink = () => document.getElementsByTagName("center")[0].insertAdjace
 */
 const onTrainingPage = async () => {
     const ownedCodestones = await getStoredCodestones();
-    const codestones = document.querySelectorAll("table[width='500'] tr:nth-child(2n) td:last-child b:has(~ img)");
-    const usage = {};
+    const codestones = document.querySelectorAll("table[width='500'] tr:nth-child(2n) td:last-child img");
+    const usage = new Array(17);
     codestones.forEach(codestone => {
-        const available = ownedCodestones[codestone.innerText]?.qty ?? 0;
-        const used = usage[codestone.innerText] ?? 0;
+        const textElement = codestone.previousElementSibling;
+        const itemIndex = getIndexFromImageUrl(codestone.src);
+        const available = ownedCodestones[itemIndex] ?? 0;
+        const used = usage[itemIndex] ?? 0;
         if (used < available) {
-            usage[codestone.innerText] = used + 1;
-            makeLink(codestone, true, ownedCodestones[codestone.innerText].id);
+            usage[itemIndex] = used + 1;
+            makeLink(textElement, true, itemIndex);
         }
         else {
-            makeLink(codestone, false);
-            codestone.style.color = "red";
+            makeLink(textElement, false);
+            textElement.style.color = "red";
             codestone.parentElement.parentElement.style.backgroundColor = "wheat";
         }
     });
@@ -306,12 +280,12 @@ const onTrainingPage = async () => {
 * Saves codestones to storage
 */
 const onSDBPage = () => {
-    const ownedCodestones = {};
+    const ownedCodestones = new Array(17);
     document.querySelectorAll("#boxform ~ tr:not(:last-child)").forEach(row => {
-        const name = row.children[1].children[0].childNodes[0].data;
-        const quantity = row.children[4].innerText;
-        const id = row.querySelector("td:nth-child(6) a").href.match(/\(0,(\d+),/)[1];
-        ownedCodestones[name] = {id: id, qty: quantity};
+        const imageUrl = row.querySelector("img[height='80']").src;
+        const quantity = row.children[4].textContent;
+        const index = getIndexFromImageUrl(imageUrl);
+        ownedCodestones[index] = parseInt(quantity);
     });
     setStoredCodestones(ownedCodestones);
 }
@@ -321,17 +295,15 @@ const onSDBPage = () => {
 */
 const onQuickStock = async () => {
     const storage = await getStoredCodestones();
-    const allExistingCodestones = getExistingCodestones();
+    const codestoneNames = ["Mau", "Tai-Kai", "Lu", "Vo", "Eo", "Main", "Zei", "Orn", "Har", "Bri", "Mag", "Vux", "Cui", "Kew", "Sho", "Zed"];
     document.querySelector("input[type='submit']").addEventListener("click", () => {
-        const rows = document.querySelectorAll("input[name='buyitem'] ~ table tr:has(input[type='hidden'])");
-        const limit = Math.min(70, rows.length);
-        for(let i = 0; i < limit; i++) {
-            const name = rows[i].children[0].innerText;
-            if(allExistingCodestones.includes(name) && rows[i].children[3].children[0].checked) {
-                if(!storage[name]) storage[name] = {qty: 0};
-                storage[name].qty++;
-            }
-        }
+        const names = [...document.querySelectorAll("input[name='buyitem'] ~ table tr:has(input[type='hidden'])")].slice(0, 70).querySelectorAll("tr:has(td:nth-of-type(3) input:checked) td:first-of-type");
+        names.forEach(name => {
+            const itemIndex = codestoneNames.findIndex(codestone => name.match(codestone + " Codestone"));
+            if(itemIndex === -1) return;
+            storage[itemIndex + 1]++;
+        })
+        setStoredCodestones(storage);
     });
 }
 
@@ -346,7 +318,7 @@ const onQuickStock = async () => {
 * @param query {string} The string to search for
 * @returns {boolean} Whether the string is in the current page's url
 */
-const isUrl = (query) => window.location.href.includes(query);
+const isUrl = (query, parameters) => window.location.href.includes(query) && (!parameters || Object.entries(parameters).every(([name, data]) => isParam(name, data.value, data.nullIsTrue)));
 
 /**
 * Checks whether the current page's url contains a parameter and its value is the desired value.
@@ -355,16 +327,17 @@ const isUrl = (query) => window.location.href.includes(query);
 * @param nullIsTrue {boolean} Whether the ausence of the parameter should be counted as a positive or negative result
 * @returns {boolean} Whether the parameter has the appropriate value
 */
-const isParam = (parameter, value, nullIsTrue = false) => window.location.href.match(new RegExp(`${parameter}=${value}(&|$)`)) ?? (nullIsTrue && !window.location.href.match(parameter + '='));
+const isParam = (parameter, value, nullIsTrue = true) => window.location.href.match(new RegExp(`${parameter}=${value}(&|$)`)) ?? (nullIsTrue && !window.location.href.match(parameter + '='));
 
 (async function() {
     'use strict';
-    if(isParam('type', 'status')) {
+    await migrateToV2();
+    if(isParam('type', 'status', false)) {
         addPinField();
         addSDBLink();
         onTrainingPage();
     }
-    else if(isUrl('safetydeposit') && isParam('offset', 0, true) && isParam('obj_name', '', true) && isParam('category', 2)) onSDBPage();
+    else if(isUrl('safetydeposit', {'obj_name': {value: ''}, category: {value: 2, nullIsTrue: false}})) onSDBPage();
     else if(isUrl('quickstock')) onQuickStock();
     if(isDebug) {
         console.info("Codestone Tracker storage:");
