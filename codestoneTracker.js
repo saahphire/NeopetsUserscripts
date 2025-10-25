@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Codestone Tracker
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      2.0.0
+// @version      2.0.1
 // @description  Tracks your codestones, removes them with a click on the training page, adds a link to SW for the ones you don't have yet
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -283,7 +283,7 @@ const onSDBPage = () => {
     const ownedCodestones = new Array(17);
     document.querySelectorAll("#boxform ~ tr:not(:last-child)").forEach(row => {
         const imageUrl = row.querySelector("img[height='80']").src;
-        const quantity = row.children[4].textContent;
+        const quantity = row.querySelector('td[align="center"]:not(:first-child)').textContent;
         const index = getIndexFromImageUrl(imageUrl);
         ownedCodestones[index] = parseInt(quantity);
     });
