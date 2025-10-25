@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Codestone Tracker
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      2.0.1
+// @version      2.0.2
 // @description  Tracks your codestones, removes them with a click on the training page, adds a link to SW for the ones you don't have yet
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -68,7 +68,7 @@ const pin = '0000';
 * @constant {boolean}
 * @default
 */
-const isDebug = true;
+const isDebug = false;
 
 /*
 ☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆
@@ -87,6 +87,7 @@ const migrateToV2 = async () => {
         return (id < 22208) ? [id - 7457, parseInt(entry.qty)] : [id - 22197, parseInt(entry.qty)];
     }).reduce((agg, [id, qty]) => {agg[id] = qty;return agg;}, new Array(17));
     await GM.setValue("codestones", newStorage);
+    GM.setValue("saahphire-codestone-tracker", null);
 }
 
 /*
