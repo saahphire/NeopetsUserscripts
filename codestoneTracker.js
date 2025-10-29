@@ -258,7 +258,7 @@ const addSDBLink = () => document.getElementsByTagName("center")[0].insertAdjace
 */
 const onTrainingPage = async () => {
     const ownedCodestones = await getStoredCodestones();
-    const codestones = document.querySelectorAll("table[width='500'] tr:nth-child(2n) td:last-child img");
+    const codestones = document.querySelectorAll("table[width='500'] tr:nth-child(2n) td:last-child b + img");
     const usage = new Array(17);
     codestones.forEach(codestone => {
         const textElement = codestone.previousElementSibling;
