@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Remove Premium Reminders
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.1.0
+// @version      1.1.1
 // @description  Removes all the little "Hey if you have premium you can get X!" things. Doesn't touch actual ads.
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -12,7 +12,9 @@
 // @match        *://*.neopets.com/games/*
 // @match        *://*.neopets.com/neolodge.phtml
 // @match        *://*.neopets.com/lab2.phtml
+// @match        *://*.neopets.com/process_lab2.phtml
 // @match        *://*.neopets.com/petpetlab.phtml
+// @match        *://*.neopets.com/process_petpetlab.phtml
 // @match        *://*.neopets.com/neoboards/*
 // @match        *://*.neopets.com/shops/wizard.phtml*
 // @match        *://*.neopets.com/trudys_surprise.phtml
