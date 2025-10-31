@@ -6,6 +6,3 @@ See [Userscript Descriptions](https://github.com/saahphire/NeopetsUserscripts/wi
 
 # How to Install
 See [How to Install](https://github.com/saahphire/NeopetsUserscripts/wiki/How-to-Install) for a quick guide on installation, or check your preferred extension's docs
-
-# License
-Please take note that fishingLog is under a MIT license, unlike my other scripts.
