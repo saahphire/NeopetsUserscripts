@@ -1,22 +1,29 @@
 // ==UserScript==
-// @name         Neopets: Lottery Numbers Generator
+// @name         Neopets: Outbox (Sent NeoMail)
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
+<<<<<<< HEAD
 <<<<<<< HEAD
 // @version      1.0.0
 =======
 // @version      1.1.0
 >>>>>>> parent of 0fda26a... Fix query for input instead of textarea
 // @description  Generates not-so-random numbers for you to play in the lottery, making sure you repeat as little numbers as possible to increase your chances of winning. And it actually works! Unlike 90% of the lottery userscripts!
+=======
+// @version      1.0.5
+// @description  Saves the last 100 sent neomails in an Outbox
+>>>>>>> main
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
 // @homepage     https://github.com/saahphire/NeopetsUserscripts
-// @downloadURL  https://github.com/saahphire/NeopetsUserscripts/blob/main/lottery.js
-// @updateURL    https://github.com/saahphire/NeopetsUserscripts/blob/main/lottery.js
-// @match        *://*.neopets.com/games/lottery.phtml
+// @match        *://*.neopets.com/neomessages.phtml*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=neopets.com
-// @license      Unlicense
+// @license      The Unlicense
+// @grant        GM.setValue
+// @grant        GM.getValue
+// @downloadURL  none
 // ==/UserScript==
 
+<<<<<<< HEAD
 /*
 •:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•:•:•:•:•:•:•:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•.•:•:•:•:•:•:•:•:•.•:•:•.•:•.••:•.•:•.••:
 ........................................................................................................................
@@ -68,129 +75,208 @@ const interleave = (array) => {
     for(var i = 0; i < a.length; i++) {
         res[i * 2] = a[i]; 
         res[i * 2 + 1] = b[i]; 
+=======
+const savedMessageLimit = 100;
+
+const properties = ["timestamp", "nickname", "username", "subject", "body", "reply"];
+
+class Outbox {
+    constructor(rawMessages) {
+        const parsedMessages = JSON.parse(rawMessages);
+        this.messages = parsedMessages.map(msg => new Message(msg.t, msg.n, msg.u, msg.s, msg.b, msg.r));
+>>>>>>> main
     }
-    return res;
-}
 
-const fisherYatesShuffle = (array) => {
-    for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]];
+    async save() {
+        this.messages = this.messages.slice(savedMessageLimit * -1);
+        GM.setValue("neopets-outbox", JSON.stringify(this.messages.map(msg => msg.minify())));
     }
-    return array;
-}
 
-const interleaveNTimes = (array, n) => {
-    if(n === 0) return array;
-    return interleaveNTimes(interleave(array), n - 1);
-}
-
-const getCurrentNumbers = () => [...document.querySelector(".content p:nth-of-type(3)").childNodes]
-                                .filter((e, i) => i % 4 === 2)
-                                .flatMap(txt => txt.textContent.match(/\d+/g).map(num => parseInt(num)))
-                                .sort((a, b) => a - b);
-
-const getRemoveFrom = (currentNumbers) => {
-    return currentNumbers
-    .filter((number, index) => currentNumbers.findIndex(n => n === number) === index)
-    .map(number => [number, Array.from(new Array(Math.min(currentNumbers.filter(n => n === number).length, 4)), (e, i) => fisherYatesShuffle([0, 1, 2, 3])[i])]);
-}
-
-const isValidArray = (array, previousTicketNumbers) => {
-    if(array.some((number, index) => array.findIndex(n => n === number) !== index)) return false;
-    for(let i = 0; i < previousTicketNumbers.length; i += 6)
-        if(previousTicketNumbers.slice(i, i + 6).every(number => array.findIndex(n => n === number) !== -1)) return false;
-    return true;
-}
-
-const createTicketNumbers = (currentNumbers, attempts = 0) => {
-    if(attempts > 250) throw new Error("Too many shuffling attempts!");
-    const removeFrom = getRemoveFrom(currentNumbers);
-    const numbers = Array.from(new Array(4), () => Array.from(new Array(30), (_, i) => i + 1));
-    removeFrom.forEach(([number, arrays]) => arrays.forEach(array => numbers[array] = numbers[array].slice(0, number - 1).concat(numbers[array].slice(number))));
-    let interleaved = Array.from(new Array(4), () => []);
-    for(let i = 0; i < 3; i++)
-        interleaved[i] = interleaveNTimes(fisherYatesShuffle(numbers[i]), i * 2);
-    const result = interleaved.flat();
-    if(isValidArray(result.slice(0, 6), currentNumbers)) return result;
-    return createTicketNumbers(currentNumbers, attempts + 1);
-}
-
-const getRandomTicketNumbers = (currentNumbers) => {
-    if(currentNumbers.length === 6) return currentNumbers;
-    const newNumber = Math.ceil(Math.random() * 30);
-    return getRandomTicketNumbers(currentNumbers.includes(newNumber) ? currentNumbers : currentNumbers.concat([newNumber]));
-}
-
-const fillTicket = (numbers) => {
-    const sorted = numbers.sort((a, b) => a - b);
-    inputNames.forEach((name, index) => {
-        document.querySelector(`input[name="${name}"]`).value = sorted[index];
-    });
-}
-
-const fillLotteryNumbers = () => {
-    const currentNumbers = getCurrentNumbers();
-    if(currentNumbers.length >= 120) return false;
-    try {
-        const numbers = createTicketNumbers(currentNumbers);
-        if(verbose) console.log(`Generated ticket numbers (only the first six will be used): [${numbers.join(', ')}]`);
-        fillTicket(numbers.slice(0, 6));
-    } catch (e) {
-        console.error(e);
-        document.querySelector(".content p:nth-of-type(2)").insertAdjacentHTML("beforeBegin", `<p style="color:darkred">Something went wrong! You can buy non-optimized numbers like usual or refresh the page.</p><p style="color:red;">${e}</p>`);
-        fillTicket(getRandomTicketNumbers(currentNumbers));
-    }
-    return true;
-}
-
-const addLuckyButton = (form) => {
-    if(!enableLuckyButton) return;
-    const orderedLucky = luckyNumbers.sort((a, b) => a - b);
-    const alreadyPlayed = [...document.querySelector(".content p:nth-of-type(3)").childNodes]
-        .filter((e, i) => i % 4 === 2).
-        some(t => t.textContent.replace(":", "").trim() === orderedLucky.join(" "));
-    if(alreadyPlayed) return;
-    const luckyButton = document.createElement("input");
-    luckyButton.type = "button";
-    luckyButton.value = "Buy Your Lucky Ticket!";
-    luckyButton.style = "padding: 1em;"
-    document.querySelector('input[form="lottery"]').insertAdjacentElement("afterEnd", luckyButton);
-    luckyButton.addEventListener("click", () => {
-        luckyNumbers.forEach((n, i) => document.querySelector(`input[name="${inputNames[i]}"]`).value = n);
-        form.submit();
-    });
-    return luckyButton;
-}
-
-const moveButton = (form) => {
-    const button = form.querySelector('input[type="submit"]');
-    document.querySelector(".content p:nth-of-type(2)").insertAdjacentElement("beforeBegin", button);
-    form.id = "lottery";
-    button.setAttribute("form", "lottery");
-    button.style = "padding: 1em;";
-    return button;
-}
-
-const changeHTML = (canBuy) => {
-    const form = document.querySelector('form[action="process_lottery.phtml"]');
-    const buyButton = moveButton(form);
-    if(canBuy) {
-        const luckyButton = addLuckyButton(form);
-        form.addEventListener("submit", () => {
-            buyButton.disabled = true;
-            luckyButton.disabled = true;
-        })
-    }
-    else {
-        buyButton.disabled = true;
-        buyButton.value = "All 20 tickets have been bought!"
-        document.querySelectorAll('input[size="2"]').forEach(input => input.disabled = true);
+    async add() {
+        const timestamp = new Date().getTime();
+        const nickname = document.querySelector('input[name="recipient"] ~ span')?.textContent;
+        const username = document.querySelector('input[name="recipient"]').value;
+        const subject = document.querySelector('input[name="subject"]').value;
+        const bodyTextArea = document.getElementById("message_body") ?? document.querySelector('textarea[name="message_body"]');
+        const body = bodyTextArea.value ?? bodyTextArea.contentDocument.body.innerText.replaceAll(/\n\n/g, "\n");
+        const replyElement = document.querySelector('td[bgcolor="#DEDEDE"]')?.cloneNode(true);
+        if (replyElement) {
+            replyElement.querySelector("input").remove();
+            const reply = replyElement.innerHTML;
+            this.messages.push(new Message(timestamp, nickname, username, subject, body, reply));
+        }
+        else this.messages.push(new Message(timestamp, nickname, username, subject, body));
+        this.save();
     }
 }
 
-(function() {
+class Message {
+    constructor(timestamp, nickname, username, subject, body, reply) {
+        this.timestamp = timestamp;
+        this.nickname = nickname;
+        this.username = username;
+        this.subject = subject;
+        this.body = body;
+        this.reply = reply;
+    }
+
+    minify() {
+        return Object.fromEntries(properties.map(p => [p[0], this[p]]));
+    }
+
+    toTitle() {
+        const tr = document.createElement("tr");
+        tr.dataset.timestamp = this.timestamp;
+        tr.innerHTML = `
+        <td class="outbox--timestamp">${(new Date(this.timestamp)).toLocaleString(navigator.language, {dateStyle: "short", timeStyle: "short"})}</td>
+        <td class="outbox--recipient">${this.nickname ? this.nickname + '<br>[' : ''}<a href="https://www.neopets.com/userlookup.phtml?user=${this.username}">${this.username}</a>${this.nickname ? ']' : ''}</td>
+        <td class="outbox--subject">${this.subject}</td>
+        `;
+        tr.onclick = () => this.toggle(tr);
+        return tr;
+    }
+
+    toHTML() {
+        const table = document.createElement("table");
+        table.classList.add("outbox--full", "inactive");
+        setTimeout(() => table.classList.remove("inactive"), 10);
+        const tbody = document.createElement("tbody");
+        table.appendChild(tbody);
+        tbody.innerHTML = `
+        <tr><td>To:</td><td>[<a href="https://www.neopets.com/userlookup.phtml?user=${this.username}">${this.username}</a>] ${this.nickname ?? ''}</td></tr>
+        <tr><td>Sent:</td><td>${(new Date(this.timestamp)).toLocaleString(navigator.language, {dateStyle: "short", timeStyle: "short"})}</td></tr>
+        <tr><td>Subject:</td><td>${this.subject}</td>
+        ${this.reply ? '<tr><td>' + this.username + ' wrote:</td><td>' + this.reply + '</td></tr>' : ''}
+        <tr><td>Message:</td><td>${this.body.replaceAll("\n", "<br>")}</td></tr>
+        `;
+        return table;
+    }
+
+    toggle(tr) {
+        tr.classList.toggle("active");
+        if(tr.classList.contains("active")) this.expand(tr);
+        else this.collapse(tr);
+    }
+
+    expand(tr) {
+        const row = document.createElement("tr");
+        tr.insertAdjacentElement("afterEnd", row);
+        const cell = document.createElement("td");
+        row.appendChild(cell);
+        cell.colSpan = 3;
+        cell.appendChild(this.toHTML());
+    }
+
+    collapse(tr) {
+        const row = tr.nextElementSibling;
+        row.getElementsByClassName("outbox--full")[0].classList.add("inactive");
+        setTimeout(() => row.remove(), 250);
+    }
+}
+
+class UI {
+    constructor(outbox) {
+        this.anchor = document.createElement("a");
+        this.anchor.href = "#";
+        this.anchor.onclick = () => this.open(outbox);
+        this.anchor.textContent = "Outbox";
+    }
+
+    appendAnchor() {
+        const lastLink = document.querySelector("div.medText a:first-child");
+        lastLink.insertAdjacentElement("afterEnd", this.anchor);
+        lastLink.insertAdjacentText("afterEnd", " | ");
+    }
+
+    makeMessageList(outbox) {
+        const table = document.createElement("table");
+        table.classList.add("outbox--list");
+        const tbody = document.createElement("tbody");
+        table.appendChild(tbody);
+        outbox.messages.forEach(msg => tbody.prepend(msg.toTitle()));
+        tbody.insertAdjacentHTML("afterBegin", '<tr class="outbox--list-header"><th class="neomail-outbox-date">Date Sent</th><th class="neomail-outbox-recipient">To</th><th class="neomail-outbox-subject">Subject</th></tr>');
+        return table;
+    }
+
+    open(outbox) {
+        const links = document.querySelector("div.medText");
+        document.getElementsByClassName("content")[0].style.display = "none";
+        const parent = document.createElement("td");
+        document.getElementsByClassName("content")[0].insertAdjacentElement("beforeBegin", parent);
+        parent.classList.add("content");
+        parent.appendChild(links);
+        const messageList = this.makeMessageList(outbox);
+        parent.appendChild(messageList);
+    }
+}
+
+const css = `<style>
+.outbox--list {
+  width: 100%;
+  border: 1px solid #000000;
+  border-collapse: collapse;
+  margin-top: 50px;
+}
+.outbox--list-header th {
+  font-weight: bolder;
+  background-color: #687DAA;
+  color: #FFFFFF;
+  height: 22px;
+  font-size: 9pt;
+  font-weight: bold;
+  text-align: left;
+  padding-left: 3px;
+}
+.outbox--list td, .outbox--list th {
+  padding: 3px;
+}
+.outbox--timestamp {
+  line-height: 2.5;
+}
+.neomail-outbox-date {
+  width: 130px;
+}
+.neomail-outbox-recipient {
+  width: 200px;
+}
+.outbox--list tr {
+  border: 1px solid black;
+  cursor: pointer;
+}
+.outbox--list tr:nth-child(2n+1) {
+  background: #EDEDED;
+}
+.outbox--list td {
+  font-size: 8pt;
+}
+.outbox--full {
+  width: 100%;
+  transform: scaleY(100%);
+  transform-origin: top;
+  transition: transform 250ms ease-in-out;
+}
+.outbox--full.inactive {
+  transform: scaleY(0);
+  transition: transform 250ms ease-in-out;
+}
+.outbox--full, .outbox--full tr:nth-child(2n+1), .outbox--full tr:nth-child(2n) {
+  background: white;
+}
+.outbox--full td {
+  padding: 6px;
+  font-size: 9pt;
+}
+.outbox--full td:first-child {
+  width: 100px;
+  background-color: #C8E3FF;
+  font-size: 8pt;
+  font-weight: bolder;
+}
+</style>`;
+
+(async function() {
     'use strict';
+<<<<<<< HEAD
     const canBuy = fillLotteryNumbers();
     changeHTML(canBuy);
 =======
@@ -375,4 +461,13 @@ const changeHTML = (canBuy) => {
   const canBuy = fillLotteryNumbers();
   changeHTML(canBuy);
 >>>>>>> parent of 0fda26a... Fix query for input instead of textarea
+=======
+    document.head.insertAdjacentHTML("beforeEnd", css);
+    const outbox = new Outbox(await GM.getValue("neopets-outbox", "[]"));
+    const ui = new UI(outbox);
+    ui.appendAnchor();
+    document.querySelector(".content input[type='submit']")?.addEventListener("click", () => {
+        outbox.add();
+    });
+>>>>>>> main
 })();

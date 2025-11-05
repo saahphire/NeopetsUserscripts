@@ -1,17 +1,17 @@
 // ==UserScript==
 // @name         Neopets: Outbox (Sent NeoMail)
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.3
+// @version      1.0.4
 // @description  Saves the last 100 sent neomails in an Outbox
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
-// @downloadURL  https://github.com/saahphire/NeopetsUserscripts/blob/main/outbox.js
-// @updateURL    https://github.com/saahphire/NeopetsUserscripts/blob/main/outbox.js
+// @homepage     https://github.com/saahphire/NeopetsUserscripts
 // @match        *://*.neopets.com/neomessages.phtml*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=neopets.com
 // @license      The Unlicense
 // @grant        GM.setValue
 // @grant        GM.getValue
+// @downloadURL  none
 // ==/UserScript==
 
 const savedMessageLimit = 100;
@@ -34,7 +34,8 @@ class Outbox {
         const nickname = document.querySelector('input[name="recipient"] ~ span')?.textContent;
         const username = document.querySelector('input[name="recipient"]').value;
         const subject = document.querySelector('input[name="subject"]').value;
-        const body = document.getElementById("message_body").value ?? document.getElementById("message_body").contentDocument.body.innerText.replaceAll(/\n\n/g, "\n");
+        const bodyTextArea = document.getElementById("message_body") ?? document.querySelector('input[name="message_body"]');
+        const body = bodyTextArea.value ?? bodyTextArea.contentDocument.body.innerText.replaceAll(/\n\n/g, "\n");
         const replyElement = document.querySelector('td[bgcolor="#DEDEDE"]')?.cloneNode(true);
         if (replyElement) {
             replyElement.querySelector("input").remove();
