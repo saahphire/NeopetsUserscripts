@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Lottery Numbers Generator
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.1.0
+// @version      1.1.1
 // @description  Generates not-so-random numbers for you to play in the lottery, making sure you repeat as little numbers as possible to increase your chances of winning.
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -38,7 +38,7 @@
 
 // Add your lucky numbers here! If you'd like to get rid of the lucky button instead, change "true" to "false"
 const enableLuckyButton = true;
-const luckyNumbers = [0, 0, 0, 0, 0, 0];
+const luckyNumbers = [2, 7, 11, 20, 25, 27];
 const verbose = true;
 
 const inputNames = ["one", "two", "three", "four", "five", "six"];
@@ -58,7 +58,8 @@ const scoreTickets = (tickets) => {
 };
 
 const trySwap = (tickets, score, fixedCount) => {
-  const ticketIndex = rand(tickets.length - fixedCount) + fixedCount - 1;
+  if(tickets.length < 1) return 0;
+  const ticketIndex = rand(tickets.length - fixedCount) + fixedCount;
   const currentTicket = Array.from(tickets[ticketIndex]);
   const numberIndex = rand(6);
   let delta = 0;
