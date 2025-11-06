@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Daily Quest Links
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.2.0
+// @version      1.3.0
 // @description  Adds links to quickly complete daily quests
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -46,7 +46,9 @@ const links = {
   "Groom your Neopet":
     "https://www.neopets.com/safetydeposit.phtml?obj_name=&category=10",
   "Play a game": "https://www.neopets.com/games/favourites.phtml",
-  "Fish at Ye Olde Fishing Vortex": "https://www.neopets.com/water/fishing.phtml"
+  "Fish at Ye Olde Fishing Vortex": "https://www.neopets.com/water/fishing.phtml",
+  "Try on an NC Wearable": "https://ncmall.neopets.com/mall/shop.phtml",
+  "Fight in the Battledome": "https://www.neopets.com/dome/fight.phtml"
 };
 
 const makeLink = (quest) => {
