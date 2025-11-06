@@ -5,12 +5,14 @@
 // @description  Adds links to quickly complete daily quests
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
+// @homepage     https://github.com/saahphire/NeopetsUserscripts
 // @downloadURL  https://github.com/saahphire/NeopetsUserscripts/blob/main/dailyQuestLinks.js
 // @updateURL    https://github.com/saahphire/NeopetsUserscripts/blob/main/dailyQuestLinks.js
 // @match        *://*.neopets.com/questlog/
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=neopets.com
 // @license      The Unlicense
 // ==/UserScript==
+
 /*
 •:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•:•:•:•:•:•:•:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•.•:•:•:•:•:•:•:•:•.•:•:•.•:•.••:•.•
 ..................................................................................................................
@@ -44,6 +46,7 @@ const links = {
   "Groom your Neopet":
     "https://www.neopets.com/safetydeposit.phtml?obj_name=&category=10",
   "Play a game": "https://www.neopets.com/games/favourites.phtml",
+  "Fish at Ye Olde Fishing Vortex": "https://www.neopets.com/water/fishing.phtml"
 };
 
 const makeLink = (quest) => {
