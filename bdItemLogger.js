@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Battledome Item Logger
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.0
+// @version      1.0.1
 // @description  Logs what prizes you have received at the Battledome, not including neopoints, and exports it with the formatting of your choice
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -97,17 +97,17 @@ const exportResult = async (output, filterLower, filterHigher) => {
     output.addEventListener("click", () => {
         GM.setClipboard(formatted);
         output.classList.add("copied");
-        //setTimeout(() => output.classList.remove("copied"), 500);
+        setTimeout(() => output.classList.remove("copied"), 500);
     });
 }
 
 const grabItems = async () => {
-    const prizes = document.getElementsByClassName("prizname");
+    const prizes = document.querySelectorAll(".prizname");
     if(prizes.length === 0) return;
     const allPrizes = await GM.getValue("prizes", []);
     const now = (new Date()).getTime();
     prizes.forEach(prize => {
-        if(prize.textContent.match(/\d+ Neopoints/)) return;
+        if(prize.textContent.match(/\d+ Neopoints/) || prize.textContent === "inventory") return;
         allPrizes.push([now, prize.textContent]);
     });
     GM.setValue("prizes", allPrizes);
