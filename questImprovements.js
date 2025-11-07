@@ -1,21 +1,14 @@
 // ==UserScript==
 // @name         Neopets: Quest Improvements
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.0
+// @version      0.1.0
 // @description  Adds an estimated value for the items requested of you in every quest. Also remembers and fills your Brain Tree answers.
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
 // @homepage     https://github.com/saahphire/NeopetsUserscripts
 // @downloadURL  https://github.com/saahphire/NeopetsUserscripts/blob/main/questImprovements.js
 // @updateURL    https://github.com/saahphire/NeopetsUserscripts/blob/main/questImprovements.js
-// @match        *://*.neopets.com/halloween/esophagor.phtml*
-// @match        *://*.neopets.com/island/kitchen.phtml*
-// @match        *://*.neopets.com/winter/snowfaerie.phtml*
-// @match        *://*.neopets.com/halloween/witchtower.phtml*
-// @match        *://*.neopets.com/space/coincidence.phtml*
-// @match        *://*.neopets.com/halloween/braintree.phtml*
-// @match        *://*.neopets.com/medieval/earthfaerie.phtml*
-// @match        *://*.neopets.com/faerieland/darkfaerie.phtml*
+// @match        *://*.neopets.com/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=neopets.com
 // @license      The Unlicense
 // @grant        GM.setValue
@@ -26,12 +19,13 @@
 •:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•:•:•:•:•:•:•:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•.•:•:•:•:•:•:•:•:•.•:•:•.•:•.••:•.•:•.••:
 ........................................................................................................................
 ☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦
+    This script is still in its testing phase! Testing random faerie quests is extremely hard. Use at your own risk!
+
     This script does the following:
     - Adds price estimates for every quest in the game
     - Adds a link on the quest page to the Shop Wizard as soon as you get the item, no need to refresh
-    - Saves and fills the Brain Tree's answers that you got from Esophagor
-    - Adds a button to go to the Brain Tree as soon as you finish your second Esophagor quest
-    Note that random events with Faerie quests don't get price estimates, but the Quests page where you turn them in does.
+    - Saves and the Brain Tree's answers that you got from Esophagor and fills them when you click their names
+    - Adds a link from the Brain Tree to the Esophagor and another from the Esophagor to the Brain Tree
     
     Price estimates are retrieved from itemDB. Please consider contributing by adding a simple userscript:
       https://itemdb.com.br/contribute
@@ -45,6 +39,11 @@
 const slugify = (name) => name.toString().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w-]+/g, '').replace(/--+/g, '-');
 
 const quests = [
+    {
+        url: 'quests.phtml',
+        itemSelector: '',
+        totalSelector: ''
+    },
     {
         url: "halloween/esophagor.phtml",
         itemSelector: ".item-name, .ingredient-grid p b",
@@ -97,6 +96,7 @@ const addInfo = (info, selector) => {
 }
 
 const onBrainTree = async () => {
+    if(!document.querySelector("div p b").textContent.startsWith("You've already")) document.querySelector('.container .button-default__2020.button-yellow__2020').insertAdjacentHTML("afterEnd", `<a class="button-default__2020 button-blue__2020 btn-single__2020" href="https://www.neopets.com/halloween/esophagor.phtml">To the Esophagor!</a>`);
     const inputs = document.getElementsByClassName("brain-input");
     if(inputs.length === 0) return;
     const [year, location] = await getBrainTree();
@@ -104,13 +104,15 @@ const onBrainTree = async () => {
     addInfo(location, "answer_2");
 }
 
+const addPricesToEsophagor = () => {
+    if(document.querySelector(".quest_dialogue__2021 u")) setBrainTree(document.querySelector(".quest_dialogue__2021 u").textContent);
+    if(!document.querySelector(".gotree")) document.querySelector('.container .button-default__2020.button-yellow__2020:not(.q-button__2020)')?.insertAdjacentHTML("afterEnd", `<a class="button-default__2020 button-blue__2020 btn-single__2020 gotree" href="https://www.neopets.com/halloween/braintree.phtml">To the Brain Tree!</a>`);
+}
+
 const onEsophagor = () => {
-    document.querySelector("h2 b")?.insertAdjacentHTML("afterEnd", '<a href="https://www.neopets.com/halloween/braintree.phtml" target="_blank"> (Brain Tree)</a>');
-    const container = document.getElementById("container__2020");
-    const observer = new MutationObserver(() => {
-        if(document.querySelector(".quest_dialogue__2021 u")) setBrainTree(document.querySelector(".quest_dialogue__2021 u").textContent);
-    });
-    observer.observe(container, {childList: true, subtree: true});
+    addPricesToEsophagor();
+    const observer = new MutationObserver(addPricesToEsophagor);
+    observer.observe(document.getElementById("container__2020"), {childList: true, subtree: true});
 }
 
 const getItemValues = (items) => {
@@ -120,11 +122,11 @@ const getItemValues = (items) => {
         const slug = slugify(item.name);
         return new Promise((price) =>
           fetch(`https://itemdb.com.br/api/v1/items/${slug}`).then((res) => {
-            res.json().then((json) => price(json.price.value) * item.quantity);
-          }),
+            res.json().then((json) => price(json.price.value) * item.quantity).catch(() => total(-1));
+          })
         );
-      }),
-    ).then((prices) => total(prices.reduce((a, c) => a + c, 0)))
+      })
+    ).then((prices) => total(prices.reduce((a, c) => a + c, 0).toString().replaceAll(/\B(?=(\d{3})+(?!\d))/g, ',')))
   );
 };
 
@@ -166,10 +168,25 @@ const getTotal = async (quest) => {
     }
 }
 
+const checkForFaerie = async () => {
+    const re = document.getElementsByClassName("randomEvent")[0];
+    if(!re || !re.innerText.match(/faerie /i)) return;
+    const maybeItem = re.querySelector("p b");
+    if(!maybeItem) return;
+    const itemValue = await getItemValues([{name: maybeItem.textContent, quantity: 1}]);
+    if(itemValue < 0) return;
+    maybeItem.insertAdjacentHTML("afterEnd", ` (${itemValue} NP)`);
+    parseItem(maybeItem, 0, []);
+}
+
 (function() {
     'use strict';
+    checkForFaerie();
     const url = window.location.href;
     if(url.includes("halloween/braintree.phtml")) onBrainTree();
-    else getTotal(quests.find(quest => url.includes(quest.url)));
-    if(url.includes("esophagor")) onEsophagor();
+    else {
+        const quest = quests.find(q => url.includes(q.url));
+        if(quest) getTotal(quest);
+        if(url.includes("esophagor")) onEsophagor();
+    }
 })();
