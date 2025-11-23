@@ -1,13 +1,13 @@
 // ==UserScript==
 // @name         Neopets: Quest Improvements
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      0.1.0
+// @version      0.2.0
 // @description  Adds an estimated value for the items requested of you in every quest. Also remembers and fills your Brain Tree answers.
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
 // @homepage     https://github.com/saahphire/NeopetsUserscripts
-// @downloadURL  https://github.com/saahphire/NeopetsUserscripts/blob/main/questImprovements.js
-// @updateURL    https://github.com/saahphire/NeopetsUserscripts/blob/main/questImprovements.js
+// @downloadURL  https://github.com/saahphire/NeopetsUserscripts/blob/quest-improvements/questImprovements.js
+// @updateURL    https://github.com/saahphire/NeopetsUserscripts/blob/quest-improvements/questImprovements.js
 // @match        *://*.neopets.com/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=neopets.com
 // @license      The Unlicense
@@ -22,9 +22,10 @@
     This script is still in its testing phase! Testing random faerie quests is extremely hard. Use at your own risk!
 
     This script does the following:
-    - Adds price estimates for every quest in the game
-    - Adds a link on the quest page to the Shop Wizard as soon as you get the item, no need to refresh
-    - Saves and the Brain Tree's answers that you got from Esophagor and fills them when you click their names
+    - Adds price estimates for every quest in the game, including faerie quests
+    - Adds a link to the requested item to the Shop Wizard as soon as you get the request, no need to refresh
+      - Does that even for faerie quests in case you have alt accounts you want to SW in.
+    - Saves the Brain Tree's answers that you got from Esophagor and fills them automatically
     - Adds a link from the Brain Tree to the Esophagor and another from the Esophagor to the Brain Tree
     
     Price estimates are retrieved from itemDB. Please consider contributing by adding a simple userscript:
@@ -40,18 +41,13 @@ const slugify = (name) => name.toString().normalize('NFD').replace(/[\u0300-\u03
 
 const quests = [
     {
-        url: 'quests.phtml',
-        itemSelector: '',
-        totalSelector: ''
-    },
-    {
         url: "halloween/esophagor.phtml",
         itemSelector: ".item-name, .ingredient-grid p b",
         totalSelector: "h2 b"
     },
     {
         url: "halloween/witchtower.phtml",
-        itemSelector: ".item-name, .ingredient-grid p b",
+        itemSelector: ".ingredient-grid p b",
         totalSelector: "h2 b"
     },
     {
@@ -61,7 +57,7 @@ const quests = [
     },
     {
         url: "island/kitchen.phtml",
-        itemSelector: ".item-name, .ingredient-grid p b",
+        itemSelector: ".ingredient-grid p b",
         totalSelector: "h2 b"
     },
     {
@@ -72,41 +68,43 @@ const quests = [
     {
         // TODO
         url: "medieval/earthfaerie.phtml",
-        itemSelector: ".item-name, .ingredient-grid p b",
+        itemSelector: ".ingredient-grid p b",
         totalSelector: "h2 b"
     },
     {
         url: "faerieland/darkfaerie.phtml",
         itemSelector: "#dark-container p:first-of-type b",
         totalSelector: "#dark-container p:nth-child(5) b"
+    },
+    {
+        url: "quests.phtml",
+        itemSelector: ".item b",
+        totalSelector: ".item b"
     }
 ];
 
-const resetBrainTree = () => ["Year", "Location"].forEach(info => GM.setValue(`brainTree${info}`, ""));
+const offsetHours = parseInt(new Intl.DateTimeFormat("en-UK", {timeStyle: "long", timeZone: "America/Los_Angeles"}).format(new Date()).slice(-1));
 
-const setBrainTree = (value) => GM.setValue(`brainTree${isNaN(parseInt(value)) ? 'Location' : 'Year'}`, value ?? "");
+const setBrainTree = (value) => GM.setValue(`brainTree${isNaN(parseInt(value)) ? 'Location' : 'Year'}`, {date: new Date().getTime(), info: value ?? ""});
 
-const getBrainTree = () => Promise.all(["Year", "Location"].map(async info => await GM.getValue(`brainTree${info}`, "")));
-
-const addInfo = (info, selector) => {
-    const goToEsophagor = `<a href="https://www.neopets.com/halloween/esophagor.phtml">Ask the Esophagor</a>`;
-    const label = document.querySelector(`label[for="${selector}"]`);
-    label.innerHTML += ` (${info ?? goToEsophagor})`;
-    if(info) label.addEventListener("click", () => document.getElementById(selector).value = info);
-}
+const getBrainTree = () => Promise.all(["Year", "Location"].map(async info => {
+    const data = await GM.getValue(`brainTree${info}`, "");
+    if(!data || data.info === "" || data.date < new Date().setUTCHours(offsetHours)) return;
+    return data.info;
+}));
 
 const onBrainTree = async () => {
-    if(!document.querySelector("div p b").textContent.startsWith("You've already")) document.querySelector('.container .button-default__2020.button-yellow__2020').insertAdjacentHTML("afterEnd", `<a class="button-default__2020 button-blue__2020 btn-single__2020" href="https://www.neopets.com/halloween/esophagor.phtml">To the Esophagor!</a>`);
+    if(!document.querySelector("div p b").textContent.startsWith("You've already")) document.querySelector('.container .button-default__2020.button-yellow__2020').insertAdjacentHTML("afterEnd", `<a class="button-default__2020 button-blue__2020 btn-single__2020" href="https://www.neopets.com/halloween/esophagor.phtml" target="_blank">To the Esophagor!</a>`);
     const inputs = document.getElementsByClassName("brain-input");
     if(inputs.length === 0) return;
     const [year, location] = await getBrainTree();
-    addInfo(year, "answer_1");
-    addInfo(location, "answer_2");
+    if(year) document.getElementById("answer_1").value = year;
+    if(location) document.getElementById("answer_2").value = location;
 }
 
 const addPricesToEsophagor = () => {
     if(document.querySelector(".quest_dialogue__2021 u")) setBrainTree(document.querySelector(".quest_dialogue__2021 u").textContent);
-    if(!document.querySelector(".gotree")) document.querySelector('.container .button-default__2020.button-yellow__2020:not(.q-button__2020)')?.insertAdjacentHTML("afterEnd", `<a class="button-default__2020 button-blue__2020 btn-single__2020 gotree" href="https://www.neopets.com/halloween/braintree.phtml">To the Brain Tree!</a>`);
+    if(!document.querySelector(".gotree")) document.querySelector('.container .button-default__2020.button-yellow__2020:not(.q-button__2020)')?.insertAdjacentHTML("afterEnd", `<a class="button-default__2020 button-blue__2020 btn-single__2020 gotree" href="https://www.neopets.com/halloween/braintree.phtml" target="_blank">To the Brain Tree!</a>`);
 }
 
 const onEsophagor = () => {
@@ -169,14 +167,13 @@ const getTotal = async (quest) => {
 }
 
 const checkForFaerie = async () => {
-    const re = document.getElementsByClassName("randomEvent")[0];
-    if(!re || !re.innerText.match(/faerie /i)) return;
-    const maybeItem = re.querySelector("p b");
-    if(!maybeItem) return;
-    const itemValue = await getItemValues([{name: maybeItem.textContent, quantity: 1}]);
+    const re = document.getElementsByClassName("new_quest_pushdown")[0];
+    if(!re) return;
+    const item = re.querySelector("b");
+    const itemValue = await getItemValues([{name: item.textContent, quantity: 1}]);
     if(itemValue < 0) return;
-    maybeItem.insertAdjacentHTML("afterEnd", ` (${itemValue} NP)`);
-    parseItem(maybeItem, 0, []);
+    item.insertAdjacentHTML("afterEnd", ` (${itemValue} NP)`);
+    parseItem(item, 0, []);
 }
 
 (function() {
