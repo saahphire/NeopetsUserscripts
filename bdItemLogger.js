@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Battledome Item Logger
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.1
+// @version      1.0.2
 // @description  Logs what prizes you have received at the Battledome, not including neopoints, and exports it with the formatting of your choice
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -43,11 +43,11 @@
 
 const resultFormat = {
     // Anything that should come before your repetitions. You may leave this blank as "", but don't delete it.
-    prefix: "<ul>",
+    prefix: "",
     // What your repetitions should look like, replacing {{time}} with the formatted time and {{item}} with the item's name.
-    repeat: "<li>{{time}} - {{item}}</li>\n",
+    repeat: "          - '{{time}} - {{item}}'\n",
     // Anything that should come before your repetitions. You may leave this blank as "", but don't delete it.
-    suffix: "</ul>"
+    suffix: ""
 }
 
 const timeFormat = {
@@ -79,7 +79,7 @@ const getFilteredPrizes = async (filterLower, filterHigher) => {
     const allPrizes = await GM.getValue("prizes", []);
     const start = filterLower ? (new Date(`${filterLower}-0700`)).getTime() : null;
     const end = filterHigher ? (new Date(`${filterHigher}-0700`)).getTime() : null;
-    return allPrizes.filter(([time, _]) => (!start || time >= start) && (!end || time < end));
+    return allPrizes.filter(([time, prize]) => (!start || time >= start) && (!end || time < end) && (!prize.match(/\d+ Plot Points/)));
 }
 
 const formatValues = (allPrizes) => {
@@ -107,7 +107,7 @@ const grabItems = async () => {
     const allPrizes = await GM.getValue("prizes", []);
     const now = (new Date()).getTime();
     prizes.forEach(prize => {
-        if(prize.textContent.match(/\d+ Neopoints/) || prize.textContent === "inventory") return;
+        if(prize.textContent.match(/\d+ Neopoints/) || prize.textContent.match(/\d+ Plot Points/) || prize.textContent === "inventory") return;
         allPrizes.push([now, prize.textContent]);
     });
     GM.setValue("prizes", allPrizes);

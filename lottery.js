@@ -38,8 +38,8 @@
 
 // Add your lucky numbers here! If you'd like to get rid of the lucky button instead, change "true" to "false"
 const enableLuckyButton = true;
-const luckyNumbers = [2, 7, 11, 20, 25, 27];
-const verbose = true;
+const luckyNumbers = [0, 0, 0, 0, 0, 0];
+const verbose = false;
 
 const inputNames = ["one", "two", "three", "four", "five", "six"];
 
