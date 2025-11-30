@@ -42,7 +42,7 @@ const slugify = (name) => name.toString().normalize('NFD').replace(/[\u0300-\u03
 const quests = [
     {
         url: "halloween/esophagor.phtml",
-        itemSelector: ".item-name, .ingredient-grid p b",
+        itemSelector: ".ingredient-grid p b",
         totalSelector: "h2 b"
     },
     {
