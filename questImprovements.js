@@ -6,8 +6,8 @@
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
 // @homepage     https://github.com/saahphire/NeopetsUserscripts
-// @downloadURL  https://github.com/saahphire/NeopetsUserscripts/blob/quest-improvements/questImprovements.js
-// @updateURL    https://github.com/saahphire/NeopetsUserscripts/blob/quest-improvements/questImprovements.js
+// @downloadURL  https://github.com/saahphire/NeopetsUserscripts/blob/main/questImprovements.js
+// @updateURL    https://github.com/saahphire/NeopetsUserscripts/blob/main/questImprovements.js
 // @match        *://*.neopets.com/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=neopets.com
 // @license      The Unlicense
@@ -89,7 +89,11 @@ const setBrainTree = (value) => GM.setValue(`brainTree${isNaN(parseInt(value)) ?
 
 const getBrainTree = () => Promise.all(["Year", "Location"].map(async info => {
     const data = await GM.getValue(`brainTree${info}`, "");
-    if(!data || data.info === "" || data.date < new Date().setUTCHours(offsetHours)) return;
+    const midnight = new Date();
+    midnight.setUTCHours(offsetHours);
+    midnight.setUTCMinutes(0);
+    midnight.setSeconds(0);
+    if(!data || data.info === "" || data.date < midnight.getTime()) return;
     return data.info;
 }));
 
