@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Store All
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.0
+// @version      1.0.1
 // @description  Selects closet (for wearables) or deposit for every item in your quick stock. Focuses on the submit button so you only have to press enter.
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -33,7 +33,7 @@
 
 (function() {
     'use strict';
-    document.querySelectorAll('[name="quickstock"] tr:not(:first-child, :last-child, :nth-last-child(2)').forEach(item => {
+    document.querySelectorAll('[name="quickstock"] tr:has(td:nth-child(3) input):not(:has(b))').forEach(item => {
         const closet = item.querySelector('input[value="closet"]');
         if(closet) closet.checked = true;
         else item.querySelector('input[value="deposit"]').checked = true;
