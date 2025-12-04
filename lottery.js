@@ -2,7 +2,7 @@
 // @name         Neopets: Lottery Numbers Generator
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
 // @version      1.1.1
-// @description  Generates not-so-random numbers for you to play in the lottery, making sure you repeat as little numbers as possible to increase your chances of winning.
+// @description  Generates not-so-random numbers for you to play in the lottery, making sure you repeat as few numbers as possible to increase your chances of winning.
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
 // @homepage     https://github.com/saahphire/NeopetsUserscripts
