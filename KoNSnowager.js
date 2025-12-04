@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Keepers of Neopia: Snowager Checklist
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.0
+// @version      1.0.1
 // @description  For Keepers of Neopia's December 2025 Monthly Challenge. Keeps track of your Snowager checklist.
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -115,7 +115,6 @@ const checkItem = async () => {
         if(possibility.check && possibility.check(item)) checksPassed.push(possibility.id);
     });
     if(checksPassed.length === 0) checksPassed.push("other");
-    // TODO
     if(document.querySelector("#snowager_container p").textContent.match("SUPER RARE")) checksPassed.push("rare");
     return checksPassed;
 }
@@ -145,6 +144,7 @@ div#container__2020.container.theme-bg .kon-checklist ul li {
 </style>`;
 
 const searchForItem = async () => {
+    if(document.queryselector('kon-checklist')) return;
     const checksPassed = await checkItem();
     if(checksPassed.length === 0) return;
     updateStoredChecklist(checksPassed);
