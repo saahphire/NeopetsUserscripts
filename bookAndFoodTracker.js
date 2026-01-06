@@ -500,6 +500,9 @@ const borderCSS = `<style>
     border-width: 8px;
     box-sizing: border-box;
     box-shadow: none;
+}
+
+.popup-body__2020 .petCare-itemgrid .petCare-itemgrid-item.saahphire-bft-to-do {
     padding-bottom: calc(100% - 16px);
 }
 
