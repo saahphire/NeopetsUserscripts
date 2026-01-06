@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: SDB Improvements (Single Page, Prices, No Reload, Export)
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.0
+// @version      1.0.1
 // @description  Records all items in your SDB and adds a button to display them all in a single page
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -226,7 +226,7 @@ const adjustQuantities = (cell, removed = null) => {
 
 const onSubmitIndividual = (event) => {
   event.preventDefault();
-  document.getElementById("pin_field").setAttribute("form", event.target.id);
+  document.getElementById("pin_field")?.setAttribute("form", event.target.id);
   event.target.parentElement.parentElement.getElementsByClassName("remove_safety_deposit")[0].setAttribute("form", event.target.id);
   const formData = new FormData(event.target);
   const cell = event.target.parentElement;
@@ -234,7 +234,7 @@ const onSubmitIndividual = (event) => {
   fetch("https://www.neopets.com/process_safetydeposit.phtml?checksub=scan", {method: "POST", body: formData}).then(() => {
     adjustQuantities(cell);
     removeLoading(cell);
-    document.getElementById("pin_field").removeAttribute("form");
+    document.getElementById("pin_field")?.removeAttribute("form");
     document.getElementsByClassName("remove_safety_deposit")[0].removeAttribute("form");
   });
 }
@@ -639,6 +639,7 @@ script ~ tr:not(:last-child):has(.sdb-saah-wearable), script ~ tr:not(:last-chil
   display: flex;
   gap: 0.25em;
   margin: 0.5em 0 0.25em;
+  justify-content: center;
 }
 
 .sdb-saah-move-form + br {
@@ -648,6 +649,10 @@ script ~ tr:not(:last-child):has(.sdb-saah-wearable), script ~ tr:not(:last-chil
 .sdb-saah-name .search-helper img {
     width: 20px;
     height: 20px;
+}
+
+.sdb-saah-value {
+  text-align: center;
 }
 
 @keyframes lds-hourglass {
