@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: SDB Improvements (Single Page, Prices, No Reload, Export)
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.0
+// @version      1.0.1
 // @description  Records all items in your SDB and adds a button to display them all in a single page
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -226,7 +226,7 @@ const adjustQuantities = (cell, removed = null) => {
 
 const onSubmitIndividual = (event) => {
   event.preventDefault();
-  document.getElementById("pin_field").setAttribute("form", event.target.id);
+  document.getElementById("pin_field")?.setAttribute("form", event.target.id);
   event.target.parentElement.parentElement.getElementsByClassName("remove_safety_deposit")[0].setAttribute("form", event.target.id);
   const formData = new FormData(event.target);
   const cell = event.target.parentElement;
@@ -234,7 +234,7 @@ const onSubmitIndividual = (event) => {
   fetch("https://www.neopets.com/process_safetydeposit.phtml?checksub=scan", {method: "POST", body: formData}).then(() => {
     adjustQuantities(cell);
     removeLoading(cell);
-    document.getElementById("pin_field").removeAttribute("form");
+    document.getElementById("pin_field")?.removeAttribute("form");
     document.getElementsByClassName("remove_safety_deposit")[0].removeAttribute("form");
   });
 }
