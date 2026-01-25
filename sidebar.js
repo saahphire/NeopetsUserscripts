@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Sidebar
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.1
+// @version      1.0.0
 // @description  Adds a very customizable sidebar with icons and links of your choice to every page in Neopets, a settings page, and notebooks
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -887,13 +887,13 @@ const addNewNotebookToGuiAndStorage = async gui => {
 const isNotebookUrlMatch = notepad =>
   urlMatchers[notepad.mode](window.location.href, notepad.matcher);
 
-const getNotebooksFromStorage = async (update) => {
+const getNotebooksFromStorage = async (showAll, update) => {
   let currentNotebooks = await GM.getValue('notebooks', defaultNotebooks);
   if (update) {
     currentNotebooks = currentNotebooks.filter(a => a);
     GM.setValue('notebooks', currentNotebooks);
   }
-  return currentNotebooks;
+  return showAll ? currentNotebooks : currentNotebooks.filter(isNotebookUrlMatch);
 };
 
 const createNotebookFolder = async (notepad, index, gui) => {
@@ -908,10 +908,8 @@ const createNotebookFolder = async (notepad, index, gui) => {
 };
 
 const renderNotebooksInGui = async (showAll, gui) => {
-  const list = await getNotebooksFromStorage(true);
-  list.forEach((notepad, index) => {
-    if(isNotebookUrlMatch(notepad)) createNotebookFolder(notepad, index, gui);
-  });
+  const list = await getNotebooksFromStorage(showAll, true);
+  list.forEach((notepad, index) => createNotebookFolder(notepad, index, gui));
 };
 
 const createNotebooksGUI = async () => {
@@ -1168,6 +1166,7 @@ const saveSettingsToStorage = savedGui => {
     agg[setting.key] = savedGui.folders[setting.folder].controllers[setting.name];
     return agg;
   }, {});
+  console.log(settingsToSave);
   GM.setValue('settings', settingsToSave);
 };
 
