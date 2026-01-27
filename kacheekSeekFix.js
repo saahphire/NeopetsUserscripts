@@ -40,6 +40,7 @@ const createLink = area => {
     a.textContent = area.alt;
     a.href = area.href;
     if(!a.href.startsWith('https')) a.addEventListener('click', onClick);
+    return a;
 }
 
 (function() {
