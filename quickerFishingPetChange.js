@@ -77,8 +77,10 @@ const fillPets = async () => {
 const css = `<style>
 .quicker-fishing-pet-change {
   display: flex;
+  margin: auto;
   width: 100%;
   justify-content: center;
+  flex-wrap: wrap;
   gap: 0.5em;
 }
 
