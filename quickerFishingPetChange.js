@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Quicker Fishing Vortex Pet Change
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.1.0
+// @version      1.1.1
 // @description  Adds links to quickly switch between pets while fishing
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -146,7 +146,7 @@ const css = `<style>
 
 (async function() {
     'use strict';
-    if(!document.querySelector('input.btn-single__2020')) return;
     const div = createContainer();
-    updatePets().then(() => fillPets(div));
+    if(!document.querySelector('input.btn-single__2020')) await updatePets();
+    fillPets(div);
 })();
