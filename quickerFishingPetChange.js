@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Quicker Fishing Vortex Pet Change
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.0
+// @version      1.1.0
 // @description  Adds links to quickly switch between pets while fishing
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -56,22 +56,37 @@ const onButtonClick = e => {
   })
 }
 
-const getPetButtonHTML = (pet, activePet) => `<button role="button" data-pet="${pet}"${pet.toLowerCase() === activePet ? ' class="active"' : ''}><img src="https://pets.neopets.com/cpn/${pet}/1/1.png"></button>`;
-
 const createContainer = () => {
     const div = document.createElement("div");
-    div.classList.add("quicker-fishing-pet-change");
+    div.classList.add("quicker-fishing-pet-change", "loading");
     div.insertAdjacentHTML("afterBegin", css);
     document.getElementsByClassName('btn-single__2020')[0].parentElement.insertAdjacentElement("afterEnd", div);
     return div;
 }
 
-const fillPets = async () => {
-    const div = createContainer();
+const addButton = async (petName, activePet) => {
+    const button = document.createElement('button');
+    button.role = 'button';
+    button.dataset.pet = petName;
+    if(petName === activePet) button.classList.add('active');
+    button.addEventListener("click", onButtonClick);
+    let img;
+    await new Promise(resolve => {
+        img = new Image();
+        img.onload = resolve;
+        img.src = `https://pets.neopets.com/cpn/${petName}/1/1.png`;
+    });
+    button.appendChild(img);
+    return button;
+  }
+
+const fillPets = async (div) => {
     const petNames = await GM.getValue("pets", []);
     const activePet = document.getElementsByClassName("profile-dropdown-link")[0].href.split("=")[1].toLowerCase();
-    petNames.forEach(pet => div.insertAdjacentHTML("beforeEnd", getPetButtonHTML(pet, activePet)));
-    div.querySelectorAll("button").forEach(button => button.addEventListener("click", onButtonClick));
+    Promise.all(petNames.map(pet => addButton(pet, activePet))).then(buttons => {
+      buttons.forEach(button => div.appendChild(button));
+      div.classList.remove('loading');
+    });
 }
 
 const css = `<style>
@@ -106,12 +121,22 @@ const css = `<style>
   filter: greyscale(0.5);
 }
 
-.quicker-fishing-pet-change button.loading::before {
+.quicker-fishing-pet-change.loading {
+  height: 0;
+}
+
+.quicker-fishing-pet-change button.loading::before, .quicker-fishing-pet-change.loading::before {
   content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26px' height='26px' viewBox='0 0 24 24'%3E%3Cpath fill='%23fff' d='M12,23a9.63,9.63,0,0,1-8-9.5,9.51,9.51,0,0,1,6.79-9.1A1.66,1.66,0,0,0,12,2.81h0a1.67,1.67,0,0,0-1.94-1.64A11,11,0,0,0,12,23Z' stroke-width='0.5' stroke='%23fff'%3E%3CanimateTransform attributeName='transform' dur='0.75s' repeatCount='indefinite' type='rotate' values='0 12 12;360 12 12'/%3E%3C/path%3E%3C/svg%3E");
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+}
+
+.quicker-fishing-pet-change.loading::before {
+  filter: invert(1);
+  top: auto;
+  margin-top: 25px;
 }
 
 .quicker-fishing-pet-change img {
@@ -121,6 +146,7 @@ const css = `<style>
 
 (async function() {
     'use strict';
-    if(document.querySelector('input.btn-single__2020')) await updatePets();
-    fillPets();
+    if(!document.querySelector('input.btn-single__2020')) return;
+    const div = createContainer();
+    updatePets().then(() => fillPets(div));
 })();
