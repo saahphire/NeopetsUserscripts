@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Quicker Fishing Vortex Pet Change
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.2.0
+// @version      1.3.0
 // @description  Adds links to quickly switch between pets while fishing
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -64,38 +64,44 @@ const createContainer = () => {
     return div;
 }
 
+const createButton = (petName) => {
+  const button = document.createElement('button');
+  button.role = 'button';
+  button.dataset.pet = petName;
+  button.addEventListener("click", onButtonClick);
+  return button;
+}
+
 const addButton = async (petName, activePet) => {
-    const button = document.createElement('button');
-    button.role = 'button';
-    button.dataset.pet = petName;
-    if(petName.toLowerCase() === activePet) button.classList.add('active');
-    button.addEventListener("click", onButtonClick);
-    let img;
-    await new Promise(resolve => {
-        img = new Image();
-        img.onload = resolve;
-        img.src = `https://pets.neopets.com/cpn/${petName}/1/1.png`;
-    });
-    button.appendChild(img);
-    return button;
-  }
+  const button = createButton(petName);
+  if(petName.toLowerCase() === activePet) button.classList.add('active');
+  let img;
+  await new Promise(resolve => {
+      img = new Image();
+      img.onload = resolve;
+      img.src = `https://pets.neopets.com/cpn/${petName}/1/1.png`;
+  });
+  button.appendChild(img);
+  return button;
+}
+
+const addNextPetButton = (petNames, activePet) => {
+    const nextPet = petNames[(petNames.findIndex(petName => petName.toLowerCase() === activePet) + 1) % petNames.length];
+    const nextButton = createButton(nextPet);
+    nextButton.classList.add('button-default__2020', 'button-yellow__2020', 'btn-single__2020');
+    nextButton.textContent = `Fish With ${nextPet}`;
+    document.getElementsByClassName('btn-single__2020')[0].parentElement.insertAdjacentElement('afterEnd', nextButton);
+}
 
 const fillPets = async (div) => {
-    const petNames = await GM.getValue("pets", []);
-    const activePet = document.getElementsByClassName("profile-dropdown-link")[0].href.split("=")[1].toLowerCase();
-    Promise.all(petNames.map(pet => addButton(pet, activePet))).then(buttons => {
-      buttons.forEach(button => div.appendChild(button));
-      if(document.getElementsByClassName('btn-single__2020')[0].textContent === 'Cast Your Line Again') {
-        const nextPet = petNames[(petNames.findIndex(petName => petName.toLowerCase() === activePet) + 1) % petNames.length];
-        const nextButton = document.createElement('button');
-        nextButton.role = 'button';
-        nextButton.dataset.pet = nextPet;
-        nextButton.classList.add('button-default__2020', 'button-yellow__2020', 'btn-single__2020');
-        nextButton.textContent = `Fish With ${nextPet}`;
-        document.getElementsByClassName('btn-single__2020')[0].insertAdjacentElement('afterEnd', nextButton);
-      }
-      div.classList.remove('loading');
-    });
+  const petNames = await GM.getValue("pets", []);
+  const activePet = document.getElementsByClassName("profile-dropdown-link")[0].href.split("=")[1].toLowerCase();
+  if(document.getElementsByClassName('btn-single__2020')[0].textContent === 'Cast Your Line Again')
+    addNextPetButton(petNames, activePet);
+  Promise.all(petNames.map(pet => addButton(pet, activePet))).then(buttons => {
+    buttons.forEach(button => div.appendChild(button));
+    div.classList.remove('loading');
+  });
 }
 
 const css = `<style>
