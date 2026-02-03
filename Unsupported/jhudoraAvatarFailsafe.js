@@ -16,6 +16,8 @@
 // @grant        GM.deleteValue
 // ==/UserScript==
 
+// This userscript doesn't work. I'm not sure why. It worked when I tested it with single-digit numbers and I'll need at least 10 days to reach double digits again.
+
 (async function() {
     'use strict';
     if(document.getElementsByClassName('level-item')[1]?.textContent === '25')
