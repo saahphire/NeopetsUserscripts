@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Non-Dailies Notifications
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      0.1.0
+// @version      1.0.0
 // @description  Sends a native browser notification for most things that don't refresh at midnight (but have a regular time), like Snowager or training
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -43,7 +43,7 @@
 // Set an activity to false if you don't want it to be tracked, and true if you do. Do NOT delete or rename entries.
 const activityToggles = {
     'Snowager': true,
-    'Deadly Dice': true,
+    'Deadly Dice': false,
     'Obelisk': true,
     'Wheel of Excitement': true,
     'Wheel of Mediocrity': true,
@@ -56,7 +56,9 @@ const activityToggles = {
     'Expellibox': true,
     'Swashbuckling Academy': true,
     'Training School': true,
-    'Secret Training School': true
+    'Secret Training School': true,
+    'Edna': true,
+    'Esophagor': true
 }
 
 const activities = [
@@ -163,6 +165,20 @@ const activities = [
         url: 'island/fight_training.phtml?type=status',
         timestamp: () => trainingTimestamp(),
         watch: () => document.querySelector('td + td > br + b')
+    },
+    {
+        name: 'Edna',
+        url: 'halloween/witchtower.phtml',
+        timestamp: () => ednaTimestamp(),
+        // TODO MutationObserver probably
+        watch: () => document.querySelector('b[style="color:darkred"], p[style="color:darkgreen;"]')
+    },
+    {
+        name: 'Esophagor',
+        url: 'halloween/esophagor.phtml',
+        // TODO not updating?
+        timestamp: () => ednaTimestamp(),
+        watch: () => document.querySelector('b[style="color:darkred"], p[style="color:darkgreen;"]')
     }
 ]
 const timeFromString = string => string
@@ -194,6 +210,11 @@ const obeliskTimestamp = () => {
     thursday.setUTCDate(thursday.getDate() + ((4 - thursday.getDay() + 7) % 7));
     if((controlThursday.getTime() - thursday.getTime()) % 1209600000 !== 0) thursday.setUTCDate(thursday.getDate() + 7);
     return Math.min(nextMonday.getTime(), thursday.getTime());
+}
+
+const ednaTimestamp = () => {
+    const time = document.querySelector('b[style="color:darkred"] + b');
+    if(time) return timeFromString(time.textContent);
 }
 
 const graveDangerTimestamp = async () => {
@@ -245,24 +266,33 @@ const getTimeRemaining = timestamp => {
     return `${daysRemaining ? daysRemaining + 'd' : ''}${hoursRemaining}h${minutesRemaining}m${secondsRemaining}s`;
 }
 
-const alertTimers = () => {
+const buildNotification = activity => {
+    return {
+        text: 'Click to open it!',
+        title: `${activity.name} reset!`,
+        image: activity.image,
+        onclick: () => GM.openInTab(`https://${activity.name === 'Expellibox' ? 'ncmall' : 'www'}.neopets.com/${activity.url}`)
+    }
+}
+
+const alertTimers = async channel => {
     const now = new Date().getTime();
     activities.forEach(async activity => {
         if(!activityToggles[activity.name]) return;
-        GM.getValue(activity.name).then(async timestamp => {
-            if(timestamp && timestamp <= now) {
-                GM.deleteValue(activity.name);
-                if(!activity.expiration || activity.expiration*60*1000 + timestamp > now)
-                    GM.notification({
-                        text: 'Click to open it!',
-                        title: `${activity.name} reset!`,
-                        image: activity.image,
-                        onclick: () => GM.openInTab(`https://${activity.name === 'Expellibox' ? 'ncmall' : 'www'}.neopets.com/${activity.url}`)
-                    });
-                if(activity.expiration) GM.setValue(activity.name, await activity.timestamp(true));
-            }
-        })
+        const timestamp = await GM.getValue(activity.name);
+        if(!timestamp || timestamp > now) return;
+        GM.deleteValue(activity.name);
+        if(!activity.expiration || activity.expiration*60*1000 + timestamp > now) {
+            GM.notification(buildNotification(activity));
+            channel.postMessage('notified');
+        }
+        if(activity.expiration) GM.setValue(activity.name, await activity.timestamp(true));
     })
+}
+
+const makeTimeout = (timeout, channel) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => alertTimers(channel), 60000 + (Math.random() * 5000));
 }
 
 const addTimers = async () => {
@@ -283,18 +313,25 @@ const addTimers = async () => {
 }
 
 const onActivityPage = async activity => {
-    // There's a timer running for this activity, meaning it's unavailable
-    if(await GM.getValue(activity.name)) return;
     const startTimer = await activity.watch();
     if(!startTimer) return;
-    GM.setValue(activity.name, await activity.timestamp());
+    const timestamp = await activity.timestamp();
+    if(timestamp) GM.setValue(activity.name, timestamp);
+    else GM.deleteValue(activity.name);
     document.getElementsByClassName('saahphire-timers')[0].remove();
     addTimers();
 }
 
+const initializeAlerts = () => {
+    const channel = new BroadcastChannel('saahphire-non-dailies-notification');
+    let timeout;
+    channel.onmessage = () => makeTimeout(timeout, channel);
+    makeTimeout(timeout, channel);
+}
+
 const initializeScript = async () => {
     document.head.insertAdjacentHTML('beforeEnd', css);
-    setInterval(alertTimers, 1000);
+    initializeAlerts();
     addTimers();
     const currentActivity = activities.find(act => window.location.href.match(/.+:\/\/(?:\w+\.)?neopets.com\/(.+)/)?.[1].startsWith(act.url));
     if(currentActivity) onActivityPage(currentActivity);
