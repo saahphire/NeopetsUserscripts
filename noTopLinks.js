@@ -28,11 +28,6 @@
 •:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•:•:•:•:•:•:•:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•.•:•:•:•:•:•:•:•:•.•:•:•.•:•.••:•.•:•.••:
 */
 
-const linksStillThere = [
-    ['https://neopets.com/closet.phtml', 'Closet'],
-    ['https://neopets.com/safetydeposit.phtml', 'Safety Deposit Box']
-];
-
 (function() {
     'use strict';
     document.querySelectorAll('.medText:has(a[href="/neohome/"]), .medText:has(a[href="/neohome/"]) + br').forEach(e => e.remove());
