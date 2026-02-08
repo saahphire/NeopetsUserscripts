@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Shop Condenser
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.0
+// @version      1.1.0
 // @description  Condenses your shop's view. Removes useless elements.
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -69,25 +69,6 @@ const remove = [
     'form + table:has(a[href="/pin_prefs.phtml"])',
     'font[size="1"]'
 ];
-
-const shopLetters = [
-    ['a', 'n', '0'],
-    ['b', 'o', '1'],
-    ['c', 'p', '2'],
-    ['d', 'q', '3'],
-    ['e', 'r', '4'],
-    ['f', 's', '5'],
-    ['g', 't', '6'],
-    ['h', 'u', '7'],
-    ['i', 'v', '8'],
-    ['j', 'w', '9'],
-    ['k', 'x', '_'],
-    ['l', 'y'],
-    ['m', 'z']
-];
-
-const usernameLetter = document.querySelector('.user a').textContent.charAt(0);
-const swLetters = shopLetters.find(letterCluster => letterCluster.find(letter => letter === usernameLetter));
 
 const buildJumpTo = () => {
     const ul = document.createElement('ul');
@@ -166,18 +147,6 @@ p, ul {
     margin: 0.25em;
 }
 
-#search-form, #ssw-tabs-1 {
-    height: auto;
-}
-
-#search-form p {
-    margin: 0;
-}
-
-#results_table tr:not(:first-child, :nth-child(2), :has(a[href*="owner=${swLetters.join('"], a[href*="owner=')}"])) {
-    display: none;
-}
-
 .saahphire-jump-to {
     padding: 0;
     text-align: center;
@@ -247,7 +216,9 @@ form[action="market.phtml"] {
 
 [name="view"] + table tr {
     display: grid;
-    grid-template-columns: 3fr repeat(var(--columns), 1fr);
+    grid-template-columns: 3fr;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
     padding: 0;
     background-color: #ffffcc;
 }
@@ -292,7 +263,6 @@ br, tr:has(> td[bgcolor="#cccccc"]), .sf {
     document.querySelectorAll('form[action="market.phtml"]').forEach(form => moveStockInputs(form));
     removeDescriptions();
     addMaxToRemove();
-    document.querySelector('[name="view"] + table')?.style.setProperty('--columns', document.querySelectorAll('[name="view"] + table > tbody > tr:first-child td').length - 2);
     addPinToLastRow();
     document.querySelectorAll(remove.join(', ')).forEach(rm => rm.remove());
     [...document.querySelectorAll('b + p[align="center"]')].find(p => p.textContent.startsWith('Only purchases'))?.remove();
