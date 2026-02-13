@@ -1,8 +1,7 @@
 # NeopetsUserscripts
 Userscripts for Neopets, written in GM4
 
-# About Each Script
-See [Userscript Descriptions](https://github.com/saahphire/NeopetsUserscripts/wiki/Userscript-Descriptions) for information on each script's features, or look at its comments
+<img width="1920" height="1080" alt="A screenshot of the blog" src="https://github.com/user-attachments/assets/045879b1-c92b-43a4-ae79-85926e1c7459" />
+I've made [a blog](https://neopetsuserscripts.wordpress.com) for my userscripts so it's easier for you to find out whenever I post a new userscript! It has a newsletter, RSS feed, and posts in chronological order. From now on, that's where I'll keep the descriptions of each userscript. To find one, just use the search bar and use spaces wherever there's capitalization (so addPostNumberToTopics.js = Add Post Number to Topics).
 
-# How to Install
-See [How to Install](https://github.com/saahphire/NeopetsUserscripts/wiki/How-to-Install) for a quick guide on installation, or check your preferred extension's docs
+I've also created [a Bluesky account](https://bsky.app/profile/saahuserscripts.bsky.social) for the same purposes. I hate X and so should you.
