@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Instant Trudy's Surprise
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.0
+// @version      1.0.1
 // @description  I don't have time to wait three years until Trudy's surprise finishes spinning and gives a random set of slots that don't even mean anything. Neither do you!
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -77,5 +77,7 @@ const addButton = () => {
 
 (async function() {
     'use strict';
-    if(document.querySelector('#trudyContainer iframe').contentWindow.slt_check_trudy === 1) addButton();
+    document.querySelector('#trudyContainer iframe').addEventListener('load', (e) => {
+        if(e.target.contentWindow.slt_check_trudy === 1) addButton();
+    })
 })();
