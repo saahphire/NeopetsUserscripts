@@ -81,7 +81,7 @@ const onPetPage = () => {
     document.querySelector('.content textarea').style.width = "100%";
 }
 
-const onUserLookup = () => document.getElementsByClassName("settings-textarea")[0].style.height = "80vh";
+const onUserLookup = () => document.head.insertAdjacentHTML('beforeend', '<style>.settings-textarea{height:80vh;}</style>');
 
 const onFont = () => document.head.insertAdjacentHTML('beforeend', '<style>.settings-textbox{grid-column: span 2}</style>');
 
@@ -125,7 +125,7 @@ const locator = [
     ['neopet_desc', onPetLookup],
     ['editpage', onPetPage],
     ['profile', onUserLookup],
-    ['neoboards', onFont],
+    ['settings\\/neoboards', onFont],
     ['neomessages', onNeomail],
     ['create_topic', onTopic],
     ['topic=', onPost],
