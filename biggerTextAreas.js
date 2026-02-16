@@ -117,8 +117,8 @@ const onGuildLayout = () => document.getElementsByName('guild_welcome')[0].style
 
 const onGuildBoard = () => {
     const textarea = document.getElementsByName('message_text')[0];
-    textarea.width = '100%';
-    textarea.height = '50vh';
+    textarea.style.width = '100%';
+    textarea.style.height = '50vh';
 }
 
 const locator = [
@@ -131,7 +131,7 @@ const locator = [
     ['topic=', onPost],
     ['market', onShop],
     ['gallery_desc_edit', onShop],
-    ['handcrafter', onHandcrafted],
+    ['handcrafted', onHandcrafted],
     ['guild_admin_layout', onGuildLayout],
     ['guild_board', onGuildBoard]
 ];
