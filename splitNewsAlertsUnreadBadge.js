@@ -25,6 +25,9 @@
     - Marks news as read when you click/tap their notification
     - Adds a red notification badge on the right for unread alerts
 
+    If you only care about alerts, check out this userscript instead:
+    https://update.greasyfork.org/scripts/527400/Alert%20Notification%20Fix.user.js
+
     ✦ ⌇ saahphire
 ☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦
 ........................................................................................................................
