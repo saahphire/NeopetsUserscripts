@@ -1,16 +1,16 @@
 // ==UserScript==
 // @name         Neopets: Move BD Pets to Top
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.0
+// @version      1.0.1
 // @description  Moves training pets, as well as favorited pets, to the top of the page in the Academy and Training Schools.
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
 // @homepage     https://github.com/saahphire/NeopetsUserscripts
 // @downloadURL  https://github.com/saahphire/NeopetsUserscripts/blob/main/moveBDPetsToTop.js
 // @updateURL    https://github.com/saahphire/NeopetsUserscripts/blob/main/moveBDPetsToTop.js
-// @match        *://*.neopets.com/pirates/academy.phtml?type=status
-// @match        *://*.neopets.com/island/training.phtml?type=status
-// @match        *://*.neopets.com/island/fight_training.phtml?type=status
+// @match        *://*.neopets.com/pirates/academy.phtml?type=status*
+// @match        *://*.neopets.com/island/training.phtml?type=status*
+// @match        *://*.neopets.com/island/fight_training.phtml?type=status*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=neopets.com
 // @license      Unlicense
 // @grant        GM.setValue
