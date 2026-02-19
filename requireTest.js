@@ -42,10 +42,12 @@ const addAction = (a, itemName) => {
     }
 }
 
-export default const createSWLink = (itemName, children = []) => {
+const createSWLink = (itemName, children = []) => {
     const a = document.createElement('a');
     children.forEach(a.appendChild);
     if(!children.length) a.textContent = itemName;
     addAction(a, itemName);
     return a;
 }
+
+module.exports = {createSWLink};
