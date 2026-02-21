@@ -32,22 +32,21 @@ const openNewSsw = (itemName, newSsw) => {
 const addAction = (a, itemName) => {
     const oldSsw = document.getElementsByClassName('sswdrop')[0];
     const newSsw = document.getElementById('ssw__2020');
-    if(oldSsw && newSsw) {
+    if(oldSsw || newSsw) {
         const callback = oldSsw ? () => openOldSsw(itemName, oldSsw) : () => openNewSsw(itemName, newSsw);
         a.addEventListener('click', callback);
+        a.style.cursor = 'pointer';
     }
     else {
-        a.href = encodeURI(itemName).replaceAll('%20', '+');
+        a.href = `https://www.neopets.com/shops/wizard.phtml?string=${encodeURIComponent(itemName).replaceAll("%20", "+")}`;
         a.target = '_blank';
     }
 }
 
-const createSWLink = (itemName, children = []) => {
+const createSWLink = (itemName, children) => {
     const a = document.createElement('a');
-    children.forEach(a.appendChild);
-    if(!children.length) a.textContent = itemName;
+    if(!children) a.textContent = itemName;
+    else (children.length ? children : [children]).forEach(child => a.appendChild(child));
     addAction(a, itemName);
     return a;
 }
-
-module.exports = {createSWLink};
