@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Codestone Tracker
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      2.0.3
+// @version      2.1.0
 // @description  Tracks your codestones, removes them with a click on the training page, adds a link to SW for the ones you don't have yet
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -17,6 +17,7 @@
 // @grant        GM.setValue
 // @grant        GM.getValue
 // @license      The Unlicense
+// @require      https://update.greasyfork.org/scripts/567035/1759043/Neopets%3A%20Shop%20Wizard%20Anchor%20Creator.js
 // ==/UserScript==
 
 /*
@@ -116,7 +117,7 @@ const addPinField = () => {
     div.innerHTML = `<p>Enter your <a href="/pin_prefs.phtml">PIN</a>:</p>
     <input type="password" name="pin" id="pin_field" size="4" maxlength="4" style="width:10ex;height:15px;">
     <img src="https://images.neopets.com/pin/bank_pin_mgr_35.jpg" border="1" width="35" height="35" align="left">`;
-    document.querySelector(".content > div:nth-child(2) center").insertAdjacentElement("afterEnd", div);
+    document.querySelector(".content > div:nth-child(2) center")?.insertAdjacentElement("afterEnd", div);
 }
 
 /*
@@ -225,21 +226,19 @@ const removeCodestone = async (itemIndex, pin, anchor) => {
 * @param itemIndex {number} The codestone's index within image numbers and our storage
 */
 const makeLink = (codestoneElement, isSDB, itemIndex) => {
-    const a = document.createElement("a");
-    codestoneElement.insertAdjacentElement("beforeBegin", a);
-    a.appendChild(codestoneElement);
-    const foundPin = getPin();
-    if(iWantToRemoveCodestonesFromMySDBWithAClick && isSDB && typeof foundPin === 'string') {
+    if(isSDB) {
+        const foundPin = getPin();
+        if(!iWantToRemoveCodestonesFromMySDBWithAClick || typeof foundPin !== 'string') return;
+        const a = document.createElement("a");
+        codestoneElement.insertAdjacentElement("beforeBegin", a);
+        a.appendChild(codestoneElement);
         a.onclick = (e) => {
             e.preventDefault();
             removeCodestone(itemIndex, foundPin, a)
         };
         a.href = "#";
     }
-    else {
-        a.href = `https://www.neopets.com/${isSDB ? 'safetydeposit.phtml?obj_name' : 'shops/wizard.phtml?string'}=${codestoneElement.textContent.replace(" ", "+")}`;
-        a.target = "_blank";
-    }
+    else codestoneElement.previousElementSibling.insertAdjacentElement('afterend', createSWLink(codestoneElement.textContent, codestoneElement));
 }
 
 /**
