@@ -10,15 +10,13 @@
 // @updateURL    https://github.com/saahphire/NeopetsUserscripts/blob/main/bookAndFoodTracker.js
 // @match        *://*.neopets.com/*
 // @exclude      *://*.neopets.com/~*
-// @exclude      *://*.neopets.com/donations.phtml*
-// @exclude      *://*.neopets.com/objects.phtml?*type=shop*
-// @exclude      *://*.neopets.com/medieval/rubbishdump.phtml
 // @exclude      *://*.neopets.com/*lookup.phtml*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=neopets.com
 // @license      Unlicense
 // @grant        GM.setValue
 // @grant        GM.getValue
 // @grant        GM.deleteValue
+// @require      https://update.greasyfork.org/scripts/567036/1759045/itemDB%20Fetch%20Lib.js
 // ==/UserScript==
 
 /*
@@ -203,7 +201,7 @@ const onList = async () => {
 
 const requestUpdate = async () => {
     Object.entries(lists).forEach(async ([listId, info]) => {
-        const items = await (await fetch(`https://itemdb.com.br/api/v1/lists/official/${info.itemdb}/itemdata`)).json();
+        const items = await (await fetchItemDb(`https://itemdb.com.br/api/v1/lists/official/${info.itemdb}/itemdata`, 'Book and Food Tracker'));
         const itemIds = items.map(item => getIdFromImageSource(item.image));
         updateCache(listId, itemIds);
     });
@@ -417,7 +415,7 @@ const init = async () => {
       (Unlicensed scripts have no rules, but I'm judging you so hard.)
     ☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂
 */
-    if(href.match('type=shop')) return;
+    // if(href.match('type=shop')) return;
     document.head.insertAdjacentHTML('beforeEnd', borderCSS);
     if(Object.values(lists).some(info => href.match(info.url))) {
         onList();
@@ -494,7 +492,7 @@ const onListCSS = `<style>
 </style>`;
 
 const borderCSS = `<style>
-.saahphire-bft-to-do, :not(:has(.items-center)) .gap-4:has(.saahphire-bft-to-do), .popup-body__2020 .petCare-itemgrid .petCare-itemgrid-item.saahphire-bft-to-do {
+.saahphire-bft-to-do, :not(:has(.items-center)) .gap-4:has(.saahphire-bft-to-do) {
     border-image: 24 / 8px round;
     border-style: solid;
     border-width: 8px;
