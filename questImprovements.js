@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Quest Improvements
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.0
+// @version      1.1.0
 // @description  Adds an estimated value for the items requested of you in every quest. Also remembers and fills your Brain Tree answers.
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -121,7 +121,7 @@ const getItemValues = (items) => {
       items.map((item) => {
         const slug = slugify(item.name);
         return new Promise((price) =>
-          fetch(`https://itemdb.com.br/api/v1/items/${slug}`).then((res) => {
+          fetch(`https://itemdb.com.br/api/v1/items/${slug}`, {credentials: 'include'}).then((res) => {
             res.json().then((json) => price(json.price.value) * item.quantity).catch(() => total(-1));
           })
         );
