@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Faerieland Employment Agency Estimates
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.1.0
+// @version      1.1.1
 // @description  Gives price estimates for each job that doesn't require a coupon, and calculates your profit.
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -34,7 +34,7 @@
 •:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•:•:•:•:•:•:•:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•.•:•:•:•:•:•:•:•:•.•:•:•.•:•.••:•.•:•.••:
 */
 
-const getItemsFromitemDB = async (orderedJobs) => (await fetchItemDb(`https://itemdb.com.br/api/v1/items/many?image_id[]=${orderedJobs.map(job => job.image).join("&image_id[]=")}`, 'Faerieland Employment Agency Estimates')).json();
+const getItemsFromitemDB = async (orderedJobs) => (await fetchItemDb(`https://itemdb.com.br/api/v1/items/many?image_id[]=${orderedJobs.map(job => job.image).join("&image_id[]=")}`, 'Faerieland Employment Agency Estimates'));
 
 const addCommasToNumber = n => n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
