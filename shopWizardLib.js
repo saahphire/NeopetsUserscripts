@@ -2,7 +2,7 @@
 •:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•:•:•:•:•:•:•:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•.•:•:•:•:•:•:•:•:•.•:•:•.•:•.••:•.•:•.••:
 ........................................................................................................................
 ☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦
-    This script does nothing on its own. It was created to be @required. It allows you to use:
+    This isn't a script and it does nothing on its own. It was created to be @required. It allows an userscript to use:
         createSWLink(string itemName)
     To get an anchor element that opens the Shop Wizard in a new tab with a specific query if the user doesn't have
     Premium, or the SSW with identical search on if they do have premium.
