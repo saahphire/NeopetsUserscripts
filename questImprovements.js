@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Quest Improvements
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.0
+// @version      1.1.0
 // @description  Adds an estimated value for the items requested of you in every quest. Also remembers and fills your Brain Tree answers.
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -13,6 +13,8 @@
 // @license      The Unlicense
 // @grant        GM.setValue
 // @grant        GM.getValue
+// @require      https://update.greasyfork.org/scripts/567035/1759043/Neopets%3A%20Shop%20Wizard%20Anchor%20Creator.js
+// @require      https://update.greasyfork.org/scripts/567036/1759045/itemDB%20Fetch%20Lib.js
 // ==/UserScript==
 
 /*
@@ -115,16 +117,17 @@ const onEsophagor = () => {
     observer.observe(document.getElementById("container__2020"), {childList: true, subtree: true});
 }
 
+const getPrice = async (slug, quantity) => {
+    const res = await fetchItemDb(`https://itemdb.com.br/api/v1/items/${slug}`, 'Quest Improvements');
+    return (res?.price.value ?? 0) * quantity;
+}
+
 const getItemValues = (items) => {
   return new Promise((total) =>
     Promise.all(
       items.map((item) => {
         const slug = slugify(item.name);
-        return new Promise((price) =>
-          fetch(`https://itemdb.com.br/api/v1/items/${slug}`).then((res) => {
-            res.json().then((json) => price(json.price.value) * item.quantity).catch(() => total(-1));
-          })
-        );
+        return getPrice(slug, item.quantity);
       })
     ).then((prices) => total(prices.reduce((a, c) => a + c, 0).toString().replaceAll(/\B(?=(\d{3})+(?!\d))/g, ',')))
   );
@@ -134,11 +137,7 @@ const gotValidItems = (items) => items && items.length > 0 && !items[0].dataset.
 
 const parseItem = (item, index, quantities) => {
     const name = item.textContent.trim().replace(/(.+)x\d$/, "$1");
-    const a = document.createElement("a");
-    a.href = `https://www.neopets.com/shops/wizard.phtml?string=${encodeURIComponent(name).replaceAll("%20", "+")}`;
-    a.target = "_blank";
-    item.insertAdjacentElement("afterEnd", a);
-    a.appendChild(item);
+    item.nextElementSibling.insertAdjacentElement("beforebegin", createSWLink(name, item));
     return {
         name: name,
         quantity: quantities[index] ?? 1
