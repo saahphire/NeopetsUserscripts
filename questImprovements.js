@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Quest Improvements
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.1.1
+// @version      1.2.0
 // @description  Adds an estimated value for the items requested of you in every quest. Also remembers and fills your Brain Tree answers.
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -13,7 +13,7 @@
 // @license      The Unlicense
 // @grant        GM.setValue
 // @grant        GM.getValue
-// @require      https://update.greasyfork.org/scripts/567035/1759043/Neopets%3A%20Shop%20Wizard%20Anchor%20Creator.js
+// @require      https://update.greasyfork.org/scripts/567035/1759343/Neopets%3A%20Shop%20Wizard%20Anchor%20Creator.js
 // @require      https://update.greasyfork.org/scripts/567036/1759045/itemDB%20Fetch%20Lib.js
 // ==/UserScript==
 
