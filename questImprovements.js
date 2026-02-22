@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Quest Improvements
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.1.0
+// @version      1.1.1
 // @description  Adds an estimated value for the items requested of you in every quest. Also remembers and fills your Brain Tree answers.
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -137,7 +137,9 @@ const gotValidItems = (items) => items && items.length > 0 && !items[0].dataset.
 
 const parseItem = (item, index, quantities) => {
     const name = item.textContent.trim().replace(/(.+)x\d$/, "$1");
-    item.nextElementSibling.insertAdjacentElement("beforebegin", createSWLink(name, item));
+    if(item.nextElementSibling)
+        item.nextElementSibling.insertAdjacentElement("beforebegin", createSWLink(name, item));
+    else item.parentElement.appendChild(createSWLink(name, item));
     return {
         name: name,
         quantity: quantities[index] ?? 1
