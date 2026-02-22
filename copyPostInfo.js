@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Copy Post Info
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.0
+// @version      1.0.1
 // @description  Adds a button to copy a NeoBoard post's timestamp, username, page, and maybe post number
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -38,7 +38,7 @@ const buttonColor = '#e587e2';
 const copyInfo = (button, li) => {
     const timestamp = li.getElementsByClassName('boardPostDate')[0].textContent.trim();
     const username = li.getElementsByClassName('postAuthorName')[0].textContent;
-    const page = document.getElementsByClassName('boardPageButton-active')[0].textContent;
+    const page = document.getElementsByClassName('boardPageButton-active')[0]?.textContent ?? 1;
     const post = li.getElementsByClassName('boardPostNumber')[0]?.textContent.replace('#', '');
     navigator.clipboard.writeText(`${timestamp}\t${username}\t${page}${post ? '\t' + post : ''}`);
     button.textContent = '✔️';
