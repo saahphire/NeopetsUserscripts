@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Add Post Number to Topics
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.0
+// @version      1.0.1
 // @description  Adds a post's number (starting at 1) to the right of its date. Adds its ID as a tooltip.
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -32,7 +32,7 @@
 (function() {
     'use strict';
     document.head.insertAdjacentHTML('beforeEnd', '<style>.boardPostNumber { float: right; } .boardPostDate { display: inline-block; }</style>');
-    const previousPagePosts = (parseInt(document.getElementsByClassName('boardPageButton-active')[0].textContent) - 1) * 20;
+    const previousPagePosts = (parseInt(document.getElementsByClassName('boardPageButton-active')[0]?.textContent ?? 1) - 1) * 20;
     document.querySelectorAll('.boardPostDate').forEach((date, index) => {
         const postNumber = index + previousPagePosts + 1;
         const postUID = date.parentElement.querySelector('.reportButton-neoboards a').href.match(/regarding=(\d+)/)[1];
