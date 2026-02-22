@@ -16,15 +16,17 @@
 */
 
 const openOldSsw = (itemName, oldSsw) => {
-    oldSsw.classList.toggle('panel_shown');
-    oldSsw.classList.toggle('panel_hidden');
+    oldSsw.classList.add('panel_shown');
+    oldSsw.classList.remove('panel_hidden');
     oldSsw.style.display = '';
+    if(!oldSsw.querySelector('#ssw-tabs-2.ui-tabs-hide')) document.getElementById('button-new-search').click();
     document.getElementById('searchstr').value = itemName;
     document.getElementById('ssw-criteria').selectedIndex = 1;
 }
 
 const openNewSsw = (itemName, newSsw) => {
     newSsw.style.display = 'block';
+    if(!newSsw.querySelector('#ssw-tabs-2.ssw-hide')) document.getElementById('ssw-button-new-search').click();
     document.getElementById('searchstr').value = itemName;
     document.getElementById('ssw-criteria').selectedIndex = 0;
 }
