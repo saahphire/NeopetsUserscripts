@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Codestone Tracker
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      2.1.0
+// @version      2.2.0
 // @description  Tracks your codestones, removes them with a click on the training page, adds a link to SW for the ones you don't have yet
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -17,7 +17,7 @@
 // @grant        GM.setValue
 // @grant        GM.getValue
 // @license      The Unlicense
-// @require      https://update.greasyfork.org/scripts/567035/1759043/Neopets%3A%20Shop%20Wizard%20Anchor%20Creator.js
+// @require      https://update.greasyfork.org/scripts/567035/1759343/Neopets%3A%20Shop%20Wizard%20Anchor%20Creator.js
 // ==/UserScript==
 
 /*
