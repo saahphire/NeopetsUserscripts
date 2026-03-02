@@ -11,8 +11,6 @@
 // @match        *://*.neopets.com/userlookup.phtml*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=neopets.com
 // @license      Unlicense
-// @grant        GM.setValue
-// @grant        GM.getValue
 // ==/UserScript==
 
 /*
