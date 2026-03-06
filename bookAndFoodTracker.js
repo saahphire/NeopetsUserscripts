@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Book and Food Tracker
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.0
+// @version      1.0.1
 // @description  Adds a border to books/gourmet food a tracked pet hasn't read/eaten yet. Also moves them to the top in various pages.
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -401,7 +401,7 @@ const pages = [
     ['browseshop.phtml', onUserShop],
     ['safetydeposit.phtml', onSDB],
     ['tradingpost.phtml', onTradingPost],
-    ['index.phtml', onHomepage]
+    ['com/index.phtml', onHomepage]
 ];
 
 const init = async () => {
