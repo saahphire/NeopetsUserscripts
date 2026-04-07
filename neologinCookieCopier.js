@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: NeoLogin Cookie Copier
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.0
+// @version      1.0.1
 // @description  Adds a cookie button to your username so you can copy your neologin cookie. Do NOT share it!
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -72,7 +72,7 @@ const createLink = (modal) => {
     const modal = createModal();
     const link = createLink(modal);
     const prevLink = document.querySelector('.nav-signout-icon + h3') ?? document.getElementById('logout_link');
-    prevLink.insertAdjacentElement('afterEnd', link);
+    prevLink?.insertAdjacentElement('afterEnd', link);
     document.head.insertAdjacentHTML('beforeend', `<style>
 .saahphire-cookie-modal {
     width: 40%;
