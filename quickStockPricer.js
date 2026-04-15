@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Neopets: Quick Stock Pricer
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.1.0
-// @description  Adds itemDB prices to your Quick Stock page. Updated for the API changes!
+// @version      1.2.0
+// @description  Adds itemDB prices to your Quick Stock page. Updated for the API changes and the new Quick Stock!
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
 // @homepage     https://github.com/saahphire/NeopetsUserscripts
@@ -63,7 +63,7 @@ const css = `<style>
 (async function() {
     'use strict';
     window.postMessage('Saahphire Quick Stock Pricer here');
-    const cells = document.querySelectorAll('[name="quickstock"] td[align="left"]');
+    const cells = document.querySelectorAll('tr:not(:last-child) td.text-left:first-child');
     const names = [...cells].map(cell => cell.childNodes[0].textContent);
     if(!names.length) return;
     const response = await fetch(`https://itemdb.com.br/api/v1/items/many?name[]=${names.join('&name[]=')}`, {credentials: 'include'});
