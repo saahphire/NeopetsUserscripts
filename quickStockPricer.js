@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Quick Stock Pricer
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.2.0
+// @version      1.3.0
 // @description  Adds itemDB prices to your Quick Stock page. Updated for the API changes and the new Quick Stock!
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -30,6 +30,8 @@
 ........................................................................................................................
 •:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•:•:•:•:•:•:•:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•.•:•:•:•:•:•:•:•:•.•:•:•.•:•.••:•.•:•.••:
 */
+
+const getItemName = (cell) => cell.childNodes[0].childNodes[0].textContent;
 
 const addInfoToCell = (info) => {
     const p = document.createElement('p');
@@ -64,10 +66,10 @@ const css = `<style>
     'use strict';
     window.postMessage('Saahphire Quick Stock Pricer here');
     const cells = document.querySelectorAll('tr:not(:last-child) td.text-left:first-child');
-    const names = [...cells].map(cell => cell.childNodes[0].textContent);
+    const names = [...cells].map(getItemName);
     if(!names.length) return;
     const response = await fetch(`https://itemdb.com.br/api/v1/items/many?name[]=${names.join('&name[]=')}`, {credentials: 'include'});
     const items = await response.json();
-    cells.forEach(cell => cell.appendChild(addInfoToCell(items[cell.childNodes[0].textContent])));
+    cells.forEach(cell => cell.appendChild(addInfoToCell(items[getItemName(cell)])));
     document.head.insertAdjacentHTML('beforeend', css);
 })();
