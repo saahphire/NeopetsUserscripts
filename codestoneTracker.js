@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Codestone Tracker
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      2.2.0
+// @version      3.0.0
 // @description  Tracks your codestones, removes them with a click on the training page, adds a link to SW for the ones you don't have yet
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -10,39 +10,29 @@
 // @updateURL    https://github.com/saahphire/NeopetsUserscripts/blob/main/codestoneTracker.js
 // @match        *://*.neopets.com/island/training.phtml?type=status
 // @match        *://*.neopets.com/island/fight_training.phtml?type=status
-// @match        *://*.neopets.com/safetydeposit.phtml?*category=2&*
-// @match        *://*.neopets.com/safetydeposit.phtml?*category=2
-// @match        *://*.neopets.com/quickstock.phtml*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=neopets.com
-// @grant        GM.setValue
-// @grant        GM.getValue
 // @license      The Unlicense
-// @require      https://update.greasyfork.org/scripts/567035/1759343/Neopets%3A%20Shop%20Wizard%20Anchor%20Creator.js
+// @require      https://update.greasyfork.org/scripts/567035/1759043/Neopets%3A%20Shop%20Wizard%20Anchor%20Creator.js
 // ==/UserScript==
 
 /*
-•:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•:•:•:•:•:•:•:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•.•:•:•:•:•:•:•:•:•.•:•:•.•:•.••:•.•
-..................................................................................................................
+•:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•:•:•:•:•:•:•:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•.•:•:•:•:•:•:•:•:•.•:•:•.
+........................................................................................................
 ☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆
+    Apparently this doesn't work for the Ninja Training School. I can't access it so you're out of luck.
     This script does the following:
-    0. Every feature SHOULD work for both the Training School and the Ninja Training School, but I can't test
-       the Ninja Training School so I'm doing it blindly.
-    1. Remembers which codestones you have in your SDB
-       - To do that, you must go to your SDB's Codestones page:
-         https://www.neopets.com/island/training.phtml?type=status
-       - If the script gets out of sync, go back to the Codestones page to update it.
-    2. Adds a link to your SDB's Codestones page to the top links (Courses, Status, etc)
+    1. Accesses your SDB to count how many codestones of each type you have
+    2. Forwards any random events to the page you're in (in theory. It's hard to test)
     3. Highlights any pet waiting for their course to be paid if you don't own all needed codestones
-    4. Adds a link to the Shop Wizard search page to each codestone you don't own
+    4. Adds a link to the Shop Wizard (or SSW, if you have Premium) to each codestone you don't own
     5. Adds a link to remove one codestone from your Safety Deposit Box if you own it
-       - To do this, you'll either have to add your PIN to the pin const, fill your PIN in the PIN box at the top
-         of the page, or not have a pin at all. I couldn't get PIN autofillers to work with this script, sorry.
-    6. Remembers whenever you add codestones to your SDB by using the quick stock page
-       - I didn't do the same with the inventory page because I don't know if anyone uses it
+       - To do this, you'll either have to add your PIN to the pin const, fill your PIN in the PIN box
+         at the top of the page, or not have a pin at all. I couldn't get PIN autofillers to work with
+         this script, sorry.
     ✦ ⌇ saahphire
 ☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆
-..................................................................................................................
-•:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•:•:•:•:•:•:•:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•.•:•:•:•:•:•:•:•:•.•:•:•.•:•.••:•.•
+........................................................................................................
+•:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•:•:•:•:•:•:•:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•.•:•:•:•:•:•:•:•:•.•:•:•.
 */
 
 /*
@@ -64,33 +54,6 @@ const iWantToRemoveCodestonesFromMySDBWithAClick = true;
 */
 const pin = '0000';
 
-/**
-* Turns debug mode on or off. In debug mode, your codestone storage will be printed on the console on every page refresh.
-* @constant {boolean}
-* @default
-*/
-const isDebug = false;
-
-/*
-☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆
-             Migration
-☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆
-*/
-
-/**
-* Migrates your storage from version 1.x to version 2.x. You can delete this (and its call) after visiting your SDB, quick stock, or either schoopl once.
-*/
-const migrateToV2 = async () => {
-    const oldStorage = await GM.getValue("saahphire-codestone-tracker");
-    if(!oldStorage) return;
-    const newStorage = Object.values(JSON.parse(oldStorage)).map(entry => {
-        const id = parseInt(entry.id);
-        return (id < 22208) ? [id - 7457, parseInt(entry.qty)] : [id - 22197, parseInt(entry.qty)];
-    }).reduce((agg, [id, qty]) => {agg[id] = qty;return agg;}, new Array(17));
-    await GM.setValue("codestones", newStorage);
-    GM.setValue("saahphire-codestone-tracker", null);
-}
-
 /*
 ☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆
                  PIN
@@ -110,15 +73,11 @@ const getPin = () => {
 /**
 * Adds an input field for your PIN in the Training School's page
 */
-const addPinField = () => {
-    const div = document.createElement("div");
-    div.classList.add("saahphire-pin");
-    div.style = "display: flex;place-content:center;place-items:center;gap:0.5em;";
-    div.innerHTML = `<p>Enter your <a href="/pin_prefs.phtml">PIN</a>:</p>
-    <input type="password" name="pin" id="pin_field" size="4" maxlength="4" style="width:10ex;height:15px;">
-    <img src="https://images.neopets.com/pin/bank_pin_mgr_35.jpg" border="1" width="35" height="35" align="left">`;
-    document.querySelector(".content > div:nth-child(2) center")?.insertAdjacentElement("afterEnd", div);
-}
+const addPinField = () => document.querySelector(".content > div:nth-child(2) center")?.insertAdjacentHTML('afterEnd', `<div class="saahphire-pin" style="display:flex;place-content:center;place-items:center;gap:0.5em">
+<p>Enter your <a href="/pin_prefs.phtml">PIN</a>:</p>
+<input type="password" name="pin" id="pin_field" size="4" maxlength="4" style="width:10ex;height:15px;">
+<img src="https://images.neopets.com/pin/bank_pin_mgr_35.jpg" border="1" width="35" height="35" align="left">
+</div>`);
 
 /*
 ☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆
@@ -137,41 +96,6 @@ const getIndexFromImageUrl = (imageUrl) => parseInt(imageUrl.match(/codestone(\d
 * @returns {number}
 */
 const getIdFromIndex = (index) => index < 22208 ? index + 7457 : index + 22197;
-
-/*
-☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆
-               Storage
-☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆
-*/
-
-/**
-* Retrieves stored data about your codestones
-* @returns {Array<number>}
-*/
-const getStoredCodestones = async () => {
-    return await GM.getValue("codestones");
-}
-
-/**
-* Saves data about your codestones
-* @param codestones {Array<number>} The data to be saved
-*/
-const setStoredCodestones = (codestones) => {
-    GM.setValue("codestones", codestones);
-}
-
-/**
-* Adjusts the quantity of a given codestone in your saved data by reducing it by one
-* @param imageUrl {string} The codestone's image URL
-* @returns {number} The new quantity
-*/
-const removeOneFromStorage = async (imageUrl) => {
-    const index = getIndexFromImageUrl(imageUrl);
-    const storage = await getStoredCodestones();
-    storage[index]--;
-    setStoredCodestones(storage);
-    return storage[index];
-}
 
 /*
 ☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆
@@ -212,7 +136,6 @@ const removeCodestone = async (itemIndex, pin, anchor) => {
     const url = `https://www.neopets.com/process_safetydeposit.phtml?offset=0&remove_one_object=${itemId}&obj_name=&category=2&pin=${pin}`;
     try {
         await fetch(url);
-        removeOneFromStorage(itemIndex);
         communicateSuccess(anchor);
     } catch (e) {
         communicateFailure(anchor, e)
@@ -241,11 +164,6 @@ const makeLink = (codestoneElement, isSDB, itemIndex) => {
     else codestoneElement.previousElementSibling.insertAdjacentElement('afterend', createSWLink(codestoneElement.textContent, codestoneElement));
 }
 
-/**
-* Adds a link to the Codestones page in the SDB to the top link list
-*/
-const addSDBLink = () => document.getElementsByTagName("center")[0].insertAdjacentHTML("beforeEnd", " | <a href='https://www.neopets.com/safetydeposit.phtml?obj_name=&category=2'>SDB</a>");
-
 /*
 ☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆
             Page-Specific
@@ -253,16 +171,33 @@ const addSDBLink = () => document.getElementsByTagName("center")[0].insertAdjace
 */
 
 /**
+* Fetches the codestone SDB page and retrieves each codestone's quantity
+* @returns {Object.<number, number>} A dictionary with the item's id as key and quantity as value
+*/
+const getStoredCodestones = async () => {
+    const fetched = await fetch('https://www.neopets.com/safetydeposit.phtml?obj_name=&category=2');
+    const text = await fetched.text();
+    const randomEvent = text.match(/<link [^>]+randomevents.+>[\s\S]+<div class="copy">\s*.+\s*<\/div>/);
+    if(randomEvent) document.querySelector('td[class="content"], .container').insertAdjacentHTML('afterbegin', randomEvent);
+    const matches = text.matchAll(/center"><b>(\d+)<\/b>[\s\S]+?back_to_inv\[(\d+)\]/g);
+    const result = {};
+    matches.forEach(match => result[match[2]] = parseInt(match[1]));
+    return result;
+}
+
+/**
 * Adds links to each codestone shown in the Training School status page
 */
 const onTrainingPage = async () => {
-    const ownedCodestones = await getStoredCodestones();
     const codestones = document.querySelectorAll("table[width='500'] tr:nth-child(2n) td:last-child b + img");
+    if(!codestones.length) return;
+    const ownedCodestones = await getStoredCodestones();
     const usage = new Array(17);
     codestones.forEach(codestone => {
         const textElement = codestone.previousElementSibling;
         const itemIndex = getIndexFromImageUrl(codestone.src);
-        const available = ownedCodestones[itemIndex] ?? 0;
+        const itemId = getIdFromIndex(itemIndex);
+        const available = ownedCodestones[itemId] ?? 0;
         const used = usage[itemIndex] ?? 0;
         if (used < available) {
             usage[itemIndex] = used + 1;
@@ -276,49 +211,11 @@ const onTrainingPage = async () => {
     });
 }
 
-/**
-* Saves codestones to storage
-*/
-const onSDBPage = () => {
-    const ownedCodestones = new Array(17);
-    document.querySelectorAll("#boxform ~ tr:not(:last-child)").forEach(row => {
-        const imageUrl = row.querySelector("img[height='80']").src;
-        const quantity = row.querySelector('td[align="center"]:not(:first-child)').textContent;
-        const index = getIndexFromImageUrl(imageUrl);
-        ownedCodestones[index] = parseInt(quantity);
-    });
-    setStoredCodestones(ownedCodestones);
-}
-
-/**
-* Adds an event listener so whenever you store codestones in the Quick Stock, their quantities get updated
-*/
-const onQuickStock = async () => {
-    const storage = await getStoredCodestones();
-    const codestoneNames = ["Mau", "Tai-Kai", "Lu", "Vo", "Eo", "Main", "Zei", "Orn", "Har", "Bri", "Mag", "Vux", "Cui", "Kew", "Sho", "Zed"];
-    document.querySelector("input[type='submit']").addEventListener("click", () => {
-        const names = [...document.querySelectorAll("input[name='buyitem'] ~ table tr:has(input[type='hidden'])")].slice(0, 70).querySelectorAll("tr:has(td:nth-of-type(3) input:checked) td:first-of-type");
-        names.forEach(name => {
-            const itemIndex = codestoneNames.findIndex(codestone => name.match(codestone + " Codestone"));
-            if(itemIndex === -1) return;
-            storage[itemIndex + 1]++;
-        })
-        setStoredCodestones(storage);
-    });
-}
-
 /*
 ☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆
             URL Checkers
 ☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆
 */
-
-/**
-* Checks whether the current page's url contains a string.
-* @param query {string} The string to search for
-* @returns {boolean} Whether the string is in the current page's url
-*/
-const isUrl = (query, parameters) => window.location.href.includes(query) && (!parameters || Object.entries(parameters).every(([name, data]) => isParam(name, data.value, data.nullIsTrue)));
 
 /**
 * Checks whether the current page's url contains a parameter and its value is the desired value.
@@ -331,16 +228,8 @@ const isParam = (parameter, value, nullIsTrue = true) => window.location.href.ma
 
 (async function() {
     'use strict';
-    await migrateToV2();
     if(isParam('type', 'status', false)) {
         addPinField();
-        addSDBLink();
         onTrainingPage();
-    }
-    else if(isUrl('safetydeposit', {'obj_name': {value: ''}, category: {value: 2, nullIsTrue: false}})) onSDBPage();
-    else if(isUrl('quickstock')) onQuickStock();
-    if(isDebug) {
-        console.info("Codestone Tracker storage:");
-        console.info(await getStoredCodestones());
     }
 })();
