@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Guild Poll Alert
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.1
+// @version      1.0.2
 // @description  Sends a native browser notification whenever you load a page in your guild and there's a new poll in it
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -41,7 +41,7 @@ const getCurrentPollOptions = () => [...document.querySelectorAll('td[valign="mi
 
 (async function() {
     'use strict';
-    const desc = document.querySelector('tr:has(.content) + tr font[size="1"]')?.textContent;
+    const desc = document.querySelector('td[width="180"] tr:has(.content) + tr font[size="1"]')?.textContent;
     if(!desc) return;
     const options = getCurrentPollOptions();
     const oldPoll = await GM.getValue('poll', {options: []});
