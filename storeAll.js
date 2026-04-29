@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Store All
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.2.0
+// @version      1.3.0
 // @description  Selects closet (for wearables) or deposit for every item in your quick stock. Updated for new Quick Stock.
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -57,7 +57,26 @@ list to disable them. CASE SENSITIVE. Must be in lowercase! You can replace 'dis
 */
 const order = ['discard', 'closet', 'shed', 'chamber', 'deposit'];
 
+/* 
+•:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•:•:•:•:•:•:•:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•.•:•:•:•:•:•:•:•
+Your exceptions list. These operations will always be performed upon these items, no matter
+what order you've chosen. You can also add the operations "stock" (add to shop stock) and
+"gallery" here. For example, if you want all Imposter Apples to go to your SDB despite being a
+junk item, and all Platinum Nerkmids to go to your shop, you'll have something like this:
+const exceptions = {
+    'Imposter Apple': 'deposit',
+    'Platinum Nerkmid': 'stock'
+}
+You can have multiple items with the same operation, but each item can only appear once.
+•:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•:•:•:•:•:•:•:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•.•:•:•:•:•:•:•:•
+*/
+const exceptions = {
+    'Item Name': 'operation',
+    'Item 2': 'operation'
+}
+
 const fire = (item, inputName) => {
+    if(!inputName) return false;
     const input = item.querySelector(`input[value="${inputName}"]`);
     if(!input) return false;
     const event = new Event('change', { bubbles: true });
@@ -73,7 +92,7 @@ const discard = (item) => {
 
 const select = (item, operation) => ((operation === 'discard' || operation === 'donate') && !discard(item)) ? false : fire(item, operation);
 
-const sort = (items) => items.forEach(item => order.find(operation => select(item, operation)));
+const sort = (items) => items.forEach(item => fire(item, exceptions[item.getElementsByTagName('span')[0].textContent]) || order.find(operation => select(item, operation)));
 
 const watch = (items) => {
     const observer = new MutationObserver(() => {
