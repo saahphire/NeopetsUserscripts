@@ -1,14 +1,14 @@
 // ==UserScript==
 // @name         Neopets: Quick Stock Pricer
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.3.1
+// @version      1.3.2
 // @description  Adds itemDB prices to your Quick Stock page. Updated for the API changes and the new Quick Stock!
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
 // @homepage     https://github.com/saahphire/NeopetsUserscripts
 // @downloadURL  https://github.com/saahphire/NeopetsUserscripts/blob/main/quickStockPricer.js
 // @updateURL    https://github.com/saahphire/NeopetsUserscripts/blob/main/quickStockPricer.js
-// @match        *://*.neopets.com/quickstock.phtml
+// @match        *://*.neopets.com/quickstock.phtml*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=neopets.com
 // @license      Unlicense
 // @require      https://update.greasyfork.org/scripts/567036/1759045/itemDB%20Fetch%20Lib.js
@@ -35,10 +35,16 @@ const getItemName = (cell) => cell.childNodes[0].childNodes[0].textContent;
 
 const addInfoToCell = (info) => {
     const p = document.createElement('p');
-    p.textContent = `${info.price.value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} NP`;
-    p.dataset.price = info.price.value;
-    p.title = new Date(info.price.addedAt).toLocaleString();
-    if(info.price.inflated) p.classList.add('saahphire-quickstockpricer-inflated');
+    if(info.price) {
+        p.textContent = `${info.price.value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} NP`;
+        p.dataset.price = info.price.value;
+        p.title = new Date(info.price.addedAt).toLocaleString();
+        if(info.price.inflated) p.classList.add('saahphire-quickstockpricer-inflated');
+    }
+    else {
+        p.textContent = 'No price found';
+        console.log('Couldn\'t find a price in', info);
+    }
     if(info.saleStatus) p.classList.add(`saahphire-quickstockpricer-${info.saleStatus.status}`);
     return p;
 }
