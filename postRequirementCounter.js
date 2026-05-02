@@ -11,6 +11,7 @@
 // @match        *://*.neopets.com/neoboards/topic.phtml*
 // @match        *://*.neopets.com/neomessages.phtml?type=read_message*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=www.neopets.com
+// @license      Unlicense
 // @grant        GM.setValue
 // @grant        GM.getValue
 // ==/UserScript==
