@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Battleground of the Obelisk Boon Reminder
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.0
+// @version      1.0.1
 // @description  Adds a button that shows all boons and descriptions for a faction. Adds descriptions for boons when your faction wins.
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -79,7 +79,7 @@ const factions = {
     wizards: ['Cartogriphication', 'Doctor who?', 'Doppelgänger', 'Double Bubble', 'Refreshed Quest Request'],
     seekers: ['Bank Bribery', 'Book Smarts', 'Doctor who?', 'Right Round Round Round', 'Strength of Mind'],
     sway: ['Bank Bribery', 'Black Market Goods', 'Cheaper by the Dozen', 'Refreshed Quest Request', 'That Millionaire Feeling'],
-    thieves: ['Cheaper by the Dozen', 'Doppelgänger', 'Five-Finger Discount', 'LOL AVIES', 'Scratch Master']
+    thieves: ['Cheaper By the Dozen', 'Doppelgänger', 'Five-Finger Discount', 'LOL AVIES', 'Scratch Master']
 }
 
 const boons = {
@@ -87,7 +87,7 @@ const boons = {
     'Black Market Goods': 'Shows and highlights exclusive items in shops',
     'Book Smarts': 'Receive 2-4 intelligence points when reading books',
     'Cartogriphication': 'Know the right path in Faerie Carverns',
-    'Cheaper by the Dozen': 'Change minimum value of stocks you buy to 10 NP',
+    'Cheaper By the Dozen': 'Change minimum value of stocks you buy to 10 NP',
     'Doctor who?': 'Healing Springs fully heals pets in addition to original action',
     'Doppelgänger': 'Chance to reuse one-use items in the Battledome',
     'Double Bubble': 'Healing Potions, Morphing Potions, and Meridell Potions have a chance to refill',
