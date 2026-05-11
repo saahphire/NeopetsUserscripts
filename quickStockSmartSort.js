@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Quick Stock Smart Sort
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.4.0
+// @version      1.4.1
 // @description  (Formerly named "Store All") Selects appropriate destinations for your items based on item price and category (e.g. wearables goes to closet). Updated for the new Quick Stock.
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -92,7 +92,7 @@ const discard = (item) => {
 
 const select = (item, operation) => ((operation === 'discard' || operation === 'donate') && !discard(item)) ? false : fire(item, operation);
 
-const sort = (items) => items.forEach(item => fire(item, exceptions[item.getElementsByTagName('span')[0].textContent]) || order.find(operation => select(item, operation)));
+const sort = (items) => items.forEach(item => fire(item, exceptions[item.getElementsByTagName('span')[0].childNodes[0].textContent]) || order.find(operation => select(item, operation)));
 
 const watch = (items) => {
     const observer = new MutationObserver(() => {
