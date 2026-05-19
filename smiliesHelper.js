@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Smilies Helper
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.0
+// @version      1.0.1
 // @description  Adds a smiley/emoji/emoticon list with previews and search to neoboards, neomail, and guilds
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -172,7 +172,7 @@ const saveFieldPosition = (field, fieldName) => GM.setValue('last-position', {ar
 
 const watchField = (field, fieldName) => {
     if(!field) return;
-    field.addEventListener('keydown', () => saveFieldPosition(field, fieldName));
+    field.addEventListener('keyup', () => saveFieldPosition(field, fieldName));
     field.addEventListener('click', () => saveFieldPosition(field, fieldName));
 }
 
