@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Codestone Tracker
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      3.0.0
+// @version      3.0.1
 // @description  Tracks your codestones, removes them with a click on the training page, adds a link to SW for the ones you don't have yet
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -19,7 +19,7 @@
 •:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•:•:•:•:•:•:•:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•.•:•:•:•:•:•:•:•:•.•:•:•.
 ........................................................................................................
 ☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆
-    Apparently this doesn't work for the Ninja Training School. I can't access it so you're out of luck.
+    Now works for the Ninja Training School, thanks androidturret!
     This script does the following:
     1. Accesses your SDB to count how many codestones of each type you have
     2. Forwards any random events to the page you're in (in theory. It's hard to test)
@@ -95,7 +95,7 @@ const getIndexFromImageUrl = (imageUrl) => parseInt(imageUrl.match(/codestone(\d
 * Takes a codestone's index (from 1 to 16) and returns its item id.
 * @returns {number}
 */
-const getIdFromIndex = (index) => index < 22208 ? index + 7457 : index + 22197;
+const getIdFromIndex = (index) => index < 11 ? index + 7457 : index + 22197;
 
 /*
 ☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆
