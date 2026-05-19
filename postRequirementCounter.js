@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Post Requirement Counter
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.0
+// @version      1.1.0
 // @description  Adds a counter to topics with a set string in their names, that counts posts including given images or strings as long as they're from the current month.
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -44,6 +44,10 @@
     - Add a button next to the breadcrumbs on top of the topic's page (if it has the specific string) to open the
       leaderboard, a list of all users who posted on that date range with the amount of posts added to the leaderboard
     - Add a line under a neomail's sender's name with their 📖 requirement count | 🏆 leaderboard count
+    - Remembers usernames even after a topic has been killed (has [username removed] for everyone)
+    - Allows you to write and save an unknown user's username if the post was created after the last time you refreshed
+      while the topic was alive, and the topic is now dead
+    - Colors every valid and unknown post in red so you know which usernames you need to update. Good luck!
 
     ✦ ⌇ saahphire
 ☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦
@@ -52,7 +56,7 @@
 */
 
 const settings = {
-    topicTitle: 'whatever you write here HAS to be in the topic title',
+    topicTitle: 'keepers of neopia',
     // The first day of the month in which people can post things that will be counted for requirements and the leaderboard
     firstValidDay: 1,
     // The last day of the month in which people can post things and be counted
@@ -60,7 +64,7 @@ const settings = {
     // The number of posts with required images/strings needed to meet your requirement (will change the emoji in neomail)
     requirementCount: 12,
     // A list of urls of images a post must have to meet a requirement. Only one url in the entire list needs to match.
-    requiredImages: ['https://images.neopets.com/neoboards/smilies/flower.gif', 'https://images.neopets.com/neoboards/smilies/snowbunny.gif'],
+    requiredImages: ['https://images.neopets.com/neoboards/smilies/flower.gif'],
     // A list of strings (words/phrases) a post must have to meet a requirement. Only one string needs to match, but if you also have required images, the post must have at least one image and one string to pass.
     requiredStrings: [],
     // A list of urls of images that will add a post to the leaderboard count. Only one url needs to match.
@@ -84,10 +88,19 @@ const hasLeaderboardElement = (contents) => hasImage(contents, settings.leaderbo
 
 const isThisMonth = (post) => new Date(new Date().toLocaleDateString('en-GB', {month: 'short', year: 'numeric'}) === post.getElementsByClassName('boardPostDate')[0].textContent.match(/\w+ \d+/)[0]);
 
+const getAllSavedPosts = async () => Object.entries(await GM.getValue('users', {})).map(([username, user]) => Object.keys(user.posts).map(post => [post, username])).flat();
+
+const getEmoji = (counterWentUp, counterName) => {
+    if(counterName === 'required') return counterWentUp ? '📖' : '📘';
+    else return counterWentUp ? '🏆' : '✖️';
+}
+
 const isValidDay = (post) => {
     const day = parseInt(post.getElementsByClassName('boardPostDate')[0].textContent.match(/\d/)[0]);
     return day >= settings.firstValidDay && day <= settings.lastValidDay;
 }
+
+const isValidDate = (post) => isThisMonth(post) && isValidDay(post);
 
 const newMonthCleanup = async () => {
     const currentMonth = new Date().toLocaleDateString('en-GB', {month: 'long'});
@@ -124,44 +137,100 @@ const createChangeAnchor = (anchorText, counterInfo) => {
     return anchor;
 }
 
-const createPostCounter = (authorColumn, emoji, count, counterInfo) => {
+const createPostCounter = (authorColumn, user, counterInfo) => {
     const wrapper = document.createElement('p');
-    wrapper.style.display = 'flex';
-    wrapper.style.gap = '0.5em';
-    wrapper.textContent = emoji;
+    wrapper.classList.add('saahphire-post-requirements-count');
+    wrapper.textContent = getEmoji(user.posts[counterInfo.postId][counterInfo.countName]);
     const counter = document.createElement('span');
-    counter.textContent = count;
+    counter.textContent = user[counterInfo.countName];
     wrapper.appendChild(counter);
     wrapper.appendChild(createChangeAnchor('+', {...counterInfo, counter, value: 1}));
     wrapper.appendChild(createChangeAnchor('-', {...counterInfo, counter, value: -1}));
     authorColumn.appendChild(wrapper);
 }
 
+const createPostCounters = (authorColumn, user, username, postId) => {
+    createPostCounter(authorColumn, user, {username, postId, countName: 'required'});
+    createPostCounter(authorColumn, user, {username, postId, countName: 'leaderboard'});
+}
+
+const savePostCounts = (user, postId, metRequirement, goesToLeaderboard) => {
+    if(user.posts[postId]) return;
+    if(metRequirement) user.required++;
+    if(goesToLeaderboard) user.leaderboard++;
+    user.posts[postId] = {
+        required: Boolean(metRequirement),
+        leaderboard: Boolean(goesToLeaderboard)
+    };
+}
+
+const countPost = (postId, post, users, username) => {
+    users[username] ??= {required: 0, leaderboard: 0, posts: {}};
+    const user = users[username];
+    const contents = post.getElementsByClassName('boardPostMessage')[0];
+    savePostCounts(user, postId, hasRequirement(contents), hasLeaderboardElement(contents));
+    const authorColumn = post.getElementsByClassName('boardPostByline')[0];
+    createPostCounters(authorColumn, user, username, postId);
+    return users;
+}
+
+const updateUsername = async (button, postId, post, input) => {
+    button.textContent = '✔️';
+    setTimeout(() => button.textContent = '💾', 250);
+    post.querySelectorAll('.saahphire-post-requirements-count').forEach(counter => counter.remove());
+    let users = await GM.getValue('users', {});
+    if(button.dataset.lastUsername) {
+        const postInfo = users[button.dataset.lastUsername].posts[postId];
+        if(postInfo.required) users[button.dataset.lastUsername].required--;
+        if(postInfo.leaderboard) users[button.dataset.lastUsername].leaderboard--;
+        delete(users[button.dataset.lastUsername].posts[postId]);
+    }
+    if(input.value.length) {
+        button.dataset.lastUsername = input.value;
+        post.classList.remove('saahphire-post-requirements-unknown');
+        users = countPost(postId, post, users, input.value);
+    }
+    else {
+        button.removeAttribute('data-last-username');
+        post.classList.add('saahphire-post-requirements-unknown');
+    }
+    GM.setValue('users', users);
+}
+
+const colorPostIfUnknown = async (postId, post, savedPosts) => {
+    const contents = post.getElementsByClassName('boardPostMessage')[0];
+    const metRequirement = hasRequirement(contents);
+    const goesToLeaderboard = hasLeaderboardElement(contents);
+    if(!metRequirement && !goesToLeaderboard) return;
+    const foundPost = savedPosts.find(post => post[0] === postId);
+    if(!foundPost) post.classList.add('saahphire-post-requirements-unknown');
+    const authorColumn = post.getElementsByClassName('boardPostByline')[0];
+    const div = document.createElement('div');
+    authorColumn.prepend(div);
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.placeholder = 'Username';
+    div.appendChild(input);
+    const button = document.createElement('button');
+    button.textContent = '💾';
+    button.addEventListener('click', () => updateUsername(button, postId, post, input));
+    div.appendChild(button);
+    if(foundPost) {
+        input.value = foundPost[1];
+        countPost(postId, post, await GM.getValue('users', {}), input.value);
+        button.dataset.lastUsername = input.value;
+    }
+}
+
 const parsePosts = async (users) => {
     const page = document.getElementsByClassName('boardPageButton-active')[0]?.textContent ?? '1';
     const topicId = window.location.href.match(/topic=(\d+)/)[1];
-    document.querySelectorAll('#boardTopic li').forEach((post, number) => {
-        if(!isThisMonth(post)) return;
-        if(!isValidDay(post)) return;
-        const id = `${topicId}-${page}-${number}`;
-        const username = post.getElementsByClassName('postAuthorName')[0].textContent;
-        users[username] ??= {required: 0, leaderboard: 0, posts: {}};
-        const user = users[username];
-        const contents = post.getElementsByClassName('boardPostMessage')[0];
-        const metRequirement = hasRequirement(contents);
-        const goesToLeaderboard = hasLeaderboardElement(contents);
-        if(!user.posts[id]) {
-            if(metRequirement) user.required++;
-            if(goesToLeaderboard) user.leaderboard++;
-            user.posts[id] = {
-                required: Boolean(metRequirement),
-                leaderboard: Boolean(goesToLeaderboard)
-            };
-        }
-        const counterInfo = {username, postId: id};
-        const authorColumn = post.getElementsByClassName('boardPostByline')[0];
-        createPostCounter(authorColumn, metRequirement ? '📖' : '📘', user.required, {...counterInfo, countName: 'required'});
-        createPostCounter(authorColumn, goesToLeaderboard ? '🏆' : '✖️', user.leaderboard, {...counterInfo, countName: 'leaderboard'});
+    const livingTopic = document.getElementsByClassName('postAuthor').length;
+    const savedPosts = await getAllSavedPosts();
+    document.querySelectorAll('#boardTopic li').forEach(async (post, number) => {
+        const postId = `${topicId}-${page}-${number}`;
+        if(!livingTopic) colorPostIfUnknown(postId, post, savedPosts);
+        else if(isValidDate(post)) users = countPost(postId, post, users, post.getElementsByClassName('postAuthorName')[0].textContent);
     });
     GM.setValue('users', users);
     return users;
@@ -169,7 +238,7 @@ const parsePosts = async (users) => {
 
 const createLeaderboard = (users) => {
     const modal = document.createElement('dialog');
-    modal.id = 'saahphire-post-requirement-leadeboard';
+    modal.id = 'saahphire-post-requirement-leaderboard';
     const ul = document.createElement('ul');
     ul.style.textAlign = 'left';
     modal.appendChild(ul);
@@ -188,7 +257,7 @@ const createLeaderboard = (users) => {
     button.classList.add('replyTopicButton-top');
     button.textContent = 'Open Post Leaderboard';
     button.command = 'show-modal';
-    button.setAttribute('commandfor', 'saahphire-post-requirement-leadeboard');
+    button.setAttribute('commandfor', 'saahphire-post-requirement-leaderboard');
     document.getElementsByClassName('breadcrumbs')[0].insertAdjacentElement('afterend', button);
 }
 
@@ -200,6 +269,7 @@ const decorateUsername = (users) => {
 }
 
 const init = async () => {
+    document.head.insertAdjacentHTML('beforeend', css);
     await newMonthCleanup();
     const users = await GM.getValue('users', {});
     if(window.location.href.match(/neopets.com\/neoboards/) && isValidTopic()) {
@@ -208,6 +278,16 @@ const init = async () => {
     }
     if(window.location.href.match(/=read_message/)) decorateUsername(users);
 }
+
+const css = `<style>
+.saahphire-post-requirements-unknown, .saahphire-post-requirements-unknown div {
+    background-color: lightcoral!important;
+}
+.saahphire-post-requirements-count {
+    display: flex;
+    gap: 0.5em;
+}
+</style>`;
 
 (function() {
     'use strict';
