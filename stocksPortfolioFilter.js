@@ -2,7 +2,7 @@
 // @name         Neopets: Stocks Portfolio Filter
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
 // @version      1.0.0
-// @description  Adds links to quickly switch between pets while fishing
+// @description  Autofills stock selling if their price exceeds a threshold relative to the price you paid
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
 // @homepage     https://github.com/saahphire/NeopetsUserscripts
