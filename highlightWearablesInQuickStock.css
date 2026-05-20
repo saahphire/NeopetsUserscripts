@@ -10,7 +10,7 @@
 @license        Unlicense
 ==/UserStyle== */
 
-@-moz-document regexp("quickstock.phtml") {
+@-moz-document regexp("https?://(www\\.)?neopets\\.com/quickstock\\.phtml") {
     .np-table-row:has([value="closet"]) {
         background-color: #DFEAF7!important;
     }
