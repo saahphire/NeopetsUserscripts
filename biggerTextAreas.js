@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Bigger Text Areas
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.0
+// @version      1.0.1
 // @description  Makes various text boxes a lot bigger
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -92,7 +92,10 @@ const onTopic = () => {
     document.querySelector('[name="topic_title"]').style.width = '50vw';
 }
 
-const onPost = () => document.querySelector('[name="message"]').style.height = '40vh';
+const onPost = () => {
+    const postArea = document.querySelector('[name="message"]');
+    if(postArea) postArea.style.height = '40vh';
+}
 
 const onShop = () => {
     const tr = document.createElement('tr');
