@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Post Requirement Counter
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.1.0
+// @version      1.1.1
 // @description  Adds a counter to topics with a set string in their names, that counts posts including given images or strings as long as they're from the current month.
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -140,7 +140,7 @@ const createChangeAnchor = (anchorText, counterInfo) => {
 const createPostCounter = (authorColumn, user, counterInfo) => {
     const wrapper = document.createElement('p');
     wrapper.classList.add('saahphire-post-requirements-count');
-    wrapper.textContent = getEmoji(user.posts[counterInfo.postId][counterInfo.countName]);
+    wrapper.textContent = getEmoji(user.posts[counterInfo.postId][counterInfo.countName], counterInfo.countName);
     const counter = document.createElement('span');
     counter.textContent = user[counterInfo.countName];
     wrapper.appendChild(counter);
