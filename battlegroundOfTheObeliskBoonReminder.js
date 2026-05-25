@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Battleground of the Obelisk Boon Reminder
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.1
+// @version      1.0.2
 // @description  Adds a button that shows all boons and descriptions for a faction. Adds descriptions for boons when your faction wins.
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -78,7 +78,7 @@ const factions = {
     brutes: ['Doppelgänger', 'Equip ALL THE THINGS', 'GRRRAAAAHHHHHH', 'Right Round Round Round', 'Scratch Master'],
     wizards: ['Cartogriphication', 'Doctor who?', 'Doppelgänger', 'Double Bubble', 'Refreshed Quest Request'],
     seekers: ['Bank Bribery', 'Book Smarts', 'Doctor who?', 'Right Round Round Round', 'Strength of Mind'],
-    sway: ['Bank Bribery', 'Black Market Goods', 'Cheaper by the Dozen', 'Refreshed Quest Request', 'That Millionaire Feeling'],
+    sway: ['Bank Bribery', 'Black Market Goods', 'Cheaper By the Dozen', 'Refreshed Quest Request', 'That Millionaire Feeling'],
     thieves: ['Cheaper By the Dozen', 'Doppelgänger', 'Five-Finger Discount', 'LOL AVIES', 'Scratch Master']
 }
 
