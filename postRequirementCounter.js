@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Post Requirement Counter
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.1.1
+// @version      1.2.0
 // @description  Adds a counter to topics with a set string in their names, that counts posts including given images or strings as long as they're from the current month.
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -90,6 +90,14 @@ const isThisMonth = (post) => new Date(new Date().toLocaleDateString('en-GB', {m
 
 const getAllSavedPosts = async () => Object.entries(await GM.getValue('users', {})).map(([username, user]) => Object.keys(user.posts).map(post => [post, username])).flat();
 
+const create = (tagName, attributes, properties) => {
+    const element = document.createElement(tagName);
+    if(attributes) Object.entries(attributes).filter(attr => attr[0] !== 'textContent').forEach(([key, value]) => element.setAttribute(key, value));
+    if(attributes?.textContent) element.textContent = attributes.textContent;
+    Object.assign(element.style, properties);
+    return element;
+}
+
 const getEmoji = (counterWentUp, counterName) => {
     if(counterName === 'required') return counterWentUp ? '📖' : '📘';
     else return counterWentUp ? '🏆' : '✖️';
@@ -127,9 +135,7 @@ const changeCount = async (counterInfo) => {
 }
 
 const createChangeAnchor = (anchorText, counterInfo) => {
-    const anchor = document.createElement('a');
-    anchor.textContent = anchorText;
-    anchor.href = '#';
+    const anchor = create('a', { textContent: anchorText, href: '#' });
     anchor.addEventListener('click', (e) => {
         e.preventDefault();
         changeCount(counterInfo);
@@ -138,11 +144,8 @@ const createChangeAnchor = (anchorText, counterInfo) => {
 }
 
 const createPostCounter = (authorColumn, user, counterInfo) => {
-    const wrapper = document.createElement('p');
-    wrapper.classList.add('saahphire-post-requirements-count');
-    wrapper.textContent = getEmoji(user.posts[counterInfo.postId][counterInfo.countName], counterInfo.countName);
-    const counter = document.createElement('span');
-    counter.textContent = user[counterInfo.countName];
+    const wrapper = create('p', { class: 'saahphire-post-requirements-count', textContent: getEmoji(user.posts[counterInfo.postId][counterInfo.countName], counterInfo.countName) });
+    const counter = create('span', { textContent: user[counterInfo.countName] });
     wrapper.appendChild(counter);
     wrapper.appendChild(createChangeAnchor('+', {...counterInfo, counter, value: 1}));
     wrapper.appendChild(createChangeAnchor('-', {...counterInfo, counter, value: -1}));
@@ -205,14 +208,11 @@ const colorPostIfUnknown = async (postId, post, savedPosts) => {
     const foundPost = savedPosts.find(post => post[0] === postId);
     if(!foundPost) post.classList.add('saahphire-post-requirements-unknown');
     const authorColumn = post.getElementsByClassName('boardPostByline')[0];
-    const div = document.createElement('div');
+    const div = create('div');
     authorColumn.prepend(div);
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.placeholder = 'Username';
+    const input = create('input', { type: 'text', placeholder: 'Username' });
     div.appendChild(input);
-    const button = document.createElement('button');
-    button.textContent = '💾';
+    const button = create('button', { textContent: '💾' });
     button.addEventListener('click', () => updateUsername(button, postId, post, input));
     div.appendChild(button);
     if(foundPost) {
@@ -236,28 +236,40 @@ const parsePosts = async (users) => {
     return users;
 }
 
+const createListItem = (entry, listType, list) => list.appendChild(create('li', { textContent: `${entry[0]}: ${entry[1][listType]}` }));
+
+const populateModal = (modal, users, isLeaderboard) => {
+    const className = isLeaderboard ? 'saahphire-post-requirements-leaderboard' : 'saahphire-post-requirements-requirements';
+    const leaderboardLabel = create('label', { textContent: `Switch to ${isLeaderboard ? 'Requirements' : 'Leaderboard'}`, 'for': 'saahphire-post-requirements-switch', 'class': className });
+    modal.appendChild(leaderboardLabel);
+    const h3 = create('h3', { textContent: isLeaderboard ? 'Leaderboard' : 'Requirements', 'class': className });
+    modal.appendChild(h3);
+    const list = create(isLeaderboard ? 'ol' : 'ul', { 'class': className });
+    modal.appendChild(list);
+    if(isLeaderboard) {
+        Object.entries(users).sort((a, b) => b[1].leaderboard - a[1].leaderboard).forEach(entry => createListItem(entry, 'leaderboard', list));
+    }
+    else {
+        Object.entries(users).filter(user => user[1].required && user[1].required > settings.requirementCount).forEach(entry => createListItem(entry, 'required', list));
+        const button = create('button', { textContent: 'Pick Random' });
+        modal.appendChild(button);
+        button.addEventListener('click', () => {
+            [...list.children].forEach(child => child.classList.remove('saahphire-post-requirements-chosen'));
+            list.children[Math.floor(Math.random() * list.children.length)].classList.add('saahphire-post-requirements-chosen');
+        });
+    }
+}
+
 const createLeaderboard = (users) => {
-    const modal = document.createElement('dialog');
-    modal.id = 'saahphire-post-requirement-leaderboard';
-    const ul = document.createElement('ul');
-    ul.style.textAlign = 'left';
-    modal.appendChild(ul);
-    Object.entries(users).sort((a, b) => b[1].leaderboard - a[1].leaderboard).forEach(([username, {leaderboard}]) => {
-        const li = document.createElement('li');
-        li.textContent = `${username}: ${leaderboard}`;
-        ul.appendChild(li);
-    });
-    const buttonClose = document.createElement('button');
-    buttonClose.command = 'close';
-    buttonClose.setAttribute('commandfor', modal.id);
-    buttonClose.textContent = 'Close';
+    const modal = create('dialog', { id: 'saahphire-post-requirement-modal' });
+    const input = create('input', { type: 'checkbox', id: 'saahphire-post-requirements-switch' });
+    modal.appendChild(input);
+    populateModal(modal, users, true);
+    populateModal(modal, users);
+    const buttonClose = create('button', { command: 'close', 'commandfor': modal.id, textContent: 'Close' });
     modal.appendChild(buttonClose);
     document.body.appendChild(modal);
-    const button = document.createElement('button');
-    button.classList.add('replyTopicButton-top');
-    button.textContent = 'Open Post Leaderboard';
-    button.command = 'show-modal';
-    button.setAttribute('commandfor', 'saahphire-post-requirement-leaderboard');
+    const button = create('button', { 'class': 'replyTopicButton-top', command: 'show-modal', commandFor: 'saahphire-post-requirement-modal', textContent: 'Open Post Leaderboard' });
     document.getElementsByClassName('breadcrumbs')[0].insertAdjacentElement('afterend', button);
 }
 
@@ -286,6 +298,46 @@ const css = `<style>
 .saahphire-post-requirements-count {
     display: flex;
     gap: 0.5em;
+}
+
+#saahphire-post-requirement-modal {
+    text-align: center;
+    
+    input {
+        display: none;
+
+        & ~ .saahphire-post-requirements-leaderboard, &:checked ~ .saahphire-post-requirements-requirements {
+            display: block;
+        }
+
+        & ~ .saahphire-post-requirements-requirements, &:checked ~ .saahphire-post-requirements-leaderboard {
+            display: none;
+        }
+    }
+
+    label, button {
+        background-color: #110721;
+        display: inline-block;
+        border-radius: 5px;
+        padding: 5px 7px;
+        margin: 3px;
+        font-size: 12pt;
+        line-height: 12pt;
+        vertical-align: middle;
+        color: #fff;
+        font-family: "Palanquin", 'Arial Bold', sans-serif;
+        text-align: center;
+        cursor: pointer;
+    }
+
+    ol, ul {
+        text-align: left;
+    }
+
+    .saahphire-post-requirements-chosen {
+        font-weight: bold;
+        color: teal;
+    }
 }
 </style>`;
 
