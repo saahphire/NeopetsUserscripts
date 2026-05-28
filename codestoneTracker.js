@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Codestone Tracker
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      3.0.1
+// @version      4.0.0
 // @description  Tracks your codestones, removes them with a click on the training page, adds a link to SW for the ones you don't have yet
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -171,17 +171,35 @@ const makeLink = (codestoneElement, isSDB, itemIndex) => {
 */
 
 /**
+* Fetches the CSRF token for your SDB
+* @returns {string} Your CSRF token
+*/
+const getCsrfToken = async () => {
+    const fetched = await fetch('https://www.neopets.com/safetydeposit.phtml');
+    const text = await fetched.text();
+    const randomEvent = text.match(/<link [^>]+randomevents.+>[\s\S]+<div class="copy">\s*.+\s*<\/div>/);
+    if(randomEvent) document.querySelector('td[class="content"], .container').insertAdjacentHTML('afterbegin', randomEvent);
+    return text.match(/refCk":"([^"]+)"/)[1];
+}
+
+/**
 * Fetches the codestone SDB page and retrieves each codestone's quantity
 * @returns {Object.<number, number>} A dictionary with the item's id as key and quantity as value
 */
 const getStoredCodestones = async () => {
-    const fetched = await fetch('https://www.neopets.com/safetydeposit.phtml?obj_name=&category=2');
-    const text = await fetched.text();
-    const randomEvent = text.match(/<link [^>]+randomevents.+>[\s\S]+<div class="copy">\s*.+\s*<\/div>/);
-    if(randomEvent) document.querySelector('td[class="content"], .container').insertAdjacentHTML('afterbegin', randomEvent);
-    const matches = text.matchAll(/center"><b>(\d+)<\/b>[\s\S]+?back_to_inv\[(\d+)\]/g);
+    const token = await getCsrfToken();
+    const body = {
+        category: 2,
+        '_ref_ck': token
+    };
+    const headers = {
+        "Content-Type": "application/json",
+        "X-Requested-With": "XMLHttpRequest"
+    };
+    const fetched = await fetch('https://www.neopets.com/np-templates/ajax/safetydeposit/get-items.php', { method: 'POST', body: JSON.stringify(body), headers });
+    console.log(fetched, token);
     const result = {};
-    matches.forEach(match => result[match[2]] = parseInt(match[1]));
+    (await fetched.json()).data.items.forEach(item => result[item.id] = item.amount);
     return result;
 }
 
