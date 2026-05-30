@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Neopets: Sorter for Safety Deposit Box
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.0
-// @description  Allows you to click on each column header on your Safety Deposit Box to sort that page by its values
+// @version      2.0.0
+// @description  [UPDATED FOR NEW SDB] Adds type and itemDB price sorting options to the Safety Deposit Box's "Sort by" dropdown
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
 // @homepage     https://github.com/saahphire/NeopetsUserscripts
@@ -18,9 +18,9 @@
 •:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•:•:•:•:•:•:•:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•.•:•:•:•:•:•:•:•:•.•:•:•.•:•.••:•.•:•.••:
 ........................................................................................................................
 ☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦
-    This script adds buttons to all SDB columns so you can sort by their values. Works with itemDB's SDB pricer.
-
-    Use the Remove? column to sort by id (default SDB sorting)
+    This script allows you to sort your SDB by type (Food, Magic Item, etc) and itemDB price. You must install the
+    "itemdb - Safety Deposit Box Pricer" script (v1.6.0+) to sort by price:
+    https://itemdb.com.br/articles/userscripts
 
     ✦ ⌇ saahphire
 ☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦
@@ -28,134 +28,57 @@
 •:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•:•:•:•:•:•:•:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•.•:•:•:•:•:•:•:•:•.•:•:•.•:•.••:•.•:•.••:
 */
 
-const numberSorter = (a, b) => a - b
-const textSorter = (a, b) =>  a.trim().localeCompare(b.trim())
+const getType = (el) => el.getElementsByClassName('sdb-item-meta')[0]?.textContent.trim();
+const getPrice = (el) => parseInt(el.querySelector('.sdb-item-info a[target="_blank"]')?.textContent.replaceAll(/\D/g, ''));
 
-const sorters = {
-    'Image': {
-        retrieveDataToSort: row => row.querySelector('img[width="80"]').src,
-        sorter: textSorter
+const options = {
+    'type_asc': {
+        sorter: (a, b) => getType(a)?.localeCompare(getType(b)),
+        text: 'Type (A-Z)'
     },
-    'Name': {
-        retrieveDataToSort: row => row.querySelector('td[align="left"] b').textContent,
-        sorter: textSorter
+    'type_desc': {
+        sorter: (a, b) => getType(b)?.localeCompare(getType(a)),
+        text: 'Type (Z-A)'
     },
-    'Description': {
-        retrieveDataToSort: row => row.querySelector('td[width="350"] i').textContent,
-        sorter: textSorter
+    'price_desc': {
+        sorter: (a, b) => getPrice(b) - getPrice(a),
+        text: 'Price (High-Low)'
     },
-    'Type': {
-        retrieveDataToSort: row => row.querySelector('td[width="350"] ~ td[align="left"] b').textContent,
-        sorter: textSorter
-    },
-    'Price': {
-        retrieveDataToSort: row => parseInt(row.querySelector('[width="150px"] a').textContent.match(/\d+/g)?.join('') || 0),
-        sorter: numberSorter
-    },
-    'Qty': {
-        retrieveDataToSort: row => parseInt(row.querySelector('td[align="center"]:not([width="150px"]) b').textContent),
-        sorter: numberSorter
-    },
-    'Remove?': {
-        retrieveDataToSort: row => parseInt(row.querySelector('.remove_safety_deposit').name.match(/\d+/)[0]),
-        sorter: numberSorter
+    'price_asc': {
+        sorter: (a, b) => getPrice(a) - getPrice(b),
+        text: 'Price (Low-High)'
     }
 }
 
-const states = ["asc", "desc", "off", "asc"];
-
-const sortRow = (rowA, rowB, sortMethods, state) => {
-    const a = sortMethods.retrieveDataToSort(rowA);
-    const b = sortMethods.retrieveDataToSort(rowB);
-    if(state === "off") return a;
-    if(state === "desc") return sortMethods.sorter(b, a);
-    return sortMethods.sorter(a, b);
+const onSelectChange = (e) => {
+    const selectedOption = e.target.selectedOptions[0];
+    if(!selectedOption.classList.contains('saahphire-sdb-sorter')) return;
+    e.stopImmediatePropagation();
+    const parent = document.querySelector('.sdb-table tbody');
+    const rows = document.querySelectorAll('.sdb-row-odd, .sdb-row-even'); // Do they not know about nth-child??? I'm dying
+    [...rows].sort(options[selectedOption.value].sorter).forEach(row => parent.appendChild(row));
 }
 
-const changeHeaderState = header => {
-    const nextState = states[states.findIndex(state => state === header.dataset.state) + 1];
-    header.dataset.state = nextState;
-    header.dataset.timestamp = new Date().getTime();
+const createOption = (id) => {
+    const option = document.createElement('option');
+    option.value = id;
+    option.classList.add('saahphire-sdb-sorter');
+    option.textContent = options[id].text;
+    return option;
 }
 
-const sortColumns = () => {
-    const sibling = document.querySelector('[cellpadding="4"] tr:is([bgcolor="silver"], [bgcolor="#E4E4E4"], [bgcolor="#DFEAF7"])');
-    let rows = [...document.querySelectorAll('[cellpadding="4"] script ~ tr:is([bgcolor="#F6F6F6"], [bgcolor="#FFFFFF"])')];
-    [...document.querySelectorAll('[cellpadding="4"] tr:not(:has(th)) td.contentModuleHeaderAlt')]
-        .map(header => [header.dataset.state, sorters[header.textContent.trim()], parseInt(header.dataset.timestamp), header])
-        .concat([['asc', sorters['Remove?'], -1]])
-        .sort((a, b) => a[2] - b[2])
-        .forEach(([state, sortMethods]) => rows = rows.sort((a, b) => sortRow(a, b, sortMethods, state)));
-    rows.forEach(row => sibling.insertAdjacentElement('beforebegin', row));
+const addSelectOptions = () => {
+    const select = document.getElementsByClassName('sdb-select')[2];
+    select.addEventListener('change', onSelectChange, true);
+    Object.keys(options).forEach(id => select.appendChild(createOption(id)));
 }
-
-const onHeaderClick = (e) => {
-    const header = e.target.classList.contains("contentModuleHeaderAlt") ? e.target : e.target.parentElement;
-    changeHeaderState(header);
-    sortColumns();
-}
-
-const addColumnSorterToHeader = header => {
-    header.addEventListener('click', onHeaderClick);
-    header.dataset.state = 'off';
-    header.dataset.timestamp = 0;
-}
-
-const addColumnSorters = () => {
-    document.querySelectorAll('[cellpadding="4"] tr:not(:has(th)) td.contentModuleHeaderAlt').forEach(addColumnSorterToHeader);
-    const observer = new MutationObserver(() => {
-        const itemDBHeader = document.querySelector('[cellpadding="4"] tr:not(:has(th)) td.contentModuleHeaderAlt:has([width="25px"])');
-        if(itemDBHeader) {
-            observer.disconnect();
-            addColumnSorterToHeader(itemDBHeader);
-        }
-    });
-    observer.observe(document.querySelector('[cellpadding="4"] tr:not(:has(th)):has(td.contentModuleHeaderAlt)'), {childList: true});
-}
-
-const init = () => {
-    document.head.insertAdjacentHTML("beforeEnd", `<style>${css}</style>`);
-    addColumnSorters();
-}
-
-const css = `
-td.contentModuleHeaderAlt {
-  text-align: center;
-}
-
-.contentModuleHeaderAlt[data-state] {
-  cursor: pointer;
-  position: relative;
-  height: 3.5em;
-}
-
-.contentModuleHeaderAlt[data-state]:hover {
-  text-decoration: underline;
-}
-
-.contentModuleHeaderAlt::before {
-  display: inline-block;
-  position: absolute;
-  top: 0.25em;
-  left: 0;
-  width: 100%;
-  text-align: center;
-}
-
-.contentModuleHeaderAlt[data-state="off"]::before {
-  content: "-";
-}
-
-.contentModuleHeaderAlt[data-state="asc"]::before {
-  content: "▲";
-}
-
-.contentModuleHeaderAlt[data-state="desc"]::before {
-  content: "▼";
-}
-`;
 
 (function() {
     'use strict';
-    init();
+    document.head.insertAdjacentHTML('beforeend', `<style>
+        #sdb-inner:not(:has(img[src="https://itemdb.com.br/logo_icon.svg"][width="20px"])) option[value*="price"] {
+            display: none;
+        }
+    </style>`);
+    addSelectOptions();
 })();
