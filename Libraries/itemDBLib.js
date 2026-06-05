@@ -39,47 +39,40 @@ const createItemDBUnauthorizedButton = (text, callback) => {
     return button;
 }
 
-const fillItemDBUnauthorizedDialog = (scriptName, dialog) => {
+const fillItemDBUnauthorizedDialog = (scriptName, dialog, body) => {
     dialog.appendChild(createItemDBUnauthorizedDialogText(scriptName));
     dialog.appendChild(createItemDBUnauthorizedButton('✖️ Close', () => {
         dialog.close();
     }));
+    const goToItemDB = 
     dialog.appendChild(createItemDBUnauthorizedButton('🔗 Go to itemDB', () => {
         dialog.close();
         window.open('https://itemdb.com.br', '_blank').focus();
+        setTimeout(() => fetchItemDb(url, scriptName, body), 2000);
     }));
 }
 
-const onUnauthorized = (scriptName, channel) => {
+const onUnauthorized = (scriptName, url, body) => {
     if(!hasCreatedItemDBUnauthorizedDialog) {
         hasCreatedItemDBUnauthorizedDialog = true;
         document.head.insertAdjacentHTML('beforeend', itemDBCSS);
         const dialog = createItemDBUnauthorizedDialog();
-        fillItemDBUnauthorizedDialog(scriptName, dialog, channel);
+        fillItemDBUnauthorizedDialog(scriptName, dialog, body);
         document.body.appendChild(dialog);
     }
     document.getElementsByClassName('itemDB-rejection-modal')[0].showModal();
 }
 
-const fetchItemDb = (url, scriptName) => {
+const fetchItemDb = (url, scriptName, body) => {
     return new Promise((res, rej) => {
-        fetch(url, {credentials: 'include'})
-            .then(response => response.json())
+        fetch(url, {credentials: 'include', method: body ? 'POST' : 'GET', body})
+            .then(response => {
+                if(response.status === 200) return response.json();
+                if(response.status === 401) onUnauthorized(scriptName, url, body);
+                else throw new Error(response.status);
+            })
             .then(json => res(json))
-            .catch(e => {
-                if(e.name !== 'TypeError') throw(e);
-                console.log(`[${scriptName}] You just saw two scary red errors in the console! Don't worry, they're normal until March.`);
-                fetch(url)
-                    .then(response => {
-                        if(response.status === 401) {
-                            onUnauthorized(scriptName);
-                            document.querySelectorAll('.itemDB-rejection-modal button').forEach(button => 
-                                button.addEventListener('click', (e) => {
-                                    if(e.target.textContent === '✖️ Close') rej('Canceled');
-                                    else setTimeout(async () => res(await fetchItemDb(url, scriptName)), 2000);
-                                }), {once: true});
-                        } else res(response.json());
-                    }).catch(e => console.error(e));
+            .catch(e => console.error(e));
             })
     });
 }
