@@ -64,7 +64,7 @@ const onUnauthorized = (scriptName, url, body) => {
 }
 
 const fetchItemDb = (url, scriptName, body) =>  new Promise((res, rej) => {
-    fetch(url, {credentials: 'include', method: body ? 'POST' : 'GET', body, headers: { 'Content-Type': 'application/json' })
+    fetch(url, {credentials: 'include', method: body ? 'POST' : 'GET', body, headers: { 'Content-Type': 'application/json' }})
         .then(response => {
             if(response.status === 200) return response.json();
             if(response.status === 401) onUnauthorized(scriptName, url, body);
