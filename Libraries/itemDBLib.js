@@ -63,19 +63,16 @@ const onUnauthorized = (scriptName, url, body) => {
     document.getElementsByClassName('itemDB-rejection-modal')[0].showModal();
 }
 
-const fetchItemDb = (url, scriptName, body) => {
-    return new Promise((res, rej) => {
-        fetch(url, {credentials: 'include', method: body ? 'POST' : 'GET', body})
-            .then(response => {
-                if(response.status === 200) return response.json();
-                if(response.status === 401) onUnauthorized(scriptName, url, body);
-                else throw new Error(response.status);
-            })
-            .then(json => res(json))
-            .catch(e => console.error(e));
-            })
-    });
-}
+const fetchItemDb = (url, scriptName, body) =>  new Promise((res, rej) => {
+    fetch(url, {credentials: 'include', method: body ? 'POST' : 'GET', body})
+        .then(response => {
+            if(response.status === 200) return response.json();
+            if(response.status === 401) onUnauthorized(scriptName, url, body);
+            else throw new Error(response.status);
+        })
+        .then(json => res(json))
+        .catch(e => console.error(e));
+});
 
 const itemDBCSS = `<style>
 .itemDB-rejection-modal {
