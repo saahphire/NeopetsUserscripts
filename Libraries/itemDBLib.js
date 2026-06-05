@@ -5,8 +5,8 @@
     This is not a script and does nothing on its own. It was created to be @required by userscripts.
     This allows an userscript to send a query to itemDB, showing an error message if the user is unauthenticated.
     To use it, asynchronously call the function fetchItemDb(url, scriptName), using the URL you would use for a fetch
-    (example: https://itemdb.com.br/api/v1/items/negg) as url, and your script's name for UI purposes in case
-    authorization fails.
+    (example: https://itemdb.com.br/api/v1/items/negg) as url, your script's name for UI purposes in case
+    authorization fails, and your request's stringified body IF it's a POST request.
 
     Version: 1.0.0
 
