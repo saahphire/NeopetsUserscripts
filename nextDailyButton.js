@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Next Daily Button
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.0
+// @version      1.0.1
 // @description  Given a list of URLs, adds a button in a page to the next item on the list
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -42,6 +42,9 @@
     You can add a URL multiple times if you want to visit it more than once.
 
     All URLs must be between single or double quotes, and separated from each other by commas.
+
+    The current list is my personal URL list. I left it there so it'll serve as an example, but you can and should
+    replace it with your own list in your preferred order.
 
     ✦ ⌇ saahphire
 ☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦
@@ -107,7 +110,7 @@ const getCurrentUrlIndex = async (currentUrl) => {
     const lastIndex = await GM.getValue('last-url', 0);
     const predictedIndex = nextIndex(lastIndex);
     const essence = urlEssence(currentUrl);
-    if(predictedIndex !== -1 && essence === urlEssence(urls[predictedIndex])) return predictedIndex;
+    if(predictedIndex !== -1 && urls[predictedIndex] && essence === urlEssence(urls[predictedIndex])) return predictedIndex;
     return urls.findIndex((url) => urlEssence(url) === essence);
 }
 
