@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Next Daily Button
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.1
+// @version      1.0.2
 // @description  Given a list of URLs, adds a button in a page to the next item on the list
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -42,9 +42,6 @@
     You can add a URL multiple times if you want to visit it more than once.
 
     All URLs must be between single or double quotes, and separated from each other by commas.
-
-    The current list is my personal URL list. I left it there so it'll serve as an example, but you can and should
-    replace it with your own list in your preferred order.
 
     ✦ ⌇ saahphire
 ☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦
@@ -106,12 +103,15 @@ const urlEssence = (url) => url.replaceAll(/https?:\/\/(www.)?neopets.com\/|\?.+
 
 const nextIndex = (index) => loop ? (index + 1) % urls.length : index + 1;
 
+const isCurrentIndex = (currentUrlEssence, index) => index !== -1 && urls[index] && currentUrlEssence === urlEssence(urls[index]);
+
 const getCurrentUrlIndex = async (currentUrl) => {
+    const currentUrlEssence = urlEssence(currentUrl);
     const lastIndex = await GM.getValue('last-url', 0);
+    if(isCurrentIndex(currentUrlEssence, lastIndex)) return lastIndex;
     const predictedIndex = nextIndex(lastIndex);
-    const essence = urlEssence(currentUrl);
-    if(predictedIndex !== -1 && urls[predictedIndex] && essence === urlEssence(urls[predictedIndex])) return predictedIndex;
-    return urls.findIndex((url) => urlEssence(url) === essence);
+    if(isCurrentIndex(currentUrlEssence, predictedIndex)) return predictedIndex;
+    return urls.findIndex((url) => urlEssence(url) === currentUrlEssence);
 }
 
 const createButton = (url) => {
