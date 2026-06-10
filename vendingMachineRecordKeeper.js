@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Vending Machine Record Keeper
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.0
+// @version      1.0.1
 // @description  Records your Nerkmid Runs at the Vending Machine for you
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -55,7 +55,7 @@ const create = (tagName, attributes, textContent) => {
     return element;
 }
 
-const regexer = (str) => new RegExp(`{{${str}}}`, 'i');
+const regexer = (str) => new RegExp(`{{${str}}}`, 'ig');
 
 const formatRecord = (format, record) => fields
     .reduce((agg, curr) => agg.replaceAll(regexer(curr), record[curr]), format)
