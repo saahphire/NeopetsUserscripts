@@ -1,13 +1,13 @@
 // ==UserScript==
 // @name         Neopets: Game Avatar Infobox
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.0
+// @version      1.0.1
 // @description  Adds a little box above your high score in a game telling you how many points you'd have to score to get its avatar
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
 // @homepage     https://github.com/saahphire/NeopetsUserscripts
-// @downloadURL  https://github.com/saahphire/NeopetsUserscripts/blob/main/gameAvatarInfobox.js
-// @updateURL    https://github.com/saahphire/NeopetsUserscripts/blob/main/gameAvatarInfobox.js
+// @downloadURL  https://github.com/saahphire/NeopetsUserscripts/blob/main/Unsupported/gameAvatarInfobox.js
+// @updateURL    https://github.com/saahphire/NeopetsUserscripts/blob/main/Unsupported/gameAvatarInfobox.js
 // @match        *://*.neopets.com/games/game.phtml?game_id=*&*
 // @match        *://*.neopets.com/settings/neoboards*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=neopets.com
@@ -25,6 +25,12 @@
       avatar: name, image, requirement, and a link to its JellyNeo guide
     - Doesn't add that box if you already have that avatar unlocked. You'll need to visit the Neoboards Preferences page
       to update that.
+
+    UPDATE Jun 11, 2026:
+    I no longer wish to support this script. My other script Game Info Box also displays avatars, but doesn't keep track
+    of which avatars you have unlocked. You can simply see if your highest score was enough to get the avatar.
+    https://greasyfork.org/en/scripts/582217-neopets-game-info-box
+    https://github.com/saahphire/NeopetsUserscripts/blob/main/gameInfoBox.js
 
     ✦ ⌇ saahphire
 ☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦
