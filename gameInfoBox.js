@@ -20,6 +20,7 @@
     Only games from the Games Room with a High Scores box have been added to this script. I could add others but it's a
     lot of work and I'm not sure anyone wants it. If I'm missing any, please let me know through a GreasyFork comment or
     GitHub issue.
+    https://greasyfork.org/en/scripts/582217-neopets-game-info-box/feedback
     https://github.com/saahphire/NeopetsUserscripts/issues
 
     This will display a box under High Scores with:
