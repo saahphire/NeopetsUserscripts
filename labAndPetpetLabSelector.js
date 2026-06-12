@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Lab and Petpet Lab Selector
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.1
+// @version      1.0.2
 // @description  I tried a bunch of scripts that said they did this but none worked. Allows you to favorite pets and petpets and displays them separately. Optionally hides all other pets.
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -38,6 +38,7 @@ const addShowAllButton = async () => {
     const showAll = await GM.getValue(`${isPetpet ? 'pet' : ''}pet-show-all`, true);
     const input = document.createElement('input');
     input.type = 'checkbox';
+    input.id = 'saahphire-lab-show-all';
     input.checked = showAll;
     input.addEventListener('click', () => GM.setValue(`${isPetpet ? 'pet' : ''}pet-show-all`, input.checked));
     const label = document.createElement('label');
