@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Lab and Petpet Lab Selector
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.0
+// @version      1.0.1
 // @description  I tried a bunch of scripts that said they did this but none worked. Allows you to favorite pets and petpets and displays them separately. Optionally hides all other pets.
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -39,11 +39,9 @@ const addShowAllButton = async () => {
     const input = document.createElement('input');
     input.type = 'checkbox';
     input.checked = showAll;
-    input.id = 'saahphire-lab-show-all';
     input.addEventListener('click', () => GM.setValue(`${isPetpet ? 'pet' : ''}pet-show-all`, input.checked));
     const label = document.createElement('label');
     label.textContent = `Show All Pet${isPetpet ? 'pet' : ''}s`;
-    label.htmlFor = input.id;
     label.prepend(input);
     document.getElementsByClassName('saahphire-favorite-lab-list')[0].insertAdjacentElement('beforebegin', label);
 }
@@ -66,10 +64,8 @@ const onPetRadioChange = (e) => {
 
 const createRadio = (individualName, callback) => {
     const label = document.createElement('label');
-    label.htmlFor = `saahphire-lab-select-${individualName}`;
     const radio = document.createElement('input');
     radio.type = 'radio';
-    radio.id = label.htmlFor;
     radio.name = 'saahphire-lab-select';
     radio.addEventListener('change', callback);
     label.appendChild(radio);
@@ -121,10 +117,8 @@ const createButton = (individual, isPetpet, callbackOnChecked, callbackOnUncheck
     input.type = 'checkbox';
     input.classList.add('saahphire-favorite-lab-toggle');
     input.dataset.saahphireLab = individual;
-    input.id = `saahphire-favorite-lab-toggle-${individual}-${Math.floor(Math.random() * 100)}`;
     input.addEventListener('click', e => onPressFavoriteButton(e, isPetpet, callbackOnChecked, callbackOnUnchecked));
     const label = document.createElement('label');
-    label.htmlFor = input.id;
     label.classList.add('saahphire-favorite-lab-button');
     label.textContent = `Favorite ${individual}`;
     label.appendChild(input);
