@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Lab and Petpet Lab Selector
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.2
+// @version      1.0.3
 // @description  I tried a bunch of scripts that said they did this but none worked. Allows you to favorite pets and petpets and displays them separately. Optionally hides all other pets.
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -59,7 +59,7 @@ const createPetFigure = petName => {
 }
 
 const onPetRadioChange = (e) => {
-    const petName = e.target.id.split('-')[3];
+    const petName = e.target.value;
     document.querySelector(`[name="chosen"][value="${petName}"]`).checked = true;
 }
 
@@ -68,6 +68,7 @@ const createRadio = (individualName, callback) => {
     const radio = document.createElement('input');
     radio.type = 'radio';
     radio.name = 'saahphire-lab-select';
+    radio.value = individualName;
     radio.addEventListener('change', callback);
     label.appendChild(radio);
     return label;
@@ -149,7 +150,7 @@ const createPetpetFigure = (image, petpetName, owner) => {
 }
 
 const onPetpetRadioChange = (e) => {
-    const ownerName = e.target.id.split('-')[3];
+    const ownerName = e.target.value;
     const select = document.getElementsByClassName('h5-input')[0];
     const index = [...select.querySelectorAll('option')].findIndex(o => o.value === ownerName);
     select.selectedIndex = index;
