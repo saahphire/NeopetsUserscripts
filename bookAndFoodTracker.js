@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Neopets: Book and Food Tracker
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.1
-// @description  Adds a border to books/gourmet food a tracked pet hasn't read/eaten yet. Also moves them to the top in various pages.
+// @version      1.0.2
+// @description  Adds a border to books/gourmet food a tracked pet hasn't read/eaten yet. Also moves them to the top in various pages. Updated for new SDB.
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
 // @homepage     https://github.com/saahphire/NeopetsUserscripts
@@ -11,6 +11,8 @@
 // @match        *://*.neopets.com/*
 // @exclude      *://*.neopets.com/~*
 // @exclude      *://*.neopets.com/*lookup.phtml*
+// @exclude      *://*.neopets.com/objects.phtml?*type=shop*
+// @exclude      *://*.neopets.com/explore.phtml*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=neopets.com
 // @license      Unlicense
 // @grant        GM.setValue
@@ -23,6 +25,12 @@
 •:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•:•:•:•:•:•:•:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•.•:•:•:•:•:•:•:•:•.•:•:•.•:•.••:•.•:•.••:
 ........................................................................................................................
 ☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦
+    This script uses the itemDB API to retrieve the list of eligible books and gourmet food. itemDB has updated their
+    API in March 2026, and now requires an userscript's user to visit https://itemdb.com.br once every 24 hours if
+    they're not logged in, or once every 7 days if they are. In practice, many people have reported the 24h timer to not
+    work at all, so scripts would only work if they're logged in. This script will not work at all unless it can access
+    itemDB at least once, and the book/food lists won't stay up to date if it can't access itemDB every 24h.
+
     This script does the following:
     - Updates the list of possible books and gourmet food regularly by retrieving itemDB's data
         - Allows you to configure how often (in hours) the update happens. Default is 24h. I wouldn't go under 4h.
@@ -58,9 +66,6 @@
 ........................................................................................................................
 •:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•:•:•:•:•:•:•:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•.•:•:•:•:•:•:•:•:•.•:•:•.•:•.••:•.•:•.••:
 */
-
-// TODO
-// - Implement tracker on homepage
 
 // How many hours should pass, minimum, until the lists are checked for an update
 const updateFrequency = 24;
@@ -201,13 +206,20 @@ const onList = async () => {
 
 const requestUpdate = async () => {
     Object.entries(lists).forEach(async ([listId, info]) => {
-        const items = await (await fetchItemDb(`https://itemdb.com.br/api/v1/lists/official/${info.itemdb}/itemdata`, 'Book and Food Tracker'));
-        const itemIds = items.map(item => getIdFromImageSource(item.image));
-        updateCache(listId, itemIds);
+        // eslint-disable-next-line no-undef
+        await fetchItemDb(`https://itemdb.com.br/api/v1/lists/official/${info.itemdb}/itemdata`, 'Book and Food Tracker')
+            .then((items) => {
+                if(items.error) throw new Error(items.error);
+                if(!items || !items.length) throw new Error('Unknown error (empty response)');
+                const itemIds = items.map(item => getIdFromImageSource(item.image));
+                updateCache(listId, itemIds);
+            })
+            .catch((e) => console.error(`Couldn't fetch the list of eligible ${listId} items from itemDB. Error ${e.message}`));
     });
 }
 
 const highlightItem = async (image) => {
+    if(image.classList.contains('saahphire-bft-to-do')) return image;
     const id = getIdFromImageSource(image.src ?? image.dataset.image ?? image.style.backgroundImage);
     if(!id) return;
     const listId = await listOf(id);
@@ -242,7 +254,6 @@ const handleInventorySelect = async (listId) => {
 }
 
 const onInventorySubmit = async (selectData, listInfo) => {
-    console.log(selectData);
     if(!selectData || !selectData.actions.length) return;
     if(!selectData.actions.find(action => action === selectData.select.value)) return;
     listInfo.pet = selectData.select.value.match(/\w+$/);
@@ -296,10 +307,18 @@ const onUserShop = images => {
     });
 }
 
-const onSDB = images => {
+const onSDB = () => {
     if(!sortItems.sdb) return;
-    for(let i = 0; i < images.length; i++)
-        document.querySelectorAll('table[cellpadding="4"] tr:not(:first-child, :last-child)')[i].insertAdjacentElement('beforebegin', parentElements(images[i], 2));
+    const parent = document.querySelector('.sdb-table tbody');
+    const observer = new MutationObserver(async () => {
+        const images = await highlightItems(parent);
+        const rows = document.querySelectorAll('.sdb-row-odd, .sdb-row-even');
+        observer.disconnect();
+        for(let i = 0; i < images.length; i++)
+            rows[i].insertAdjacentElement('beforebegin', parentElements(images[i], 4));
+        observer.observe(parent, {childList: true});
+    });
+    observer.observe(parent, {childList: true});
 }
 
 const orderTradingPreviews = images => {
@@ -415,7 +434,7 @@ const init = async () => {
       (Unlicensed scripts have no rules, but I'm judging you so hard.)
     ☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂
 */
-    // if(href.match('type=shop')) return;
+    if(href.match('type=shop')) return;
     document.head.insertAdjacentHTML('beforeEnd', borderCSS);
     if(Object.values(lists).some(info => href.match(info.url))) {
         onList();
@@ -492,6 +511,10 @@ const onListCSS = `<style>
 </style>`;
 
 const borderCSS = `<style>
+.sdb-item-img {
+    background: transparent;
+}
+
 .saahphire-bft-to-do, :not(:has(.items-center)) .gap-4:has(.saahphire-bft-to-do) {
     border-image: 24 / 8px round;
     border-style: solid;
