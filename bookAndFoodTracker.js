@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Book and Food Tracker
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.2
+// @version      1.0.3
 // @description  Adds a border to books/gourmet food a tracked pet hasn't read/eaten yet. Also moves them to the top in various pages. Updated for new SDB.
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -312,10 +312,11 @@ const onSDB = () => {
     const parent = document.querySelector('.sdb-table tbody');
     const observer = new MutationObserver(async () => {
         const images = await highlightItems(parent);
-        const rows = document.querySelectorAll('.sdb-row-odd, .sdb-row-even');
+        const firstRow = document.getElementsByClassName('sdb-row-odd')[0];
         observer.disconnect();
-        for(let i = 0; i < images.length; i++)
-            rows[i].insertAdjacentElement('beforebegin', parentElements(images[i], 4));
+        for(let i = 0; i < images.length; i++) {
+            firstRow.insertAdjacentElement('beforebegin', parentElements(images[i], 4));
+        }
         observer.observe(parent, {childList: true});
     });
     observer.observe(parent, {childList: true});
@@ -513,6 +514,14 @@ const onListCSS = `<style>
 const borderCSS = `<style>
 .sdb-item-img {
     background: transparent;
+}
+
+.sdb-row-odd, .sdb-table .sdb-row-even {
+    background: #fff;
+}
+
+.sdb-table tr:nth-child(even) {
+    background: #f2f2f2;
 }
 
 .saahphire-bft-to-do, :not(:has(.items-center)) .gap-4:has(.saahphire-bft-to-do) {
