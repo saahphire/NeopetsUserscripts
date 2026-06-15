@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Battleground of the Obelisk Boon Reminder
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.2
+// @version      1.0.3
 // @description  Adds a button that shows all boons and descriptions for a faction. Adds descriptions for boons when your faction wins.
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -94,6 +94,7 @@ const boons = {
     'Equip ALL THE THINGS': 'Equip one extra weapon per pet',
     'Five-Finger Discount': '10% discount on shops (except user shops)',
     'GRRRAAAAHHHHHH': 'Deal 10% more damage in the Battledome',
+    'GRRRAAAAHHHHHH!': 'Deal 10% more damage in the Battledome',
     'LOL AVIES': "Pilfer another person's avatar while boon is active",
     'Random': 'Five random boons will be selected once the week is over.',
     'Refreshed Quest Request': 'Reroll faerie quests you receive once',
