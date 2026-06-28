@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Book and Food Tracker
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.3
+// @version      1.0.4
 // @description  Adds a border to books/gourmet food a tracked pet hasn't read/eaten yet. Also moves them to the top in various pages. Updated for new SDB.
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -18,7 +18,7 @@
 // @grant        GM.setValue
 // @grant        GM.getValue
 // @grant        GM.deleteValue
-// @require      https://update.greasyfork.org/scripts/567036/1759045/itemDB%20Fetch%20Lib.js
+// @require      https://update.greasyfork.org/scripts/567036/1862213/itemDB%20Fetch%20Lib.js
 // ==/UserScript==
 
 /*
@@ -133,27 +133,27 @@ const findUnfinishedPets = async (listId, item) => {
     const trackedPetLists = await Promise.all((await getPetsForList(listId)).map(async pet => {
         return { pet, items: await GM.getValue(`${listId}-${pet}`, []) }
     }));
-    return trackedPetLists.filter(({items}) => !items.find(itemId => itemId === item)).map(({pet}) => pet);
+    return trackedPetLists.filter(({ items }) => !items.find(itemId => itemId === item)).map(({ pet }) => pet);
 }
 
 const getIdFromImageSource = src => src.match(/items\/(\w+)/)?.[1];
 const getAllImagesFromPage = (parent) => [...(parent ?? document).querySelectorAll('img[src*="/items/"]:not(#trainingTimersToggleIcon), .item-img, .petCare-itemgrid-item')];
 const parentElements = (element, degree) => {
     let res = element;
-    for(let i = 0; i < degree; i++) res = res.parentElement;
+    for (let i = 0; i < degree; i++) res = res.parentElement;
     return res;
 }
 
 const addBorder = (listId, element, pets) => {
     element.classList.add('saahphire-bft-to-do', listId === 'gourmet' ? 'saahphire-uneaten' : 'saahphire-unread');
     element.dataset.saahphirelist = listId;
-    if(pets) element.title = `[${listId === 'gourmet' ? 'Feed' : 'Read'} to ${pets.join(', ')}] ` + element.title;
+    if (pets) element.title = `[${listId === 'gourmet' ? 'Feed' : 'Read'} to ${pets.join(', ')}] ` + element.title;
 }
 
 const getListInfo = () => {
     const href = window.location.href;
-    const officialList = Object.entries(lists).find(([, {url}]) => href.match(url)) ?? (() => {throw new Error (`Couldn't find list data for url ${href}`)})();
-    const pet = href.match(/pet_name=(\w+)/)?.[1] ?? (() => {throw new Error(`Couldn't find pet for url ${href}`)})();
+    const officialList = Object.entries(lists).find(([, { url }]) => href.match(url)) ?? (() => { throw new Error(`Couldn't find list data for url ${href}`) })();
+    const pet = href.match(/pet_name=(\w+)/)?.[1] ?? (() => { throw new Error(`Couldn't find pet for url ${href}`) })();
     return { id: officialList[0], pet }
 }
 
@@ -164,7 +164,7 @@ const updateList = (listInfo) => {
 }
 
 const onTrackUntrackClick = (toggle, listInfo) => {
-    if(toggle.checked) {
+    if (toggle.checked) {
         updateList(listInfo);
         addList(listInfo);
     }
@@ -201,31 +201,33 @@ const onList = async () => {
     const listInfo = getListInfo();
     const tracked = await isBeingTracked(listInfo);
     addButton(listInfo, tracked);
-    if(tracked) updateList(listInfo);
+    if (tracked) updateList(listInfo);
 }
 
 const requestUpdate = async () => {
-    Object.entries(lists).forEach(async ([listId, info]) => {
-        // eslint-disable-next-line no-undef
-        await fetchItemDb(`https://itemdb.com.br/api/v1/lists/official/${info.itemdb}/itemdata`, 'Book and Food Tracker')
-            .then((items) => {
-                if(items.error) throw new Error(items.error);
-                if(!items || !items.length) throw new Error('Unknown error (empty response)');
-                const itemIds = items.map(item => getIdFromImageSource(item.image));
-                updateCache(listId, itemIds);
-            })
-            .catch((e) => console.error(`Couldn't fetch the list of eligible ${listId} items from itemDB. Error ${e.message}`));
-    });
+    try {
+        for (const [listId, info] of Object.entries(lists)) {
+            // eslint-disable-next-line no-undef
+            const items = await fetchItemDb(`https://itemdb.com.br/api/v1/lists/official/${info.itemdb}/itemdata`, 'Book and Food Tracker');
+            if (items.error) throw new Error(items.error);
+            if (!items || !items.length) throw new Error('Unknown error (empty response)');
+            const itemIds = items.map(item => getIdFromImageSource(item.image));
+            updateCache(listId, itemIds);
+        }
+    }
+    catch(e) {
+        console.error(`Couldn't fetch itemDB lists for Book and Food tracker from itemDB. Error ${e.message}`);
+    }
 }
 
 const highlightItem = async (image) => {
-    if(image.classList.contains('saahphire-bft-to-do')) return image;
+    if (image.classList.contains('saahphire-bft-to-do')) return image;
     const id = getIdFromImageSource(image.src ?? image.dataset.image ?? image.style.backgroundImage);
-    if(!id) return;
+    if (!id) return;
     const listId = await listOf(id);
-    if(!listId) return;
+    if (!listId) return;
     const unfinishedPets = await findUnfinishedPets(listId, id);
-    if(unfinishedPets.length == 0) return;
+    if (unfinishedPets.length == 0) return;
     addBorder(listId, image, unfinishedPets);
     return image;
 }
@@ -244,48 +246,48 @@ const handleInventorySelect = async (listId) => {
     const select = document.querySelector('select[name="action"]');
     select.insertAdjacentHTML('afterBegin', '<option value disabled>-----------------------</option>');
     const trackedPets = await getPetsForList(listId);
-    if(!trackedPets.length) return;
+    if (!trackedPets.length) return;
     const action = listId === 'gourmet' ? 'Feed' : 'Read';
-    if(trackedPets.length === 1) {
+    if (trackedPets.length === 1) {
         select.value = `${action} to ${trackedPets[0]}`;
         document.querySelector('.invitem-submit').classList.remove("disabledButton");
     }
-    return {select, actions: trackedPets.map(pet => handleInventoryOption(pet, action, select))}
+    return { select, actions: trackedPets.map(pet => handleInventoryOption(pet, action, select)) }
 }
 
 const onInventorySubmit = async (selectData, listInfo) => {
-    if(!selectData || !selectData.actions.length) return;
-    if(!selectData.actions.find(action => action === selectData.select.value)) return;
+    if (!selectData || !selectData.actions.length) return;
+    if (!selectData.actions.find(action => action === selectData.select.value)) return;
     listInfo.pet = selectData.select.value.match(/\w+$/);
-    if(!await isInList(listInfo)) addItem(listInfo);
+    if (!await isInList(listInfo)) addItem(listInfo);
 }
 
 const onInventoryPopup = async ([{ removedNodes }]) => {
     const submit = document.querySelector('.invitem-submit');
-    if(!submit || removedNodes.length !== 2) return;
+    if (!submit || removedNodes.length !== 2) return;
     const item = getIdFromImageSource(document.getElementById('invItemImg').style.backgroundImage);
-    const listInfo = {id: await listOf(item), item};
-    if(!listInfo.id) return;
+    const listInfo = { id: await listOf(item), item };
+    if (!listInfo.id) return;
     const selectData = await handleInventorySelect(listInfo.id);
-    if(selectData?.actions) addBorder(listInfo.id, document.getElementById('invItemImg'));
+    if (selectData?.actions) addBorder(listInfo.id, document.getElementById('invItemImg'));
     submit.addEventListener('click', async () => onInventorySubmit(selectData, listInfo));
 };
 
 const orderInventory = highlightedItems => {
-    if(!sortItems.inventory) return;
+    if (!sortItems.inventory) return;
     const parent = document.getElementById('tableRowsId');
     for (let count = 0; count < highlightedItems.length; count++)
         parent.children[count].insertAdjacentElement('beforeBegin', highlightedItems[count].offsetParent);
 }
 
 const onInventory = () => {
-    const inventoryObserver = new MutationObserver(async ([{removedNodes}]) => {
-        if(removedNodes.length === 1) return;
+    const inventoryObserver = new MutationObserver(async ([{ removedNodes }]) => {
+        if (removedNodes.length === 1) return;
         orderInventory(await highlightItems());
     });
-    inventoryObserver.observe(document.getElementById('invDisplay'), {subtree: true, childList: true});
+    inventoryObserver.observe(document.getElementById('invDisplay'), { subtree: true, childList: true });
     const popupObserver = new MutationObserver(onInventoryPopup);
-    popupObserver.observe(document.querySelector('#invDesc .popup-body__2020'), {childList: true});
+    popupObserver.observe(document.querySelector('#invDesc .popup-body__2020'), { childList: true });
 }
 
 const moveToTopInTable = (cell, rows, count, maxColumns) => {
@@ -296,35 +298,35 @@ const moveToTopInTable = (cell, rows, count, maxColumns) => {
 }
 
 const onUserShop = images => {
-    if(!sortItems.usershops) return;
+    if (!sortItems.usershops) return;
     const rows = document.querySelectorAll('hr[noshade] ~ table[align="center"] tr');
     let count = 0;
     images.forEach(img => {
         const cell = img.offsetParent;
-        if(!cell.offsetParent.cellPadding) return;
+        if (!cell.offsetParent.cellPadding) return;
         moveToTopInTable(cell, rows, count, 5);
         count++;
     });
 }
 
 const onSDB = () => {
-    if(!sortItems.sdb) return;
+    if (!sortItems.sdb) return;
     const parent = document.querySelector('.sdb-table tbody');
     const observer = new MutationObserver(async () => {
         const images = await highlightItems(parent);
         const firstRow = document.getElementsByClassName('sdb-row-odd')[0];
         observer.disconnect();
-        for(let i = 0; i < images.length; i++) {
+        for (let i = 0; i < images.length; i++) {
             firstRow.insertAdjacentElement('beforebegin', parentElements(images[i], 4));
         }
-        observer.observe(parent, {childList: true});
+        observer.observe(parent, { childList: true });
     });
-    observer.observe(parent, {childList: true});
+    observer.observe(parent, { childList: true });
 }
 
 const orderTradingPreviews = images => {
-    if(!sortItems.tradingPost) return;
-    images.forEach(image => 
+    if (!sortItems.tradingPost) return;
+    images.forEach(image =>
         parentElements(image, 3)
             .querySelector('.gap-4')
             .insertAdjacentElement('beforeBegin', parentElements(image, 2))
@@ -332,17 +334,17 @@ const orderTradingPreviews = images => {
 }
 
 const orderTradingPopups = (images, parent) => {
-    if(!sortItems.tradingPost) return;
+    if (!sortItems.tradingPost) return;
     images.forEach(img => parent.prepend(parentElements(img, 2)));
 }
 
 const orderTradingLot = (images) => {
-    if(!sortItems.tradingPost) return;
+    if (!sortItems.tradingPost) return;
     images.forEach(img => parentElements(img, 3).prepend(parentElements(img, 2)));
 }
 
 const orderTradingInventory = (images, parent) => {
-    if(!sortItems.tradingPost) return;
+    if (!sortItems.tradingPost) return;
     images.forEach(img => parent.appendChild(img.parentElement));
 }
 
@@ -365,30 +367,30 @@ const tradingPost = {
 }
 
 const onTradingPost = async () => {
-    const observer = new MutationObserver(async ([{target}]) => {
+    const observer = new MutationObserver(async ([{ target }]) => {
         Object.entries(tradingPost).forEach(async ([className, data]) => {
-            if(target.classList.contains(className)) {
+            if (target.classList.contains(className)) {
                 const parent = data.parent ? document.querySelector(data.parent) : null;
                 const highlighted = await highlightItems(parent);
                 data.order(highlighted, parent);
             }
         })
     });
-    observer.observe(document.querySelector('.tp-main-content'), {childList: true, subtree: true});
+    observer.observe(document.querySelector('.tp-main-content'), { childList: true, subtree: true });
 }
 
 const orderHomepage = highlighted => {
-    if(!sortItems.homepage) return;
+    if (!sortItems.homepage) return;
     const parent = document.getElementsByClassName('petCare-itemgrid')[0];
     const petName = document.getElementById('petCareInfoName').textContent;
     highlighted.forEach(async item => {
-        if(await isBeingTracked({id: item.dataset.saahphirelist, pet: petName})) parent.prepend(item);
+        if (await isBeingTracked({ id: item.dataset.saahphirelist, pet: petName })) parent.prepend(item);
         else parent.appendChild(item);
     });
 }
 
 const addItemFromHomepageIfNoError = (target, isHighlighted, mutations) => {
-    if(mutations.some(mutation => [...mutation.addedNodes].some(node => node.classList?.contains('petCare-error')))) return;
+    if (mutations.some(mutation => [...mutation.addedNodes].some(node => node.classList?.contains('petCare-error')))) return;
     addItem({
         id: target.dataset.saahphirelist,
         pet: document.getElementById('petCareInfoName').textContent,
@@ -396,24 +398,24 @@ const addItemFromHomepageIfNoError = (target, isHighlighted, mutations) => {
     });
 }
 
-const addItemFromHomepage = async ([{target}]) => {
+const addItemFromHomepage = async ([{ target }]) => {
     const isHighlighted = await highlightItem(target);
-    if(!isHighlighted) return;
+    if (!isHighlighted) return;
     document.getElementById('petCareUseItem').addEventListener('click', () => {
         const errorObserver = new MutationObserver((mutations) => addItemFromHomepageIfNoError(target, isHighlighted, mutations));
-        errorObserver.observe(document.querySelector('#petCareResult .popup-body__2020'), {childList: true, subtree: true});
+        errorObserver.observe(document.querySelector('#petCareResult .popup-body__2020'), { childList: true, subtree: true });
     })
 }
 
 const onHomepage = async () => {
-    const inventoryObserver = new MutationObserver(async ([{addedNodes}]) => {
-        if(addedNodes.length < 4) return;
+    const inventoryObserver = new MutationObserver(async ([{ addedNodes }]) => {
+        if (addedNodes.length < 4) return;
         const highlighted = await highlightItems(document.querySelector('.petCare-itemgrid'));
         orderHomepage(highlighted);
     });
-    inventoryObserver.observe(document.querySelector('.petCareList .popup-body__2020'), {childList: true})
+    inventoryObserver.observe(document.querySelector('.petCareList .popup-body__2020'), { childList: true })
     const itemObserver = new MutationObserver(addItemFromHomepage);
-    itemObserver.observe(document.querySelector('#petCareItemImg'), {attributeFilter: ['style']})
+    itemObserver.observe(document.querySelector('#petCareItemImg'), { attributeFilter: ['style'] })
 }
 
 const pages = [
@@ -427,23 +429,23 @@ const pages = [
 const init = async () => {
     const href = window.location.href;
     if (await isDue()) requestUpdate();
-/* 
-    ☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂
-      This userscript can be exploited by using it to restock on rare
-      books and foods. Doing so is AGAINST THE RULES, both for Neopets
-      and itemDB. Don't change the code to allow yourself to do that!
-      (Unlicensed scripts have no rules, but I'm judging you so hard.)
-    ☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂
-*/
-    if(href.match('type=shop')) return;
+    /* 
+        ☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂
+          This userscript can be exploited by using it to restock on rare
+          books and foods. Doing so is AGAINST THE RULES, both for Neopets
+          and itemDB. Don't change the code to allow yourself to do that!
+          (Unlicensed scripts have no rules, but I'm judging you so hard.)
+        ☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂
+    */
+    if (href.match('type=shop')) return;
     document.head.insertAdjacentHTML('beforeEnd', borderCSS);
-    if(Object.values(lists).some(info => href.match(info.url))) {
+    if (Object.values(lists).some(info => href.match(info.url))) {
         onList();
         return;
     }
     const images = await highlightItems();
     pages.some(([url, func]) => {
-        if(href.match(url)) func(images);
+        if (href.match(url)) func(images);
     });
 }
 
@@ -566,7 +568,7 @@ tr[bgcolor]:has(a[href*="randomfriend"]):has(.saahphire-bft-to-do) {
 }
 </style>`;
 
-(function() {
+(function () {
     'use strict';
     init();
 })();
