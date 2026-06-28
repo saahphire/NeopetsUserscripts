@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Book and Food Tracker
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.4
+// @version      1.1.0
 // @description  Adds a border to books/gourmet food a tracked pet hasn't read/eaten yet. Also moves them to the top in various pages. Updated for new SDB.
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -25,6 +25,10 @@
 •:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•:•:•:•:•:•:•:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•.•:•:•:•:•:•:•:•:•.•:•:•.•:•.••:•.•:•.••:
 ........................................................................................................................
 ☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦
+    Update Jun 28th, 2026: Up until now, this script wasn't tracking items read/eaten in your SDB. If you've done that
+    before today, please visit all your lists so the script can get back on track (see list URLs at the end of this
+    comment). Sorry about that, I totally forgot!
+
     This script uses the itemDB API to retrieve the list of eligible books and gourmet food. itemDB has updated their
     API in March 2026, and now requires an userscript's user to visit https://itemdb.com.br once every 24 hours if
     they're not logged in, or once every 7 days if they are. In practice, many people have reported the 24h timer to not
@@ -269,7 +273,7 @@ const onInventoryPopup = async ([{ removedNodes }]) => {
     const listInfo = { id: await listOf(item), item };
     if (!listInfo.id) return;
     const selectData = await handleInventorySelect(listInfo.id);
-    if (selectData?.actions) addBorder(listInfo.id, document.getElementById('invItemImg'));
+    if (selectData?.actions) highlightItem(document.getElementById('invItemImg'));
     submit.addEventListener('click', async () => onInventorySubmit(selectData, listInfo));
 };
 
@@ -309,19 +313,47 @@ const onUserShop = images => {
     });
 }
 
-const onSDB = () => {
+const sortSDB = async (observer, parent) => {
     if (!sortItems.sdb) return;
-    const parent = document.querySelector('.sdb-table tbody');
-    const observer = new MutationObserver(async () => {
-        const images = await highlightItems(parent);
-        const firstRow = document.getElementsByClassName('sdb-row-odd')[0];
-        observer.disconnect();
-        for (let i = 0; i < images.length; i++) {
-            firstRow.insertAdjacentElement('beforebegin', parentElements(images[i], 4));
-        }
-        observer.observe(parent, { childList: true });
-    });
+    const images = await highlightItems(parent);
+    const firstRow = document.getElementsByClassName('sdb-row-odd')[0];
+    observer.disconnect();
+    for (let i = 0; i < images.length; i++) {
+        firstRow.insertAdjacentElement('beforebegin', parentElements(images[i], 4));
+    }
     observer.observe(parent, { childList: true });
+}
+
+const onSDBOkButtonPressed = async (listInfo, tableObserver, parent) => {
+    const selectedValue = [...document.querySelectorAll('.sdb-table select')].filter(select => select.selectedIndex !== 0)[0].selectedOptions[0].value;
+    listInfo.pet = selectedValue.match(new RegExp(`pet:${listInfo.id === 'gourmet' ? 'feed' : 'read'}:(\\w+)`))?.[1];
+    if(!listInfo.pet) return;
+    if (!await isInList(listInfo)) {
+        addItem(listInfo);
+        sortSDB(tableObserver, parent);
+    }
+}
+
+const watchSDB = (tableObserver, parent) => {
+    const observer = new MutationObserver(async (mutations) => {
+        if(!mutations.some(a => a.addedNodes[0]?.id === 'sdb__popup')) return;
+        const okButton = document.querySelector('#sdb__popup .button-green__2020');
+        if(!okButton) return;
+        const image = document.querySelector('.sdb-confirm-body img');
+        const item = getIdFromImageSource(image.src);
+        const listInfo = { id: await listOf(item), item };
+        if (!listInfo.id) return;
+        highlightItem(image);
+        okButton.addEventListener('click', () => onSDBOkButtonPressed(listInfo, tableObserver, parent));
+    });
+    observer.observe(document.body, {childList: true});
+}
+
+const onSDB = () => {
+    const parent = document.querySelector('.sdb-table tbody');
+    const observer = new MutationObserver(async () => sortSDB(observer, parent));
+    observer.observe(parent, { childList: true });
+    watchSDB(observer, parent);
 }
 
 const orderTradingPreviews = images => {
