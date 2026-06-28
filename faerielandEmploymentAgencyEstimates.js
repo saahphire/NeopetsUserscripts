@@ -11,7 +11,7 @@
 // @match        *://*.neopets.com/faerieland/employ/employment.phtml*voucher=basic*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=neopets.com
 // @license      Unlicense
-// @require      https://update.greasyfork.org/scripts/567036/1759045/itemDB%20Fetch%20Lib.js
+// @require      https://update.greasyfork.org/scripts/567036/1862213/itemDB%20Fetch%20Lib.js
 // ==/UserScript==
 
 /*
