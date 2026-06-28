@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Quick Stock Pricer
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.5.0
+// @version      1.5.1
 // @description  Adds itemDB prices to your Quick Stock page. Updated for the API changes and the new Quick Stock!
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
