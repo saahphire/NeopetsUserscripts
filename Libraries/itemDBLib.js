@@ -8,7 +8,7 @@
     (example: https://itemdb.com.br/api/v1/items/negg) as url, your script's name for UI purposes in case
     authorization fails, and your request's stringified body IF it's a POST request.
 
-    Version: 1.0.0
+    Version: 1.1.0
 
     ✦ ⌇ saahphire
 ☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦
@@ -27,7 +27,7 @@ const createItemDBUnauthorizedDialog = () => {
 
 const createItemDBUnauthorizedDialogText = (scriptName) => {
     const p = document.createElement('p');
-    p.textContent = `Your itemDB authorization has expired! You need to visit it every 24 hours (logged-in) or 14 days (logged in) so the script ${scriptName} can work.`;
+    p.textContent = `Your itemDB authorization has expired! You need to visit it every 24 hours (logged-in) or 14 days (logged in) so the script ${scriptName} can work. Once you do, please refresh this page.`;
     return p;
 }
 
@@ -39,39 +39,55 @@ const createItemDBUnauthorizedButton = (text, callback) => {
     return button;
 }
 
-const fillItemDBUnauthorizedDialog = (scriptName, dialog, body) => {
+const fillItemDBUnauthorizedDialog = (scriptName, dialog) => {
     dialog.appendChild(createItemDBUnauthorizedDialogText(scriptName));
     dialog.appendChild(createItemDBUnauthorizedButton('✖️ Close', () => {
         dialog.close();
     }));
-    const goToItemDB = 
     dialog.appendChild(createItemDBUnauthorizedButton('🔗 Go to itemDB', () => {
         dialog.close();
         window.open('https://itemdb.com.br', '_blank').focus();
-        setTimeout(() => fetchItemDb(url, scriptName, body), 2000);
     }));
 }
 
-const onUnauthorized = (scriptName, url, body) => {
-    if(!hasCreatedItemDBUnauthorizedDialog) {
+const onUnauthorized = (scriptName) => {
+    if (!hasCreatedItemDBUnauthorizedDialog) {
         hasCreatedItemDBUnauthorizedDialog = true;
         document.head.insertAdjacentHTML('beforeend', itemDBCSS);
         const dialog = createItemDBUnauthorizedDialog();
-        fillItemDBUnauthorizedDialog(scriptName, dialog, body);
+        fillItemDBUnauthorizedDialog(scriptName, dialog);
         document.body.appendChild(dialog);
     }
     document.getElementsByClassName('itemDB-rejection-modal')[0].showModal();
 }
 
-const fetchItemDb = (url, scriptName, body) =>  new Promise((res, rej) => {
-    fetch(url, {credentials: 'include', method: body ? 'POST' : 'GET', body, headers: { 'Content-Type': 'application/json' }})
+const fetchItemDb = (url, scriptName, body) => new Promise((res, rej) => {
+    const headers = { 'Content-Type': 'application/json' };
+    fetch(url, { credentials: 'include', method: body ? 'POST' : 'GET', body, headers })
         .then(response => {
-            if(response.status === 200) return response.json();
-            if(response.status === 401) onUnauthorized(scriptName, url, body);
+            if (response.status === 200) return response.json();
+            if (response.status === 401) {
+                onUnauthorized(scriptName);
+                throw new Error('Unauthorized by itemDB');
+            }
             else throw new Error(response.status, response.json().error);
         })
         .then(json => res(json))
-        .catch(e => console.error(e));
+        .catch(e => {
+            if (e instanceof TypeError && e.message === "Failed to fetch") {
+                console.log('Possible CORS issue detected. If you didn\'t get a CORS error, please report this to https://github.com/saahphire/NeopetsUserscripts/issues or https://greasyfork.org/en/scripts/567036-itemdb-fetch-lib/feedback');
+                GM_xmlhttpRequest({
+                    method: 'GET',
+                    url,
+                    headers,
+                    onload: (response) => (response.status === 200) ? res(JSON.parse(response.responseText)) : rej(res)
+                });
+            }
+            else {
+                console.error(e);
+                rej(e);
+            }
+        });
 });
 
 const itemDBCSS = `<style>
