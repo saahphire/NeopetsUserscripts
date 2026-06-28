@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: TVW Prize Shop Pricer
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.0
+// @version      1.0.1
 // @description  Uses itemDB's database to estimate the neopoint value (and NP per point) of each prize
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
