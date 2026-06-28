@@ -13,7 +13,7 @@
 // @license      Unlicense
 // @grant        GM.setValue
 // @grant        GM.getValue
-// @require      https://update.greasyfork.org/scripts/567036/1759045/itemDB%20Fetch%20Lib.js
+// @require      https://update.greasyfork.org/scripts/567036/1862213/itemDB%20Fetch%20Lib.js
 // ==/UserScript==
 
 /*
