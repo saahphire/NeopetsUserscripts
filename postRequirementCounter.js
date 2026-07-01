@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Post Requirement Counter
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.4.1
+// @version      1.4.2
 // @description  Adds a counter to topics with a set string in their names, that counts posts including given images or strings as long as they're from the current month.
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -64,7 +64,7 @@ const settings = {
     // The number of posts with required images/strings needed to meet your requirement (will change the emoji in neomail)
     requirementCount: 25,
     // A list of urls of images a post must have to meet a requirement. Only one url in the entire list needs to match.
-    requiredImages: ['https://images.neopets.com/neoboards/smilies/earth.gif'],
+    requiredImages: ['https://images.neopets.com/neoboards/smilies/flower.gif'],
     // A list of strings (words/phrases) a post must have to meet a requirement. Only one string needs to match, but if you also have required images, the post must have at least one image and one string to pass.
     requiredStrings: [],
     // A list of urls of images that will add a post to the leaderboard count. Only one url needs to match.
@@ -267,6 +267,7 @@ const populateModal = async (modal, users, isLeaderboard) => {
         modal.appendChild(button);
         const validChildren = [...list.children].filter(child => !child.classList.contains('unmet-requirements'));
         button.addEventListener('click', () => {
+            if(!validChildren.length) return window.alert('No users have met the requirements!');
             validChildren.forEach(child => child.classList.remove('saahphire-post-requirements-chosen'));
             validChildren[Math.floor(Math.random() * validChildren.length)].classList.add('saahphire-post-requirements-chosen');
         });
