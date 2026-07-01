@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Post Requirement Counter
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.4.0
+// @version      1.4.1
 // @description  Adds a counter to topics with a set string in their names, that counts posts including given images or strings as long as they're from the current month.
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -64,7 +64,7 @@ const settings = {
     // The number of posts with required images/strings needed to meet your requirement (will change the emoji in neomail)
     requirementCount: 25,
     // A list of urls of images a post must have to meet a requirement. Only one url in the entire list needs to match.
-    requiredImages: ['https://images.neopets.com/neoboards/smilies/flower.gif'],
+    requiredImages: ['https://images.neopets.com/neoboards/smilies/earth.gif', 'https://images.neopets.com/neoboards/smilies/virtupets.gif', 'https://images.neopets.com/neoboards/smilies/tyrannia.gif', 'https://images.neopets.com/neoboards/smilies/terror.gif', 'https://images.neopets.com/neoboards/smilies/shenkuu.gif', 'https://images.neopets.com/neoboards/smilies/rooisland.gif', 'https://images.neopets.com/neoboards/smilies/moltara.gif', 'https://images.neopets.com/neoboards/smilies/mystery.gif', 'https://images.neopets.com/neoboards/smilies/meridell.gif', 'https://images.neopets.com/neoboards/smilies/maraqua.gif', 'https://images.neopets.com/neoboards/smilies/lostdesert.gif', 'https://images.neopets.com/neoboards/smilies/kreludor.gif', 'https://images.neopets.com/neoboards/smilies/krawkisland.gif', 'https://images.neopets.com/neoboards/smilies/kikolake.gif', 'https://images.neopets.com/neoboards/smilies/haunted.gif', 'https://images.neopets.com/neoboards/smilies/faerieland.gif', 'https://images.neopets.com/neoboards/smilies/darigan.gif', 'https://images.neopets.com/neoboards/smilies/dacardia.gif', 'https://images.neopets.com/neoboards/smilies/brightvale.gif', 'https://images.neopets.com/neoboards/smilies/altador.gif'],
     // A list of strings (words/phrases) a post must have to meet a requirement. Only one string needs to match, but if you also have required images, the post must have at least one image and one string to pass.
     requiredStrings: [],
     // A list of urls of images that will add a post to the leaderboard count. Only one url needs to match.
@@ -265,9 +265,10 @@ const populateModal = async (modal, users, isLeaderboard) => {
         Object.entries(users).filter(user => user[1].required && user[1].required > 0).forEach(entry => createListItem(entry, 'required', list));
         const button = create('button', { textContent: 'Pick Random' });
         modal.appendChild(button);
+        const validChildren = [...list.children].filter(child => !child.classList.contains('unmet-requirements'));
         button.addEventListener('click', () => {
-            [...list.children].forEach(child => child.classList.remove('saahphire-post-requirements-chosen'));
-            list.children[Math.floor(Math.random() * list.children.length)].classList.add('saahphire-post-requirements-chosen');
+            validChildren.forEach(child => child.classList.remove('saahphire-post-requirements-chosen'));
+            validChildren[Math.floor(Math.random() * validChildren.length)].classList.add('saahphire-post-requirements-chosen');
         });
     }
 }
