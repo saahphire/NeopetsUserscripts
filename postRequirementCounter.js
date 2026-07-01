@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Post Requirement Counter
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.3.0
+// @version      1.4.0
 // @description  Adds a counter to topics with a set string in their names, that counts posts including given images or strings as long as they're from the current month.
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -272,9 +272,11 @@ const populateModal = async (modal, users, isLeaderboard) => {
     }
 }
 
-const createLeaderboard = (users) => {
+const createLeaderboard = async (users) => {
     const modal = create('dialog', { id: 'saahphire-post-requirement-modal' });
     const input = create('input', { type: 'checkbox', id: 'saahphire-post-requirements-switch' });
+    input.checked = await GM.getValue('modalIsRequirements', false);
+    input.addEventListener('click', () => GM.setValue('modalIsRequirements', input.checked));
     modal.appendChild(input);
     populateModal(modal, users, true);
     populateModal(modal, users);
