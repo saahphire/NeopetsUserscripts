@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Post Requirement Counter
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.2.2
+// @version      1.3.0
 // @description  Adds a counter to topics with a set string in their names, that counts posts including given images or strings as long as they're from the current month.
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -236,9 +236,20 @@ const parsePosts = async (users) => {
     return users;
 }
 
-const createListItem = (entry, listType, list) => list.appendChild(create('li', { textContent: `${entry[0]}: ${entry[1][listType]}` }));
+const unmetEntryClass = (entry, listType) => listType === 'required' && entry[1].required < settings.requirementCount ? {'class': 'unmet-requirements'} : undefined;
 
-const populateModal = (modal, users, isLeaderboard) => {
+const createListItem = (entry, listType, list) => list.appendChild(create('li', Object.assign({ textContent: `${entry[0]}: ${entry[1][listType]}` }, unmetEntryClass(entry, listType) )));
+
+const createRequirementsToggle = async () => {
+    const input = create('input', { type: 'checkbox' });
+    input.checked = await GM.getValue('unmet', false);
+    input.addEventListener('click', () => GM.setValue('unmet', input.checked));
+    const label = create('label', { textContent: 'Toggle unmet requirements' });
+    label.appendChild(input);
+    return label;
+}
+
+const populateModal = async (modal, users, isLeaderboard) => {
     const className = isLeaderboard ? 'saahphire-post-requirements-leaderboard' : 'saahphire-post-requirements-requirements';
     const leaderboardLabel = create('label', { textContent: `Switch to ${isLeaderboard ? 'Requirements' : 'Leaderboard'}`, 'for': 'saahphire-post-requirements-switch', 'class': className });
     modal.appendChild(leaderboardLabel);
@@ -250,7 +261,8 @@ const populateModal = (modal, users, isLeaderboard) => {
         Object.entries(users).sort((a, b) => b[1].leaderboard - a[1].leaderboard).forEach(entry => createListItem(entry, 'leaderboard', list));
     }
     else {
-        Object.entries(users).filter(user => user[1].required && user[1].required > settings.requirementCount).forEach(entry => createListItem(entry, 'required', list));
+        h3.insertAdjacentElement('afterend', await createRequirementsToggle());
+        Object.entries(users).filter(user => user[1].required && user[1].required > 0).forEach(entry => createListItem(entry, 'required', list));
         const button = create('button', { textContent: 'Pick Random' });
         modal.appendChild(button);
         button.addEventListener('click', () => {
@@ -337,6 +349,14 @@ const css = `<style>
     .saahphire-post-requirements-chosen {
         font-weight: bold;
         color: teal;
+    }
+
+    .unmet-requirements {
+        display: none;
+    }
+
+    h3 + label:has(input:checked) ~ ul .unmet-requirements {
+        display: list-item;
     }
 }
 </style>`;
