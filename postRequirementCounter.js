@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Post Requirement Counter
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.2.0
+// @version      1.2.1
 // @description  Adds a counter to topics with a set string in their names, that counts posts including given images or strings as long as they're from the current month.
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -62,7 +62,7 @@ const settings = {
     // The last day of the month in which people can post things and be counted
     lastValidDay: 25,
     // The number of posts with required images/strings needed to meet your requirement (will change the emoji in neomail)
-    requirementCount: 12,
+    requirementCount: 25,
     // A list of urls of images a post must have to meet a requirement. Only one url in the entire list needs to match.
     requiredImages: ['https://images.neopets.com/neoboards/smilies/flower.gif'],
     // A list of strings (words/phrases) a post must have to meet a requirement. Only one string needs to match, but if you also have required images, the post must have at least one image and one string to pass.
@@ -114,7 +114,7 @@ const newMonthCleanup = async () => {
     const currentMonth = new Date().toLocaleDateString('en-GB', {month: 'long'});
     const month = await GM.getValue('month');
     if(month !== currentMonth) {
-        GM.setValue('users', {});
+        await GM.setValue('users', {});
         GM.setValue('month', currentMonth);
     }
 }
