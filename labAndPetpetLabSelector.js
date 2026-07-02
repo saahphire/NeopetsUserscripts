@@ -1,14 +1,14 @@
 // ==UserScript==
 // @name         Neopets: Lab and Petpet Lab Selector
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.3
-// @description  I tried a bunch of scripts that said they did this but none worked. Allows you to favorite pets and petpets and displays them separately. Optionally hides all other pets.
+// @version      2.0.0
+// @description  Allows you to favorite pets and petpets and displays them separately. Optionally hides unfavorited and removes Lab prompt. Updated for new Lab!
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
 // @homepage     https://github.com/saahphire/NeopetsUserscripts
 // @downloadURL  https://github.com/saahphire/NeopetsUserscripts/blob/main/labAndPetpetLabSelector.js
 // @updateURL    https://github.com/saahphire/NeopetsUserscripts/blob/main/labAndPetpetLabSelector.js
-// @match        *://*.neopets.com/lab2.phtml*
+// @match        *://*.neopets.com/lab.phtml*
 // @match        *://*.neopets.com/petpetlab.phtml
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=neopets.com
 // @license      Unlicense
@@ -26,6 +26,7 @@
     - Adds a heart icon to each pet and petpet. Clicking it will toggle that pet/petpet as a favorite
     - Displays favorites separately from other pets/petpets
     - Optionally hides all other pets/petpets
+    - Optionally bypasses the need to press "Yes!  I want to try the ray! (and I am aware of the consequences)"
 
     ✦ ⌇ saahphire
 ☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦
@@ -33,8 +34,11 @@
 •:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•:•:•:•:•:•:•:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•.•:•:•:•:•:•:•:•:•.•:•:•.•:•.••:•.•:•.••:
 */
 
+// Set to false if you don't want this script to bypass the "Yes!  I want to try the ray!(and I am aware of the consequences)" button.
+const bypassLabPrompt = true;
+
 const addShowAllButton = async () => {
-    const isPetpet = !window.location.href.endsWith('lab2.phtml');
+    const isPetpet = !window.location.href.endsWith('lab.phtml');
     const showAll = await GM.getValue(`${isPetpet ? 'pet' : ''}pet-show-all`, true);
     const input = document.createElement('input');
     input.type = 'checkbox';
@@ -60,7 +64,10 @@ const createPetFigure = petName => {
 
 const onPetRadioChange = (e) => {
     const petName = e.target.value;
-    document.querySelector(`[name="chosen"][value="${petName}"]`).checked = true;
+    const select = document.getElementsByClassName('lab-select')[0];
+    select.selectedIndex = [...select.options].findIndex(opt => opt.value === petName);
+    const event = new Event('change', { bubbles: true });
+    select.dispatchEvent(event);
 }
 
 const createRadio = (individualName, callback) => {
@@ -74,21 +81,16 @@ const createRadio = (individualName, callback) => {
     return label;
 }
 
-const addPetToFavoriteList = (petName) => {
-    const container = document.getElementsByClassName('saahphire-favorite-lab-list')[0];
-    const li = document.createElement('li');
-    const button = createButton(petName, false, addPetToFavoriteList, onUncheckPetFavorite);
-    button.querySelector('input').checked = true;
-    const label = createRadio(petName, onPetRadioChange);
-    label.appendChild(createPetFigure(petName));
-    li.appendChild(label);
-    li.appendChild(button);
-    container.appendChild(li);
+const onChangeFavorite = (individual, isChecked) => {
+    const li = document.querySelector(`li:has([data-saahphire-lab="${individual}"])`);
+    const order = parseInt(li.dataset.order);
+    const listItems = [...document.querySelectorAll(`.saahphire-lab-${isChecked ? '' : 'un'}favorites li`)];
+    const next = listItems.findIndex(f => parseInt(f.dataset.order) > order);
+    if(next !== -1) listItems[next].insertAdjacentElement('beforebegin', li);
+    else document.getElementsByClassName(`saahphire-lab-${isChecked ? '' : 'un'}favorites`)[0].appendChild(li);
 }
 
-const onUncheckPetFavorite = (petName) => document.querySelector(`.saahphire-favorite-lab-list li:has([data-saahphire-lab="${petName}"])`).remove();
-
-const onPressFavoriteButton = async (e, isPetpet, cbChecked, cbUnchecked) => {
+const onPressFavoriteButton = async (e, isPetpet) => {
     const toggle = e.target;
     const individual = toggle.dataset.saahphireLab;
     document.querySelectorAll(`[data-saahphire-lab="${individual}"]`).forEach(input => {
@@ -98,44 +100,25 @@ const onPressFavoriteButton = async (e, isPetpet, cbChecked, cbUnchecked) => {
     const favorites = await GM.getValue(favoritesKey, []);
     if(toggle.checked) {
         GM.setValue(favoritesKey, favorites.concat([individual]));
-        cbChecked(individual);
+        onChangeFavorite(individual, true);
     }
     else {
         GM.setValue(favoritesKey, favorites.filter(f => f !== individual));
-        cbUnchecked(individual);
+        onChangeFavorite(individual, false);
     }
 }
 
-const createFavorites = async () => {
-    const container = document.createElement('ul');
-    container.classList.add('saahphire-favorite-lab-list');
-    document.querySelector('form[action="process_lab2.phtml"]').insertAdjacentElement('beforebegin', container);
-    const favorites = await GM.getValue('pet-favorites', []);
-    favorites.forEach(favorite => addPetToFavoriteList(favorite));
-}
-
-const createButton = (individual, isPetpet, callbackOnChecked, callbackOnUnchecked) => {
+const createButton = (individual, isPetpet) => {
     const input = document.createElement('input');
     input.type = 'checkbox';
     input.classList.add('saahphire-favorite-lab-toggle');
     input.dataset.saahphireLab = individual;
-    input.addEventListener('click', e => onPressFavoriteButton(e, isPetpet, callbackOnChecked, callbackOnUnchecked));
+    input.addEventListener('click', e => onPressFavoriteButton(e, isPetpet));
     const label = document.createElement('label');
     label.classList.add('saahphire-favorite-lab-button');
     label.textContent = `Favorite ${individual}`;
     label.appendChild(input);
     return label;
-}
-
-const addButtonsToPets = async () => {
-    const favorites = await GM.getValue('pet-favorites', []);
-    document.querySelectorAll('#bxlist li div').forEach((pet) => {
-        const petName = pet.getElementsByTagName('img')[0].src.match(/\/cpn\/(\w+)\//)[1];
-        const button = createButton(petName, false, addPetToFavoriteList, onUncheckPetFavorite);
-        pet.getElementsByTagName('input')[0].insertAdjacentElement('afterEnd', button);
-        if(favorites.find(f => f === petName)) button.querySelector('input').checked = true;
-    })
-    
 }
 
 const createPetpetFigure = (image, petpetName, owner) => {
@@ -158,69 +141,91 @@ const onPetpetRadioChange = (e) => {
     selectPetpet(select);
 }
 
-const onChangePetpetFavorite = (owner, isChecked) => {
-    console.log(`${isChecked}, ${owner}`);
-    const li = document.querySelector(`li:has([data-saahphire-lab="${owner}"])`);
-    const order = parseInt(li.dataset.order);
-    const listItems = [...document.querySelectorAll(`.saahphire-lab-${isChecked ? '' : 'un'}favorites li`)];
-    const next = listItems.findIndex(f => parseInt(f.dataset.order) > order);
-    if(next !== -1) listItems[next].insertAdjacentElement('beforebegin', li);
-    else document.getElementsByClassName(`saahphire-lab-${isChecked ? '' : 'un'}favorites`)[0].appendChild(li);
-}
-
-const createPetpet = (petpetDiv, owner, isFavorite, i)  => {
-    const image = petpetDiv.getElementsByTagName('img')[0];
-    const petpetName = image.alt;
+const createIndividual = (individual, isFavorite, i, label, figure, ownerImg) => {
     const li = document.createElement('li');
-    const label = createRadio(owner, onPetpetRadioChange);
     li.appendChild(label);
-    label.appendChild(createPetpetFigure(image, petpetName, owner));
-    const ownerImg = document.createElement('img');
-    ownerImg.src = `https://pets.neopets.com/cpn/${owner}/1/1.png`;
-    ownerImg.classList.add('saahphire-lab-owner');
-    label.appendChild(ownerImg);
-    const button = createButton(owner, true, (owner) => onChangePetpetFavorite(owner, true), (owner) => onChangePetpetFavorite(owner, false));
+    label.appendChild(figure);
+    if(ownerImg) label.appendChild(ownerImg);
+    const button = createButton(individual, ownerImg !== undefined);
     if(isFavorite) button.querySelector('input').checked = true;
     li.appendChild(button);
     li.dataset.order = i;
     return li;
 }
 
-const createPetpets = async () => {
+const createPetpet = (petpetDiv, owner, isFavorite, i)  => {
+    const image = petpetDiv.getElementsByTagName('img')[0];
+    const petpetName = image.alt;
+    const label = createRadio(owner, onPetpetRadioChange);
+    const figure = createPetpetFigure(image, petpetName, owner);
+    const ownerImg = document.createElement('img');
+    ownerImg.src = `https://pets.neopets.com/cpn/${owner}/1/1.png`;
+    ownerImg.classList.add('saahphire-lab-owner');
+    return createIndividual(owner, isFavorite, i, label, figure, ownerImg);
+}
+
+const createPet = (petName, isFavorite, i)  => {
+    const label = createRadio(petName, onPetRadioChange);
+    const figure = createPetFigure(petName);
+    return createIndividual(petName, isFavorite, i, label, figure);
+}
+
+const createPetpetLists = (favorites, favContainer, unfavContainer) => {
+    document.querySelectorAll('.ppl-petpet').forEach((petpet, i) => {
+        const owner = petpet.id.slice(3);
+        const isFavorite = favorites.includes(owner);
+        const element = createPetpet(petpet, owner, isFavorite, i);
+        (isFavorite ? favContainer : unfavContainer).appendChild(element);
+    });
+}
+
+const createPetLists = (favorites, favContainer, unfavContainer) => {
+    [...document.getElementsByClassName('lab-select')[0].options].forEach((opt, i) => {
+        if(!opt.value?.length) return;
+        const isFavorite = favorites.includes(opt.value);
+        const element = createPet(opt.value, isFavorite, i);
+        (isFavorite ? favContainer : unfavContainer).appendChild(element);
+    });
+}
+
+const createLists = async (mutationRecords) => {
+    if(mutationRecords && mutationRecords.length < 7) return;
+    const pageType = mutationRecords ? 'pet' : 'petpet';
     const container = document.createElement('div');
-    container.classList.add('saahphire-favorite-lab-list', 'petpet');
-    document.getElementsByClassName('ppl-petpet')[0].insertAdjacentElement('beforebegin', container);
+    container.classList.add('saahphire-favorite-lab-list', pageType);
+    const sibling = mutationRecords ? 'lab-as' : 'ppl-petpet';
+    document.getElementsByClassName(sibling)[0].insertAdjacentElement('beforebegin', container);
     const favContainer = document.createElement('ul');
     favContainer.classList.add('saahphire-lab-favorites');
     container.appendChild(favContainer);
     const unfavContainer = document.createElement('ul');
     unfavContainer.classList.add('saahphire-lab-unfavorites');
     container.appendChild(unfavContainer);
-    const favorites = await GM.getValue('petpet-favorites', []);
-    document.querySelectorAll('.ppl-petpet').forEach((petpet, i) => {
-        const owner = petpet.id.slice(3);
-        const isFavorite = favorites.find(f => f === owner);
-        const element = createPetpet(petpet, owner, isFavorite, i);
-        (isFavorite ? favContainer : unfavContainer).appendChild(element);
-    })
+    const favorites = await GM.getValue(`${pageType}-favorites`, []);
+    mutationRecords ? createPetLists(favorites, favContainer, unfavContainer) : createPetpetLists(favorites, favContainer, unfavContainer);
+    addShowAllButton();
 }
 
 const init = () => {
     document.head.insertAdjacentHTML('beforeend', css);
-    const isPetpet = !window.location.href.endsWith('lab2.phtml');
-    if(!isPetpet) {
-        addButtonsToPets();
-        createFavorites();
+    const isPet = window.location.href.match('/lab.phtml');
+    if(isPet) {
+        const introButton = document.getElementsByClassName('lab-intro-btn')[0];
+        const observer = new MutationObserver(createLists);
+        observer.observe(document.getElementsByClassName('lab-content')[0], {childList: true});
+        if(introButton && bypassLabPrompt) introButton.click();
     }
-    else {
-        createPetpets();
-    }
-    addShowAllButton();
+    else createLists();
 }
 
 const css = `<style>
-#bxlist div {
-    position: relative;
+.lab-select-row {
+    flex-direction: column;
+    max-width: none!important;
+    & select {
+        max-width: 320px;
+        margin: auto;
+    }
 }
 
 label[for="saahphire-lab-show-all"] {
@@ -234,18 +239,12 @@ div:has(.ppl-petpet) label[for="saahphire-lab-show-all"] {
     margin: 0;
 }
 
-#bxwrap {
-    transform: scaleY(0);
-    transition: transform 0.2s ease-in-out;
-    transform-origin: top;
-}
-
-label:has(#saahphire-lab-show-all:checked) ~ form #bxwrap, label:has(#saahphire-lab-show-all:checked) ~ .petpet .saahphire-lab-unfavorites {
+label:has(#saahphire-lab-show-all:checked) ~ .saahphire-favorite-lab-list .saahphire-lab-unfavorites {
     transform: scaleY(100%);
     max-height: 100vh;
 }
 
-label:has(#saahphire-lab-show-all:checked) ~ .petpet .saahphire-lab-favorites {
+label:has(#saahphire-lab-show-all:checked) ~ .saahphire-favorite-lab-list .saahphire-lab-favorites {
     border-radius: 0.75em 0.75em 0 0;
 }
 
@@ -255,23 +254,12 @@ label:has(#saahphire-lab-show-all:checked) ~ .petpet .saahphire-lab-favorites {
     left: 0;
 }
 
-.saahphire-favorite-lab-list.petpet {
-    & ul {
-        margin: 0;
-        padding: 1em;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5em;
-        justify-content: center;
-        width: 100%;
-    }
-    & figure {
-        align-items: center;
-        width: 120px;
+.saahphire-favorite-lab-list.petpet figure {
+    align-items: center;
+    width: 120px;
 
-        & img {
-            width: 80px;
-        }
+    & img {
+        width: 80px;
     }
 }
 
@@ -290,6 +278,16 @@ label:has(#saahphire-lab-show-all:checked) ~ .petpet .saahphire-lab-favorites {
 .saahphire-favorite-lab-list:has(.saahphire-lab-favorites) {
     border: 0;
     gap: 0;
+}
+
+.saahphire-favorite-lab-list ul {
+    margin: 0;
+    padding: 1em;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5em;
+    justify-content: center;
+    width: 100%;
 }
 
 .saahphire-lab-favorites {
