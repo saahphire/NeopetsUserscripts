@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Neopets: Shop Condenser
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      2.0.0
-// @description  Condenses your shop's view. Removes useless elements.
+// @version      2.1.0
+// @description  Condenses your shop's view. Removes useless elements. Updated for new shop layout!
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
 // @homepage     https://github.com/saahphire/NeopetsUserscripts
