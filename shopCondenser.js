@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Neopets: Shop Condenser
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      2.1.0
-// @description  Condenses your shop's view. Removes useless elements. Updated for new shop layout!
+// @version      2.0.1
+// @description  Condenses your shop's view. Removes useless elements.
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
 // @homepage     https://github.com/saahphire/NeopetsUserscripts
@@ -59,7 +59,7 @@ h1,
 .bsp-subnav__label,
 .mkt-page:has(.market-your-search__input) > b,
 .mkt-page:has(.market-your-search__input) :is(p, center, td:nth-child(2), th:nth-child(2)),
-.mkt-page:has(table[align="center"]) p,
+.mkt-page:has(table[width="530"]) p,
 .mkt-page:has(table[align="center"]) > b,
 .market-your-item__meta {
     display: none!important;
@@ -107,7 +107,7 @@ h1,
         const pinRow = document.getElementsByClassName('market-your-pin-row')[0];
         if(pinRow) submit.appendChild(pinRow);
     }
-    if(!document.getElementsByClassName('market-your-metarow')[0].children.length) document.getElementsByClassName('market-your-toolbar--foot')[0].remove();
+    if(!document.getElementsByClassName('market-your-metarow')[0]?.children.length) document.getElementsByClassName('market-your-toolbar--foot')[0].remove();
     const price = document.getElementsByClassName('market-your__col-cost')[0];
     if(price) price.textContent = 'Price';
 })();
