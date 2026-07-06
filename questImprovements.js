@@ -14,7 +14,8 @@
 // @grant        GM.setValue
 // @grant        GM.getValue
 // @require      https://update.greasyfork.org/scripts/567035/1759343/Neopets%3A%20Shop%20Wizard%20Anchor%20Creator.js
-// @require      https://update.greasyfork.org/scripts/567036/1862213/itemDB%20Fetch%20Lib.js
+// @require      https://update.greasyfork.org/scripts/567036/1868582/itemDB%20Fetch%20Lib.js
+// @grant        GM_xmlhttpRequest
 // ==/UserScript==
 
 /*
