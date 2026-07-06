@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Quest Improvements
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.2.1
+// @version      1.2.2
 // @description  Adds an estimated value for the items requested of you in every quest. Also remembers and fills your Brain Tree answers.
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
