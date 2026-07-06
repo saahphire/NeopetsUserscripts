@@ -8,7 +8,9 @@
     (example: https://itemdb.com.br/api/v1/items/negg) as url, your script's name for UI purposes in case
     authorization fails, and your request's stringified body IF it's a POST request.
 
-    Version: 1.1.0
+    You need to grant GM_xmlhttpRequest so the CORS failsafe will work.
+
+    Version: 1.1.1
 
     ✦ ⌇ saahphire
 ☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦
@@ -75,12 +77,20 @@ const fetchItemDb = (url, scriptName, body) => new Promise((res, rej) => {
         .then(json => res(json))
         .catch(e => {
             if (e instanceof TypeError && e.message === "Failed to fetch") {
-                console.log('Possible CORS issue detected. If you didn\'t get a CORS error, please report this to https://github.com/saahphire/NeopetsUserscripts/issues or https://greasyfork.org/en/scripts/567036-itemdb-fetch-lib/feedback');
+                console.log('Possible CORS issue detected and currently being circumvented. If you didn\'t get a CORS error, please report this to https://github.com/saahphire/NeopetsUserscripts/issues or https://greasyfork.org/en/scripts/567036-itemdb-fetch-lib/feedback');
                 GM_xmlhttpRequest({
-                    method: 'GET',
+                    method: body ? 'POST' : 'GET',
                     url,
                     headers,
-                    onload: (response) => (response.status === 200) ? res(JSON.parse(response.responseText)) : rej(res)
+                    data: body,
+                    onload: (response) => {
+                        if(response.status === 200) res(JSON.parse(response.responseText));
+                        else if(response.status === 401) {
+                            onUnauthorized(scriptName);
+                            throw new Error('Unauthorized by itemDB');
+                        }
+                        else rej(res);
+                    }
                 });
             }
             else {
