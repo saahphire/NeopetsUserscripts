@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Faerieland Employment Agency Estimates
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.1.2
+// @version      1.1.3
 // @description  Gives price estimates for each job that doesn't require a coupon, and calculates your profit.
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -11,7 +11,8 @@
 // @match        *://*.neopets.com/faerieland/employ/employment.phtml*voucher=basic*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=neopets.com
 // @license      Unlicense
-// @require      https://update.greasyfork.org/scripts/567036/1862213/itemDB%20Fetch%20Lib.js
+// @require      https://update.greasyfork.org/scripts/567036/1868582/itemDB%20Fetch%20Lib.js
+// @grant        GM_xmlhttpRequest
 // ==/UserScript==
 
 /*
