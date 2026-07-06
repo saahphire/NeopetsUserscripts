@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Book and Food Tracker
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.1.0
+// @version      1.1.1
 // @description  Adds a border to books/gourmet food a tracked pet hasn't read/eaten yet. Also moves them to the top in various pages. Updated for new SDB.
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
