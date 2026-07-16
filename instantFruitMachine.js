@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Instant Fruit Machine
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.0
+// @version      1.1.0
 // @description  Makes the new Fruit Machine award your prize instantly
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -11,7 +11,6 @@
 // @match        *://*.neopets.com/desert/fruit/index.phtml*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=neopets.com
 // @license      Unlicense
-// @run-at       document-idle
 // ==/UserScript==
 
 /*
@@ -30,5 +29,10 @@
 
 (function() {
     'use strict';
-    window.FruitMachine = null;
+    const interval = setInterval(() => {
+        if(window.FruitMachine) {
+            window.clearInterval(interval);
+            window.FruitMachine = null;
+        }
+    }, 200);
 })();
