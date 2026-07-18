@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Shop Condenser
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      2.0.1
+// @version      2.0.2
 // @description  Condenses your shop's view. Removes useless elements.
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -107,7 +107,7 @@ h1,
         const pinRow = document.getElementsByClassName('market-your-pin-row')[0];
         if(pinRow) submit.appendChild(pinRow);
     }
-    if(!document.getElementsByClassName('market-your-metarow')[0]?.children.length) document.getElementsByClassName('market-your-toolbar--foot')[0].remove();
+    if(!document.getElementsByClassName('market-your-metarow')[0]?.children.length) document.getElementsByClassName('market-your-toolbar--foot')[0]?.remove();
     const price = document.getElementsByClassName('market-your__col-cost')[0];
     if(price) price.textContent = 'Price';
 })();
