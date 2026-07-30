@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: TVW Prize Shop Pricer
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.3
+// @version      1.1.0
 // @description  Uses itemDB's database to estimate the neopoint value (and NP per point) of each prize
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -13,8 +13,7 @@
 // @license      Unlicense
 // @grant        GM.setValue
 // @grant        GM.getValue
-// @require      https://update.greasyfork.org/scripts/567036/1868582/itemDB%20Fetch%20Lib.js
-// @grant        GM_xmlhttpRequest
+// @require      https://update.greasyfork.org/scripts/567036/1759045/itemDB%20Fetch%20Lib.js
 // ==/UserScript==
 
 /*
@@ -41,7 +40,7 @@
 const isFetchDue = async () => Date.now() - (await GM.getValue('timestamp', 1)) >= 1000 * 60 * 60 * 24 * 3;
 const saveFetchDate = () => GM.setValue('timestamp', Date.now());
 // eslint-disable-next-line no-undef
-const fetchPrices = () => fetchItemDb('https://itemdb.com.br/api/v1/lists/official/the-void-within-prize-shop/itemdata', 'TVW Prize Shop Pricer');
+const fetchPrices = () => fetchItemDb('https://itemdb.com.br/api/v2/lists/official/the-void-within-prize-shop/itemdata?intent=pricer', 'TVW Prize Shop Pricer');
 const mapPrices = (priceData) => priceData.reduce((agg, curr) => ({...agg, [curr.name]: curr.price?.value}), undefined);
 const addCommasToThousands = (number) => number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
 
