@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Book and Food Tracker
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.1.1
+// @version      1.2.0
 // @description  Adds a border to books/gourmet food a tracked pet hasn't read/eaten yet. Also moves them to the top in various pages. Updated for new SDB.
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -18,8 +18,7 @@
 // @grant        GM.setValue
 // @grant        GM.getValue
 // @grant        GM.deleteValue
-// @require      https://update.greasyfork.org/scripts/567036/1868582/itemDB%20Fetch%20Lib.js
-// @grant        GM_xmlhttpRequest
+// @require      https://update.greasyfork.org/scripts/567036/1862213/itemDB%20Fetch%20Lib.js
 // ==/UserScript==
 
 /*
@@ -213,10 +212,10 @@ const requestUpdate = async () => {
     try {
         for (const [listId, info] of Object.entries(lists)) {
             // eslint-disable-next-line no-undef
-            const items = await fetchItemDb(`https://itemdb.com.br/api/v1/lists/official/${info.itemdb}/itemdata`, 'Book and Food Tracker');
+            const items = await fetchItemDb(`https://itemdb.com.br/api/v2/lists/official/${info.itemdb}/itemdata?intent=minimal`, 'Book and Food Tracker');
             if (items.error) throw new Error(items.error);
             if (!items || !items.length) throw new Error('Unknown error (empty response)');
-            const itemIds = items.map(item => getIdFromImageSource(item.image));
+            const itemIds = items.map(item => item.image.id);
             updateCache(listId, itemIds);
         }
     }
