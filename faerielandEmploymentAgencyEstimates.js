@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Faerieland Employment Agency Estimates
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.1.3
+// @version      1.2.0
 // @description  Gives price estimates for each job that doesn't require a coupon, and calculates your profit.
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -11,8 +11,7 @@
 // @match        *://*.neopets.com/faerieland/employ/employment.phtml*voucher=basic*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=neopets.com
 // @license      Unlicense
-// @require      https://update.greasyfork.org/scripts/567036/1868582/itemDB%20Fetch%20Lib.js
-// @grant        GM_xmlhttpRequest
+// @require      https://update.greasyfork.org/scripts/567036/1862213/itemDB%20Fetch%20Lib.js
 // ==/UserScript==
 
 /*
@@ -35,7 +34,11 @@
 •:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•:•:•:•:•:•:•:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•.•:•:•:•:•:•:•:•:•.•:•:•.•:•.••:•.•:•.••:
 */
 
-const getItemsFromitemDB = async (orderedJobs) => (await fetchItemDb(`https://itemdb.com.br/api/v1/items/many?image_id[]=${orderedJobs.map(job => job.image).join("&image_id[]=")}`, 'Faerieland Employment Agency Estimates'));
+const getItemsFromitemDB = async (orderedJobs) => {
+    const images = orderedJobs.map(job => job.image);
+    const body = { type: 'image_id', data: images, intent: 'pricer' };
+    return await fetchItemDb('https://itemdb.com.br/api/v2/items/many', 'Faerieland Employment Agency Estimates', JSON.stringify(body)).catch(console.error);
+}
 
 const addCommasToNumber = n => n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
