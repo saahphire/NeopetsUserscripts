@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         JellyNeo: Use itemDB Prices on Shop Value Guides
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.0
+// @version      1.1.0
 // @description  Allows you to use JellyNeo's Shop Value Guides with itemDB prices instead of JellyNeo prices for better accuracy.
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -22,9 +22,6 @@
     It also adds two new options to the "Sort By:" menu: "Current itemDB Price" and "itemDB NP per Points". They sort
     the results instantly instead of on submit. They aren't saved so they won't be persistent if you reload the page or
     submit, you'll have to select them again to sort by itemDB prices.
-    itemDB prices are usually more accurate and recent.
-
-    I had to use GM_xmlhttpRequest instead of fetch because of CORS.
 
     ✦ ⌇ saahphire
 ☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦
@@ -55,12 +52,14 @@ const createPricePerNP = (pricePerNP, perNPText) => {
 const fetchItems = (items) => new Promise((resolve, reject) => {
     GM_xmlhttpRequest({
         method: 'POST',
-        url: 'https://itemdb.com.br/api/v1/items/many',
+        url: 'https://itemdb.com.br/api/v2/items/many',
         headers: {
             'Content-Type': 'application/json'
         },
         data: JSON.stringify({
-            name: items
+            type: 'name',
+            data: items,
+            intent: 'pricer'
         }),
         onload: (res) => res.status === 200 ? resolve(JSON.parse(res.responseText)): reject(res)
     });
