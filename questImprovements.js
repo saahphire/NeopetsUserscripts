@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Quest Improvements
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.2.2
+// @version      1.3.0
 // @description  Adds an estimated value for the items requested of you in every quest. Also remembers and fills your Brain Tree answers.
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -14,8 +14,7 @@
 // @grant        GM.setValue
 // @grant        GM.getValue
 // @require      https://update.greasyfork.org/scripts/567035/1759343/Neopets%3A%20Shop%20Wizard%20Anchor%20Creator.js
-// @require      https://update.greasyfork.org/scripts/567036/1868582/itemDB%20Fetch%20Lib.js
-// @grant        GM_xmlhttpRequest
+// @require      https://update.greasyfork.org/scripts/567036/1759045/itemDB%20Fetch%20Lib.js
 // ==/UserScript==
 
 /*
@@ -119,7 +118,7 @@ const onEsophagor = () => {
 }
 
 const getPrice = async (slug, quantity) => {
-    const res = await fetchItemDb(`https://itemdb.com.br/api/v1/items/${slug}`, 'Quest Improvements');
+    const res = await fetchItemDb(`https://itemdb.com.br/api/v2/items/${slug}?intent=pricer`, 'Quest Improvements');
     return (res?.price.value ?? 0) * quantity;
 }
 
@@ -138,11 +137,11 @@ const gotValidItems = (items) => items && items.length > 0 && !items[0].dataset.
 
 const parseItem = (item, index, quantities) => {
     const name = item.textContent.trim().replace(/(.+)x\d$/, "$1");
-    if(item.nextElementSibling)
-        item.nextElementSibling.insertAdjacentElement("beforebegin", createSWLink(name, item));
-    else item.parentElement.appendChild(createSWLink(name, item));
+    const temp = document.createElement('b');
+    item.replaceWith(temp);
+    temp.replaceWith(createSWLink(name, item));
     return {
-        name: name,
+        name,
         quantity: quantities[index] ?? 1
     };
 }
