@@ -47,7 +47,7 @@
 
 const areas = '#lookup_desc, #message_body, [name="content"], [name="description"], [name="message"], [name="message_text"], [name="message_title"], [name="subject"], [name="topic_title"]';
 
-const regexp = /uncle|kill|balls|cum|rape|crack|weed|semen|boob/g;
+const regexp = /uncle|kill|balls|cum|rape|crack|weed|semen|boob/gi;
 
 const listenToTyping = (e) => {
     let cursor = e.target.selectionStart;
