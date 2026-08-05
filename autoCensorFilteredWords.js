@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Auto-Censor Filtered Words
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.0
+// @version      1.0.1
 // @description  Adds a period to every filtered word you try to type. uncle => u.ncle
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
