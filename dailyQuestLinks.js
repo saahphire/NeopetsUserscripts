@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Daily Quest Links
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.4.3
+// @version      1.5.0
 // @description  Adds links to quickly complete daily quests
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -52,7 +52,8 @@ const links = {
   "Play with your Neopet": "https://www.neopets.com/safetydeposit.phtml?obj_name=&category=5",
   "Read to your Neopet": "https://www.neopets.com/safetydeposit.phtml?obj_name=&category=6",
   "View Popular NC Items": "https://ncmall.neopets.com/mall/search.phtml?type=popular_items&cat=54&page=1&limit=24",
-  "Visit the NC Mall": "https://ncmall.neopets.com/mall/shop.phtml"
+  "Visit the NC Mall": "https://ncmall.neopets.com/mall/shop.phtml",
+  "Grab an Omelette": "https://www.neopets.com/prehistoric/omelette.phtml"
 };
 
 const makeLink = (quest) => {
