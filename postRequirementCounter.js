@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Post Requirement Counter
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      2.0.0
+// @version      2.0.1
 // @description  Adds a counter to topics with a set string in their names, that counts posts including given images or strings as long as they're from the current month.
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -108,7 +108,7 @@ const fulfillsTests = (post, settings, category) => {
     else return typesToTest.every(type => fulfillsType(post, `${category}${type}`, settings));
 }
 
-const isThisMonth = (post) => new Date().toLocaleDateString('en-GB', {month: 'short', year: 'numeric'}) === post.getElementsByClassName('boardPostDate')[0].textContent.match(/\w+ \d+/)[0];
+const isThisMonth = (post) => new Date().toLocaleDateString('en-GB', {month: 'short', year: 'numeric'}).replace(/([A-Za-z]{3})\w+/, '$1') === post.getElementsByClassName('boardPostDate')[0].textContent.match(/\w+ \d+/)[0];
 
 const getAllSavedPosts = async () => Object.entries(await GM.getValue('users', {})).map(([username, user]) => Object.keys(user.posts).map(post => [post, username])).flat();
 
@@ -396,9 +396,7 @@ const decorateUsername = (users, requirementCount) => {
 }
 
 const init = async () => {
-        console.log(5);
     document.head.insertAdjacentHTML('beforeend', css);
-        console.log(6);
     await newMonthCleanup();
     const users = await GM.getValue('users', {});
     if(window.location.href.match(/neopets.com\/neoboards\/topic.phtml\?/)) {
