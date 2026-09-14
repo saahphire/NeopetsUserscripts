@@ -1,17 +1,51 @@
 // ==UserScript==
 // @name         Neopets: NeoLogin Cookie Copier
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.1
-// @description  Adds a cookie button to your username so you can copy your neologin cookie. Do NOT share it!
+// @version      2.0.0
+// @description  DOES NOT WORK ANYMORE but I have a guide for the new (manual) way if you need it
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
 // @homepage     https://github.com/saahphire/NeopetsUserscripts
-// @downloadURL  https://github.com/saahphire/NeopetsUserscripts/blob/main/neologinCookieCopier.js
-// @updateURL    https://github.com/saahphire/NeopetsUserscripts/blob/main/neologinCookieCopier.js
+// @downloadURL  https://github.com/saahphire/NeopetsUserscripts/blob/main/Unsupported/neologinCookieCopier.js
+// @updateURL    https://github.com/saahphire/NeopetsUserscripts/blob/main/Unsupported/neologinCookieCopier.js
 // @match        *://*.neopets.com/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=neopets.com
 // @license      Unlicense
 // ==/UserScript==
+
+/*
+•:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•:•:•:•:•:•:•:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•.•:•:•:•:•:•:•:•:•.•:•:•.•:•.••:•.•:•.••:
+........................................................................................................................
+☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦
+    This script DOES NOT work anymore. Working is impossible. TNT changed the site so grabbing your cookies through
+    JavaScript is impossible. This is now preserved in case anyone wants to see the code. It no longer does anything.
+
+    If you need your Neopets neologin cookie, please follow these instructions:
+    - Open your cookies in DevTools. Every browser has its own way, but you can find that on Google. It's usually like:
+        - Press F12 or Shift+Esc (Opera GX has F12 set as the panic button, if you press it don't panic and just press
+          it a second time)
+        - Open Storage, or Application, or something that looks like it has data inside, or just go searching each tab
+        - Find the Cookies dropdown menu or section or whatever has "Cookies" written in it
+    - Open your https://www.neopets.com/ cookies
+    - neologin is right there! Double click on the value and copy it
+    - Now you have something like: saahphire%2Bhf87u90bht0h347tghbf9083w4ht (keysmash, not my actual cookie lol)
+    - Replace it here:
+document.cookie += "neologin=REPLACECOOKIEVALUEHERE"
+    - Copy exactly the line above this one (after replacing the cookie value)
+    - Paste it in the Console part of your target browser's DevTools
+    - Success! You're logged in!
+    - Never ever share your neologin cookie. Ever. No matter what. Blur it out, replace it with a keysmash, but don't
+      share it.
+    
+    If you want to know how the change happened, neologin has been changed to a HttpOnly cookie. Here you go:
+    https://dev.to/mohsenfallahnjd/understanding-httponly-cookies-in-depth-10oc
+    As for the why, it's way more secure. Userscripts can't steal your login information as easily anymore.
+
+    ✦ ⌇ saahphire
+☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦
+........................................................................................................................
+•:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•:•:•:•:•:•:•:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•.•:•:•:•:•:•:•:•:•.•:•:•.•:•.••:•.•:•.••:
+*/
 
 /*
 •:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•:•:•:•:•:•:•:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•.•:•:•:•:•:•:•:•:•.•:•:•.•:•.••:•.•:•.••:
@@ -27,7 +61,7 @@
 ........................................................................................................................
 •:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•:•:•:•:•:•:•:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•.•:•:•:•:•:•:•:•:•.•:•:•.•:•.••:•.•:•.••:
 */
-
+/*
 const getNeologin = () => document.cookie.split(';').find(c => c.trim().startsWith('neologin=')).trim();
  
 const createButton = (callback, modal) => {
@@ -98,3 +132,4 @@ const createLink = (modal) => {
 }
 </style>`)
 })();
+*/
