@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Neopets: Stocks Portfolio Filter
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.0
-// @description  Autofills stock selling if their price exceeds a threshold relative to the price you paid
+// @version      1.1.0
+// @description  Adds links to quickly switch between pets while fishing
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
 // @homepage     https://github.com/saahphire/NeopetsUserscripts
@@ -17,8 +17,12 @@
 •:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•:•:•:•:•:•:•:•.•:•.•:•:•:•:•:•:•:••:•.•:•.•:•.•:•:•:•:•:•:•:•:•.•:•:•.•:•.••:•.•:•.••:
 ........................................................................................................................
 ☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦
+    Update: The script now allows you to set a minimum price (like the usual 60). To filter by **change %**, set
+    minimumChange to the desired value (anything but 0). To filter by **price**, set minimumChange to 0 and minimumPrice
+    to your desired price threshold. If minimumChange is not 0, minimumPrice will be ignored.
+
     This script does the following:
-    - Finds all stocks at or above a certain change threshold (configurable)
+    - Finds all stocks at or above a certain change or price threshold (configurable)
     - Calculates change based on each share bundle instead of a company's average change
     - Shows the shares list table if any shares reach the threshold
     - Automatically inputs the amount of shares you own when the threshold is met
@@ -33,13 +37,26 @@
 */
 
 // The minimum value under "Change %" to allow selling of the stock. '.0' is optional.
+// Set to 0 if you want to use a minimum price instead.
 const minimumChange = 100.0;
 
-const isMinumumChange = element => parseFloat(element.textContent.match(/-?\d+\.?\d+/)[0]) >= minimumChange;
+// The minimum price of each stock to allow selling of the stock.
+const minimumPrice = 60;
+
+const isMinumumChange = row => parseFloat(row.getElementsByTagName('font')[0].textContent.match(/-?\d+\.?\d+/)[0]) >= minimumChange;
+
+const isMinimumPrice = (row, columnIndex) => parseInt(row.getElementsByTagName('td')[columnIndex].textContent) >= minimumPrice;
 
 const travelUpParents = (element, depth) => (depth === 0) ? element : travelUpParents(element.parentElement, depth - 1);
 
 const selectAllShares = row => row.getElementsByTagName('input')[0].value = row.querySelector('td:first-child').textContent.replace(',', '');
+
+const findPriceColumnIndex = table => {
+    const columnNames = [...table.querySelectorAll('tr:nth-child(2) td')];
+    const normalIndex =  columnNames.findIndex(columnName => columnName.textContent === 'Current Price');
+    // I don't know if any script renames it to just "Price", but just to be safe...
+    return normalIndex > -1 ? normalIndex : columnNames.findIndex(columnName => columnName.textContent === 'Price');
+}
 
 const activateSubmenu = (table, mainRow, sellRow) => {
     table.children[1].insertAdjacentElement('afterEnd', sellRow);
@@ -59,8 +76,10 @@ const addSubmitButton = table => {
 }
 
 const findSellableShares = table => {
+    const columnIndex = findPriceColumnIndex(table);
+    const isMinimum = minimumChange ? isMinumumChange : isMinimumPrice;
     [...table.querySelectorAll('& > tr[bgcolor] + tr tr:not([bgcolor])')]
-        .filter(row => isMinumumChange(row.getElementsByTagName('font')[0]))
+        .filter(row => isMinimum(row, columnIndex))
         .forEach(row => {
             selectAllShares(row);
             const sellRow = travelUpParents(row, 4);
