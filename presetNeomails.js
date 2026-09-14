@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Preset Neomails
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.0
+// @version      1.0.1
 // @description  Allows you to save a neomail as a preset that you can fill and send easily (by menu or automatically by recipient)
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -224,7 +224,7 @@ const addRecipientListener = () => {
     const input = document.getElementsByName('recipient')[0];
     fillForRecipient(input.value);
     input.addEventListener('input', () => fillForRecipient(input.value));
-    document.getElementsByName('neofriends')[0].addEventListener('change', () => fillForRecipient(input.value));
+    document.getElementsByName('neofriends')[0]?.addEventListener('change', () => fillForRecipient(input.value));
 }
 
 const init = () => {
