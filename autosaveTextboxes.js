@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Autosave Textboxes
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.0
+// @version      1.1.0
 // @description  Saves the contents of each textbox for you so you can retrieve it even if you accidentally exit the page
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -62,25 +62,26 @@ const getUrl = () => {
     return href;
 }
 
-const onTogglePressed = async (e, url, textarea) => {
+const onTogglePressed = async (e, url, textContainer) => {
     const input = e.target;
     const label = input.nextElementSibling;
+    const val = textContainer.tagName === 'BODY' ? 'innerHTML' : 'value';
     label.textContent = input.checked ? '🔙' : '📂';
     if(input.checked) {
-        input.og = textarea.value;
-        textarea.value = await getLastBox(url);
+        input.og = textContainer[val];
+        textContainer[val] = await getLastBox(url);
     }
-    else {
-        textarea.value = input.og ?? textarea.value;
+    else if(input.og || input.og === '') {
+        textContainer[val] = input.og;
         input.og = null;
     }
 }
 
-const createInput = (url, textarea) => {
+const createInput = (url, textContainer) => {
     const input = document.createElement('input');
     input.type = 'checkbox';
     input.style.display = 'none';
-    input.addEventListener('click', e => onTogglePressed(e, url, textarea));
+    input.addEventListener('click', e => onTogglePressed(e, url, textContainer));
     input.id = 'saahphire-autosave-textboxes-toggle';
     return input;
 }
@@ -95,11 +96,17 @@ const createLabel = () => {
     return label;
 }
 
-const createToggle = (url, textarea) => {
+const createToggle = (url, textContainer) => {
     const label = createLabel();
-    const input = createInput(url, textarea);
-    textarea.insertAdjacentElement('beforebegin', input);
+    const input = createInput(url, textContainer);
+    const sibling = textContainer.tagName === 'BODY' ? document.getElementById('Buttons1_message_body') : textContainer;
+    sibling.insertAdjacentElement('beforebegin', input);
     input.insertAdjacentElement('afterend', label);
+}
+
+const onNeomailAndFirefox = (url, body) => {
+    const observer = new MutationObserver(() => updateBox(url, body.innerHTML));
+    observer.observe(body, {childList: true, subtree: true, characterData: true});
 }
 
 const textboxes = [
@@ -118,9 +125,11 @@ const textboxes = [
 (function() {
     'use strict';
     const textarea = document.querySelector(textboxes.join(', '));
-    if(!textarea) return;
+    const neomailFirefoxBody = document.querySelector('iframe#message_body')?.contentDocument.body;
+    if(!textarea && !neomailFirefoxBody) return;
     const url = getUrl();
     saveBox(url);
-    textarea.addEventListener('input', e => updateBox(url, e.target.value));
-    createToggle(url, textarea);
+    if(neomailFirefoxBody) onNeomailAndFirefox(url, neomailFirefoxBody);
+    else textarea.addEventListener('input', e => updateBox(url, e.target.value));
+    createToggle(url, textarea ?? neomailFirefoxBody);
 })();
