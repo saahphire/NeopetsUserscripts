@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Guild Board URL Linkifier
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.0
+// @version      1.0.1
 // @description  Turns written URLs to clickable links in the Guild Message Board
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -37,11 +37,17 @@
 
 const bannedTags = ['TR', 'A', 'SCRIPT', 'STYLE', 'INPUT', 'TEXTAREA'];
 
+const regex = /\b(https?:\/\/[^\s<]+)|(?<![^\s])([a-z0-9-]+(?:\.[a-z0-9-]+)*\.(?:[a-z]{2,}))(?:\/[^\s<]*)?\b|\B(\/~[\w#]+)/gi;
+
+const replacements = ['<a href="$&">$&</a>', '<a href="https://$&">$&</a>', '<a href="https://neopets.com$&">$&</a>'];
+
+/*
 const replacements = [
-    [/\b(https?:\/\/[^\s<]+)/gi, '<a href="$&">$&</a>'],
+    [/\b(https?:\/\/[^\s<]+)|(?<![^\s])([a-z0-9-]+(?:\.[a-z0-9-]+)*\.(?:[a-z]{2,}))(?:\/[^\s<]*)?\b|\B(\/~[\w#]+)/gi, '<a href="$&">$&</a>'],
     [/(?<!https?:\/\/)(?<![^\s/])([a-z0-9-]+(?:\.[a-z0-9-]+)*\.(?:[a-z]{2,}))(?:\/[^\s<]*)?\b/gi, '<a href="https://$&">$&</a>'],
     [/\B\/~[\w#]+/gi, '<a href="https://neopets.com$&">$&</a>']
 ];
+*/
 
 (function() {
     'use strict';
@@ -55,12 +61,12 @@ const replacements = [
                 if(tag === 'A') flagMultiple = true;
                 return;
             }
-            if(replacements.some(replacement => treeWalker.currentNode.textContent.match(replacement[0])))
+            if(treeWalker.currentNode.textContent.match(regex))
                 nodesToReplace.push(treeWalker.currentNode);
         }
         for (const node of nodesToReplace) {
             const span = document.createElement('span');
-            span.innerHTML = replacements.reduce((innerHTML, replacement) => innerHTML.replaceAll(...replacement), node.textContent);
+            span.innerHTML = node.textContent.replaceAll(regex, (...match) => replacements.find((_, i) => match[i + 1]).replaceAll('$&', match[0]));
             while(span.firstChild) node.parentNode.insertBefore(span.firstChild, node);
             node.remove();
             span.remove();
