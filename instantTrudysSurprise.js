@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Instant Trudy's Surprise
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.1
+// @version      1.0.2
 // @description  I don't have time to wait three years until Trudy's surprise finishes spinning and gives a random set of slots that don't even mean anything. Neither do you!
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -30,13 +30,16 @@
 const AJAX_URL = 'https://www.neopets.com/trudydaily/ajax/claimprize.php';
 
 const post = (url, action) => {
-    const formData = new FormData();
-    formData.append('action', action);
-    if(action === 'getslotstate') formData.append('key', '');
+    const params=  new URLSearchParams();
+    params.append('action', action);
+    if(action === 'getslotstate') params.append('key', '');
     return fetch(url, {
         method: 'POST',
-        headers: {contentType: 'application/x-www-form-urlencoded;'},
-        body: formData
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: params
     });
 }
 
@@ -50,7 +53,6 @@ const treatNeopoints = prizes => {
 }
 
 const instantTrudy = async () => {
-
     const json = await post(AJAX_URL, 'beginroll');
     const res = await json.json();
     if(res.error != '') {
