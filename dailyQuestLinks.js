@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Neopets: Daily Quest Links
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.5.0
-// @description  Adds links to quickly complete daily quests
+// @version      1.6.0
+// @description  Adds links to quickly complete daily quests. Updated Oct 2026!
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
 // @homepage     https://github.com/saahphire/NeopetsUserscripts
@@ -22,7 +22,7 @@
     a link to the General Store will be next to that one. You may buy a Blue Short Hair Brush for 50 NP there.
     Enjoy! Like all of my scripts, this is Unlicensed.
 
-    Thank you Panda Crab for your help with waitForLogToLoad! I literally couldn't have done it without you!
+    Thank you Panda Crab for teaching me about MutationObserver, so many of my scripts are thanks to you
 
     ✦ ⌇ saahphire
 ☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆
@@ -42,7 +42,7 @@ const links = {
   "Spin the Wheel of Mediocrity":
     "https://www.neopets.com/prehistoric/mediocrity.phtml",
   "Customise your Neopet": "https://www.neopets.com/customise/",
-  "Feed your Neopet": "https://www.neopets.com/inventory.phtml",
+  "Feed your Neopet": "https://www.neopets.com/safetydeposit.phtml?obj_name=&category=18",
   "Groom your Neopet":
     "https://www.neopets.com/safetydeposit.phtml?obj_name=&category=10",
   "Play a game": "https://www.neopets.com/games/favourites.phtml",
@@ -53,7 +53,17 @@ const links = {
   "Read to your Neopet": "https://www.neopets.com/safetydeposit.phtml?obj_name=&category=6",
   "View Popular NC Items": "https://ncmall.neopets.com/mall/search.phtml?type=popular_items&cat=54&page=1&limit=24",
   "Visit the NC Mall": "https://ncmall.neopets.com/mall/shop.phtml",
-  "Grab an Omelette": "https://www.neopets.com/prehistoric/omelette.phtml"
+  "Grab an Omelette": "https://www.neopets.com/prehistoric/omelette.phtml",
+  "Donate an Item": "https://www.neopets.com/inventory.phtml",
+  "Deposit NP in the Bank": "https://www.neopets.com/bank.phtml",
+  "Claim a Recycled Item": "https://www.neopets.com/medieval/rubbishdump.phtml",
+  "Play Wise Old King": "https://www.neopets.com/medieval/wiseking.phtml",
+  "Play Grumpy Old King": "https://www.neopets.com/medieval/grumpyking.phtml",
+  "Discard an Item": "https://www.neopets.com/inventory.phtml",
+  "Scratch a Scratchcard": "https://www.neopets.com/desert/sc/kiosk.phtml",
+  "Vote in Customisation Spotlight": "https://www.neopets.com/spotlights/custompet/?tab=vote",
+  // I couldn't get a source on the exact text on this one, so it probably doesn't work. I'll update when I get it
+  "Claim your Bank Interest": "https://www.neopets.com/bank.phtml"
 };
 
 const makeLink = (quest) => {
@@ -72,26 +82,19 @@ const makeLink = (quest) => {
   }
 };
 
-function waitForLogToLoad(callback) {
-  const selector = "#QuestLogStreakName"; //if this element is ready, the entire log should be ready
-  const container = document.querySelector("#QuestLogContent"); //this appears immediately but has no children/content
-  function tryRun() {
-    const el = document.querySelector(selector);
-    if (el && !el.dataset.processed) {
-      el.dataset.processed = "true";
-      callback();
-    }
-  }
-  tryRun();
-  const observer = new MutationObserver(() => {
-    tryRun();
-  });
-  observer.observe(container, { childList: true, subtree: true });
-}
+const observe = (observer) => observer?.observe(document.getElementsByClassName('questlog-container')[0], { childList: true, subtree: true });
 
-const processQuestLog = () => document.querySelectorAll(".ql-task-description").forEach((quest) => makeLink(quest));
+const editQuestLog = (observer) => {
+  observer?.disconnect();
+  const unprocessedQuests = document.querySelectorAll('.questlog-quest:not(.ql-tada, .ql-ff, :has(.ql-reward-newbie)) .ql-task-description:not(:has(a))');
+  unprocessedQuests.forEach(quest => makeLink(quest));
+  observe(observer);
+}
 
 (function () {
   "use strict";
-    waitForLogToLoad(processQuestLog); //processQuestLog is another function defined elsewhere
+    // waitForLogToLoad(processQuestLog); //processQuestLog is another function defined elsewhere
+    editQuestLog();
+    const observer = new MutationObserver(() => editQuestLog(observer));
+    observe(observer);
 })();
