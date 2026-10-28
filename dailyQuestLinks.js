@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Daily Quest Links
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.6.0
+// @version      1.6.1
 // @description  Adds links to quickly complete daily quests. Updated Oct 2026!
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -62,8 +62,7 @@ const links = {
   "Discard an Item": "https://www.neopets.com/inventory.phtml",
   "Scratch a Scratchcard": "https://www.neopets.com/desert/sc/kiosk.phtml",
   "Vote in Customisation Spotlight": "https://www.neopets.com/spotlights/custompet/?tab=vote",
-  // I couldn't get a source on the exact text on this one, so it probably doesn't work. I'll update when I get it
-  "Claim your Bank Interest": "https://www.neopets.com/bank.phtml"
+  "Collect Bank Interest": "https://www.neopets.com/bank.phtml"
 };
 
 const makeLink = (quest) => {
@@ -73,6 +72,7 @@ const makeLink = (quest) => {
   quest.innerHTML = `<a href="${url}">${text}</a>`;
   if (
     text === "Purchase Item(s)" &&
+    document.querySelector(".ql-task-num") &&
     document.querySelector(".ql-task-num").innerText[2] !== "1"
   ) {
     quest.insertAdjacentHTML(
