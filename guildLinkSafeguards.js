@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Guild Link Safeguards
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.0
+// @version      1.0.1
 // @description  Helps prevent you from activating Leave Guild and Delete This Message
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -64,7 +64,9 @@ const settings = {
 const changeCategory = () => {
     if(settings.leaveGuild.remove || !settings.leaveGuild.category) return;
     const parent = document.querySelector('[cellpadding="4"] tbody');
+    if(!parent) return;
     const title = parent.firstChild.cloneNode(true);
+    if(!title) return;
     title.getElementsByTagName('b')[0].textContent = 'Danger Zone';
     parent.appendChild(title);
     parent.insertAdjacentHTML('beforeend', `<tr><td bgcolor="white" align="left" valign="top" class="content"><ul style="margin: 0 0 0 15px; padding: 0;"></ul></td></tr>`);
@@ -79,7 +81,9 @@ const replaceDeleteWithEmoji = (parent) => {
 
 const replaceLeaveWithEmoji = () => {
     if(!settings.deleteThisMessage.emoji) return;
-    document.querySelector('[onclick*="leave"] li').textContent = '🔚';
+    const leave = document.querySelector('[onclick*="leave"] li');
+    if(!leave) return;
+    leave.textContent = '🔚';
 }
 
 const linkCss = (config) => `
