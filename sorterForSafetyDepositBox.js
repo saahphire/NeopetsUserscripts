@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Neopets: Sorter for Safety Deposit Box
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      2.0.0
-// @description  [UPDATED FOR NEW SDB] Adds type and itemDB price sorting options to the Safety Deposit Box's "Sort by" dropdown
+// @version      2.0.1
+// @description  [UPDATED FOR NEW NEW SDB] Adds type and itemDB price sorting options to the Safety Deposit Box's "Sort by" dropdown
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
 // @homepage     https://github.com/saahphire/NeopetsUserscripts
@@ -19,8 +19,10 @@
 ........................................................................................................................
 ☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦
     This script allows you to sort your SDB by type (Food, Magic Item, etc) and itemDB price. You must install the
-    "itemdb - Safety Deposit Box Pricer" script (v1.6.0+) to sort by price:
+    "itemdb - Safety Deposit Box Pricer" script (v2.1.1+) to sort by price:
     https://itemdb.com.br/articles/userscripts
+
+    Updated for October 2026's SDB update
 
     ✦ ⌇ saahphire
 ☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦
@@ -29,34 +31,37 @@
 */
 
 const getType = (el) => el.getElementsByClassName('sdb-item-meta')[0]?.textContent.trim();
-const getPrice = (el) => parseInt(el.querySelector('.sdb-item-info a[target="_blank"]')?.textContent.replaceAll(/\D/g, ''));
+const getPrice = (el) => parseInt(el.querySelector('img[src="https://itemdb.com.br/logo_icon.svg"] + div a')?.textContent.replaceAll(/\D/g, ''));
 
 const options = {
-    'type_asc': {
+    'type': {
         sorter: (a, b) => getType(a)?.localeCompare(getType(b)),
-        text: 'Type (A-Z)'
+        text: 'Type',
+        asc: 'A-Z',
+        desc: 'Z-A'
     },
-    'type_desc': {
-        sorter: (a, b) => getType(b)?.localeCompare(getType(a)),
-        text: 'Type (Z-A)'
-    },
-    'price_desc': {
-        sorter: (a, b) => getPrice(b) - getPrice(a),
-        text: 'Price (High-Low)'
-    },
-    'price_asc': {
+    'price': {
         sorter: (a, b) => getPrice(a) - getPrice(b),
-        text: 'Price (Low-High)'
+        text: 'Price',
+        asc: 'Low–High',
+        desc: 'High-Low'
     }
 }
 
+const sortOrder = (a, b, asc) => asc ? [a, b] : [b, a];
+
 const onSelectChange = (e) => {
-    const selectedOption = e.target.selectedOptions[0];
+    const [sort, order] = document.querySelectorAll('.sdb-sort-panel-row .sdb-select');
+    const selectedOption = sort.selectedOptions[0];
     if(!selectedOption.classList.contains('saahphire-sdb-sorter')) return;
     e.stopImmediatePropagation();
+    const opt = options[selectedOption.value];
+    const isAscending = order.selectedOptions[0].value === 'asc';
     const parent = document.querySelector('.sdb-table tbody');
     const rows = document.querySelectorAll('.sdb-row-odd, .sdb-row-even'); // Do they not know about nth-child??? I'm dying
-    [...rows].sort(options[selectedOption.value].sorter).forEach(row => parent.appendChild(row));
+    const sorter = opt.sorter;
+    [...rows].sort((a, b) => sorter(...sortOrder(a, b, isAscending))).forEach(row => parent.appendChild(row));
+    document.querySelector('.sdb-sort-btn-prefix + span').textContent = `${opt.text} (${isAscending ? opt.asc : opt.desc})`;
 }
 
 const createOption = (id) => {
@@ -68,9 +73,16 @@ const createOption = (id) => {
 }
 
 const addSelectOptions = () => {
-    const select = document.getElementsByClassName('sdb-select')[2];
-    select.addEventListener('change', onSelectChange, true);
-    Object.keys(options).forEach(id => select.appendChild(createOption(id)));
+    const selects = document.querySelectorAll('.sdb-sort-panel-row .sdb-select');
+    if(!selects.length) return;
+    selects.forEach(select => select.addEventListener('change', onSelectChange, true));
+    Object.keys(options).forEach(id => selects[0].appendChild(createOption(id)));
+}
+
+const watchSortWrap = () => {
+    const wrap = document.getElementsByClassName('sdb-sort-wrap')[0];
+    const observer = new MutationObserver(addSelectOptions);
+    observer.observe(wrap, {childList: true});
 }
 
 (function() {
@@ -80,5 +92,5 @@ const addSelectOptions = () => {
             display: none;
         }
     </style>`);
-    addSelectOptions();
+    watchSortWrap();
 })();
