@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Codestone Tracker
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      4.0.1
+// @version      4.0.2
 // @description  Tracks your codestones, removes them with a click on the training page, adds a link to SW for the ones you don't have yet
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -207,7 +207,8 @@ const getStoredCodestones = async () => {
 * Adds links to each codestone shown in the Training School status page
 */
 const onTrainingPage = async () => {
-    const codestones = document.querySelectorAll(".content > table tr:nth-child(2n) td:last-child b + img");
+    const codestones = document.querySelectorAll('img[src*="codestone"]:not(.trainingIcon)');
+    console.log(codestones);
     if(!codestones.length) return;
     const ownedCodestones = await getStoredCodestones();
     const usage = new Array(17);
