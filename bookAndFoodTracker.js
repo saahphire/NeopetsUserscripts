@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Book and Food Tracker
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.2.0
+// @version      1.3.0
 // @description  Adds a border to books/gourmet food a tracked pet hasn't read/eaten yet. Also moves them to the top in various pages. Updated for new SDB.
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -84,11 +84,11 @@ const sortItems = {
 
 const lists = {
     booktastic: {
-        url: /moon\/books_read\.phtml\?pet_name=/,
+        url: /tab=booktastic/,
         itemdb: 'booktastic-book-award'
     },
     books: {
-        url: /books_read\.phtml\?pet_name=/,
+        url: /books_read.phtml\?pet_name=\w+$/,
         itemdb: 'book-award'
     },
     gourmet: {
@@ -194,7 +194,7 @@ const makeToggle = (tracked) => {
 
 const addButton = (listInfo, tracked) => {
     const toggle = makeToggle(tracked);
-    document.querySelector('.content img[width="150"]').insertAdjacentElement('afterEnd', toggle);
+    document.querySelector('.content img[width="150"], .br-award').insertAdjacentElement('afterEnd', toggle);
     toggle.insertAdjacentHTML('beforeBegin', onListCSS);
     const label = makeLabel(tracked);
     toggle.insertAdjacentElement('afterEnd', label);
@@ -507,7 +507,7 @@ const onListCSS = `<style>
     padding: 1em;
     display: block;
     box-sizing: border-box;
-    width: 150px;
+    width: fit-content;
     margin: 1em auto;
     border-radius: 0.5em;
     border: 1px solid var(--border);
