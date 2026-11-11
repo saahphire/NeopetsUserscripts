@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Daily Quest Links
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.6.2
+// @version      1.6.3
 // @description  Adds links to quickly complete daily quests. Updated Oct 2026!
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -54,7 +54,7 @@ const links = {
   "Read to your Neopet": "https://www.neopets.com/safetydeposit.phtml?cat=6",
   "View Popular NC Items": "https://ncmall.neopets.com/mall/search.phtml?type=popular_items&cat=54&page=1&limit=24",
   "Visit the NC Mall": "https://ncmall.neopets.com/mall/shop.phtml",
-  "Grab an Omelette": "https://www.neopets.com/prehistoric/omelette.phtml",
+  "Collect from the Giant Omelette": "https://www.neopets.com/prehistoric/omelette.phtml",
   "Donate an Item": "https://www.neopets.com/inventory.phtml",
   "Deposit NP in the Bank": "https://www.neopets.com/bank.phtml",
   "Claim a Recycled Item": "https://www.neopets.com/medieval/rubbishdump.phtml",
