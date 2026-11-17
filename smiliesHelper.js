@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Neopets: Smilies Helper
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.0.1
-// @description  Adds a smiley/emoji/emoticon list with previews and search to neoboards, neomail, and guilds
+// @version      1.1.0
+// @description  [UPDATED] Adds a smiley/emoji/emoticon list with previews and search to neoboards, neomail, and guilds
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
 // @homepage     https://github.com/saahphire/NeopetsUserscripts
@@ -23,8 +23,7 @@
 ........................................................................................................................
 ☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦ ⠂⠄⠄⠂⠁⠁⠂⠄⠂⠄⠄⠂☆ ⠂⠄⠄⠂⠁⠁⠂⠄⠄⠂✦
     This script adds a little pop-up you can open by clicking the 😊 emoji on the top right of your screen. The pop-up
-    features all Neopets smileys (except for *firecrackers*, which can't be used at the moment), with images and a
-    search box that works with every keyword I could think of.
+    features all Neopets smileys, with images and a search box that works with every keyword I could think of.
 
     It was inspired by Neoboards: Smilies, but that one only works on Neoboards and I chat a lot in my guild.
         (join Keepers of Neopia https://www.neopets.com/~dezys_baby)
@@ -47,7 +46,7 @@ const updateRecentSmilie = async (smilie) => {
 }
 
 const insertSmilieInText = async (smilie) => {
-    const lastPosition = await GM.getValue('last-position', {area: 'body', position: 0});
+    const lastPosition = await GM.getValue('last-position', { area: 'body', position: 0 });
     const query = lastPosition.area === 'body' ? 'textarea' : '[name="message_title"], [name="topic_title"], [name="subject"]';
     const element = document.querySelector(query);
     element.value = element.value.substring(0, lastPosition.position) + smilie.key + element.value.substring(lastPosition.position, element.value.length);
@@ -67,7 +66,7 @@ const createSmilie = (smilie) => {
 
 const onSearch = (e, searchBar, smiliesWithKeywords, searchResults) => {
     const searchKey = searchBar.value.toLowerCase();
-    if(searchKey === '' || e.code === 'Escape') {
+    if (searchKey === '' || e.code === 'Escape') {
         searchBar.dataset.searching = false;
         searchBar.value = '';
         return;
@@ -75,13 +74,13 @@ const onSearch = (e, searchBar, smiliesWithKeywords, searchResults) => {
     searchBar.dataset.searching = true;
     [...searchResults.children].forEach(res => res.remove())
     smiliesWithKeywords.forEach(smilie => {
-        if(!smilie[0].some(word => word.startsWith(searchKey))) return;
+        if (!smilie[0].some(word => word.startsWith(searchKey))) return;
         searchResults.appendChild(createSmilie(smilie[1]));
     })
 }
 
 const addSearchBar = (popup) => {
-    const smiliesWithKeywords = getAllSmilies().map(smilie => [smilie.keywords.concat([smilie.key.replace('*', '')]), smilie]);
+    const smiliesWithKeywords = getAllSmilies().map(smilie => [(smilie.keywords ?? []).concat([smilie.key.replace('*', '')]), smilie]);
     const searchBar = document.createElement('input');
     searchBar.type = 'search';
     popup.insertAdjacentHTML('beforeEnd', '<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><g fill="none" fill-rule="evenodd"><path d="m12.593 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.017-.018m.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093q.019.005.029-.008l.004-.014l-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.01-.01z"/><path fill="#2e96ff" d="M10.5 4a6.5 6.5 0 1 0 0 13a6.5 6.5 0 0 0 0-13M2 10.5a8.5 8.5 0 1 1 15.176 5.262l3.652 3.652a1 1 0 0 1-1.414 1.414l-3.652-3.652A8.5 8.5 0 0 1 2 10.5M9.5 7a1 1 0 0 1 1-1a4.5 4.5 0 0 1 4.5 4.5a1 1 0 1 1-2 0A2.5 2.5 0 0 0 10.5 8a1 1 0 0 1-1-1"/></g></svg>');
@@ -107,7 +106,7 @@ const addCategoryTab = (category) => {
     const h2 = document.createElement('h2');
     h2.textContent = categories[category] ?? 'Recents';
     div.appendChild(h2);
-    if(category === 'recents') fillRecentSmilies(div);
+    if (category === 'recents') fillRecentSmilies(div);
     else smilies[category].forEach(smilie => div.appendChild(createSmilie(smilie)));
     return div;
 }
@@ -115,7 +114,7 @@ const addCategoryTab = (category) => {
 const addCategoryTabIcon = (category) => {
     const label = document.createElement('label');
     label.classList.add('saahphire-smilies-tab-icon');
-    if(category === 'recents') label.insertAdjacentHTML('beforeend', '<svg xmlns="http://www.w3.org/2000/svg" width="15px" height="15px" viewBox="0 0 24 24"><g fill="none"><path d="m12.594 23.258l-.012.002l-.071.035l-.02.004l-.014-.004l-.071-.036q-.016-.004-.024.006l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.016-.018m.264-.113l-.014.002l-.184.093l-.01.01l-.003.011l.018.43l.005.012l.008.008l.201.092q.019.005.029-.008l.004-.014l-.034-.614q-.005-.019-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.003-.011l.018-.43l-.003-.012l-.01-.01z"/><path fill="#2e96ff" d="M20.66 7c2.762 4.783 1.123 10.9-3.66 13.66c-4.123 2.38-9.233 1.491-12.335-1.86a1 1 0 0 1 1.468-1.358a8 8 0 1 0-2.06-6.524l1.281-.335c1.047-.273 1.818.97 1.108 1.787L4.21 14.957c-.568.652-1.665.43-1.892-.444A10 10 0 0 1 7 3.34C11.783.579 17.899 2.217 20.66 7M12 6a1 1 0 0 1 1 1v4.586l2.707 2.707a1 1 0 1 1-1.414 1.414l-3-3A1 1 0 0 1 11 12V7a1 1 0 0 1 1-1"/></g></svg>');
+    if (category === 'recents') label.insertAdjacentHTML('beforeend', '<svg xmlns="http://www.w3.org/2000/svg" width="15px" height="15px" viewBox="0 0 24 24"><g fill="none"><path d="m12.594 23.258l-.012.002l-.071.035l-.02.004l-.014-.004l-.071-.036q-.016-.004-.024.006l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.016-.018m.264-.113l-.014.002l-.184.093l-.01.01l-.003.011l.018.43l.005.012l.008.008l.201.092q.019.005.029-.008l.004-.014l-.034-.614q-.005-.019-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.003-.011l.018-.43l-.003-.012l-.01-.01z"/><path fill="#2e96ff" d="M20.66 7c2.762 4.783 1.123 10.9-3.66 13.66c-4.123 2.38-9.233 1.491-12.335-1.86a1 1 0 0 1 1.468-1.358a8 8 0 1 0-2.06-6.524l1.281-.335c1.047-.273 1.818.97 1.108 1.787L4.21 14.957c-.568.652-1.665.43-1.892-.444A10 10 0 0 1 7 3.34C11.783.579 17.899 2.217 20.66 7M12 6a1 1 0 0 1 1 1v4.586l2.707 2.707a1 1 0 1 1-1.414 1.414l-3-3A1 1 0 0 1 11 12V7a1 1 0 0 1 1-1"/></g></svg>');
     else {
         const img = document.createElement('img');
         img.src = smilies[category][0].src;
@@ -163,15 +162,15 @@ const addPopup = (label) => {
 
 const addButton = () => {
     document.body.insertAdjacentHTML('beforeend',
-    `<input type="checkbox" autocomplete="off" id="saahphire-smilies-toggle" style="display:none">
+        `<input type="checkbox" autocomplete="off" id="saahphire-smilies-toggle" style="display:none">
 <label for="saahphire-smilies-toggle" class="saahphire-smilies-toggle"></label>`);
     return document.getElementsByClassName('saahphire-smilies-toggle')[0];
 }
 
-const saveFieldPosition = (field, fieldName) => GM.setValue('last-position', {area: fieldName, position: field.selectionEnd});
+const saveFieldPosition = (field, fieldName) => GM.setValue('last-position', { area: fieldName, position: field.selectionEnd });
 
 const watchField = (field, fieldName) => {
-    if(!field) return;
+    if (!field) return;
     field.addEventListener('keyup', () => saveFieldPosition(field, fieldName));
     field.addEventListener('click', () => saveFieldPosition(field, fieldName));
 }
@@ -288,6 +287,125 @@ const smilies = {
             src: 'https://images.neopets.com/neoboards/smilies/yarr.gif',
             key: '*yarr*',
             keywords: ['wink']
+        },
+        {
+            src: 'https://images.neopets.com/neoboards/smilies/eyes.gif',
+            key: '*eyes*',
+            keywords: ['looking']
+        },
+        {
+            src: 'https://images.neopets.com/neoboards/smilies/eye.gif',
+            key: '*eye*'
+        },
+        {
+            src: 'https://images.neopets.com/neoboards/smilies/eyeroll.gif',
+            key: '*eyeroll*',
+            keywords: ['rolling']
+        },
+        {
+            src: 'https://images.neopets.com/neoboards/smilies/thinking.gif',
+            key: '*hmm*',
+            keywords: ['thinking', 'pensive']
+        },
+        {
+            src: 'https://images.neopets.com/neoboards/smilies/crylaugh.gif',
+            key: ':\'D',
+            keywords: ['laugh', 'cry', 'tear']
+        },
+        {
+            src: 'https://images.neopets.com/neoboards/smilies/smileupsidedown.gif',
+            key: '(:',
+            keywords: ['upside', 'smile', 'smiling']
+        },
+        {
+            src: 'https://images.neopets.com/neoboards/smilies/yikes.gif',
+            key: ':S',
+            keywords: ['cringe', 'teeth', 'cringing', 'grimace', 'grimacing']
+        },
+        {
+            src: 'https://images.neopets.com/neoboards/smilies/happy.gif',
+            key: '=)',
+            keywords: ['smile']
+        },
+        {
+            src: 'https://images.neopets.com/neoboards/smilies/straightface.gif',
+            key: ':|',
+            keywords: ['neutral', 'pipe']
+        },
+        {
+            src: 'https://images.neopets.com/neoboards/smilies/sob.gif',
+            key: '*sob*',
+            keywords: ['cry', 'tear']
+        },
+        {
+            src: 'https://images.neopets.com/neoboards/smilies/plead.gif',
+            key: '8c',
+            keywords: ['plead', 'beg', 'yearn', 'puppy']
+        },
+        {
+            src: 'https://images.neopets.com/neoboards/smilies/happyhearts.gif',
+            key: '*happyhearts*',
+            keywords: ['loving', 'love', 'heart', 'smile']
+        },
+        {
+            src: 'https://images.neopets.com/neoboards/smilies/hearteyes.gif',
+            key: '*hearteyes*',
+            keywords: ['loving', 'love', 'smile']
+        },
+        {
+            src: 'https://images.neopets.com/neoboards/smilies/happyblush.gif',
+            key: ':*)',
+            keywords: ['blush', 'happy', 'smile']
+        },
+        {
+            src: 'https://images.neopets.com/neoboards/smilies/happycry.gif',
+            key: ':\')',
+            keywords: ['hold', 'back', 'tear', 'cry', 'smile']
+        },
+        {
+            src: 'https://images.neopets.com/neoboards/smilies/heartred.gif',
+            key: '*heartred*',
+            keywords: ['red']
+        },
+        {
+            src: 'https://images.neopets.com/neoboards/smilies/heartorange.gif',
+            key: '*heartorange*',
+            keywords: ['orange']
+        },
+        {
+            src: 'https://images.neopets.com/neoboards/smilies/heartyellow.gif',
+            key: '*heartyellow*',
+            keywords: ['yellow']
+        },
+        {
+            src: 'https://images.neopets.com/neoboards/smilies/heartgreen.gif',
+            key: '*heartgreen*',
+            keywords: ['green']
+        },
+        {
+            src: 'https://images.neopets.com/neoboards/smilies/heartblue.gif',
+            key: '*heartblue*',
+            keywords: ['blue']
+        },
+        {
+            src: 'https://images.neopets.com/neoboards/smilies/heartpurple.gif',
+            key: '*heartpurple*',
+            keywords: ['purple']
+        },
+        {
+            src: 'https://images.neopets.com/neoboards/smilies/heartblack.gif',
+            key: '*heartblack*',
+            keywords: ['black']
+        },
+        {
+            src: 'https://images.neopets.com/neoboards/smilies/heartsparkle.gif',
+            key: '*heartsparkle*',
+            keywords: ['sparkle', 'red']
+        },
+        {
+            src: 'https://images.neopets.com/neoboards/smilies/heartpink.gif',
+            key: '*heartpink*',
+            keywords: ['pink']
         }
     ],
     neopians: [
@@ -355,6 +473,11 @@ const smilies = {
             src: 'https://images.neopets.com/neoboards/smilies/cook.gif',
             key: '*cook*',
             keywords: ['skeith']
+        },
+        {
+            src: 'https://images.neopets.com/neoboards/smilies/deadchia.gif',
+            key: '*deadchia*',
+            keywords: ['dead', 'rip', 'chia']
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/fyora.gif',
@@ -432,6 +555,11 @@ const smilies = {
             keywords: ['bori', 'obelisk', 'rasala']
         },
         {
+            src: 'https://images.neopets.com/neoboards/smilies/pandora.gif',
+            key: '*pandora*',
+            keywords: ['faellie']
+        },
+        {
             src: 'https://images.neopets.com/neoboards/smilies/quartermaster.gif',
             key: '*quartermaster*',
             keywords: ['xweetok']
@@ -463,13 +591,11 @@ const smilies = {
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/sloth.gif',
-            key: '*sloth*',
-            keywords: []
+            key: '*sloth*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/snowager.gif',
-            key: '*snowager*',
-            keywords: []
+            key: '*snowager*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/swabbie.gif',
@@ -498,8 +624,7 @@ const smilies = {
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/turmaculus.gif',
-            key: '*turmaculus*',
-            keywords: []
+            key: '*turmaculus*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/velm.gif',
@@ -515,400 +640,346 @@ const smilies = {
     neopets: [
         {
             src: 'https://images.neopets.com/neoboards/smilies/acara.gif',
-            key: '*acara*',
-            keywords: []
+            key: '*acara*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/aisha.gif',
-            key: '*aisha*',
-            keywords: []
+            key: '*aisha*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/blumaroo.gif',
-            key: '*blumaroo*',
-            keywords: []
+            key: '*blumaroo*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/bori.gif',
-            key: '*bori*',
-            keywords: []
+            key: '*bori*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/bruce.gif',
-            key: '*bruce*',
-            keywords: []
+            key: '*bruce*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/buzz.gif',
-            key: '*buzz*',
-            keywords: []
+            key: '*buzz*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/chia.gif',
-            key: '*chia*',
-            keywords: []
+            key: '*chia*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/chomby.gif',
-            key: '*chomby*',
-            keywords: []
+            key: '*chomby*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/cybunny.gif',
-            key: '*cybunny*',
-            keywords: []
+            key: '*cybunny*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/draik.gif',
-            key: '*draik*',
-            keywords: []
+            key: '*draik*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/elephante.gif',
-            key: '*elephante*',
-            keywords: []
+            key: '*elephante*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/eyrie.gif',
-            key: '*eyrie*',
-            keywords: []
+            key: '*eyrie*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/flotsam.gif',
-            key: '*flotsam*',
-            keywords: []
+            key: '*flotsam*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/gelert.gif',
-            key: '*gelert*',
-            keywords: []
+            key: '*gelert*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/gnorbu.gif',
-            key: '*gnorbu*',
-            keywords: []
+            key: '*gnorbu*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/grarrl.gif',
-            key: '*grarrl*',
-            keywords: []
+            key: '*grarrl*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/grundo.gif',
-            key: '*grundo*',
-            keywords: []
+            key: '*grundo*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/hissi.gif',
-            key: '*hissi*',
-            keywords: []
+            key: '*hissi*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/ixi.gif',
-            key: '*ixi*',
-            keywords: []
+            key: '*ixi*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/jetsam.gif',
-            key: '*jetsam*',
-            keywords: []
+            key: '*jetsam*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/jubjub.gif',
-            key: '*jubjub*',
-            keywords: []
+            key: '*jubjub*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/kacheek.gif',
-            key: '*kacheek*',
-            keywords: []
+            key: '*kacheek*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/kau.gif',
-            key: '*kau*',
-            keywords: []
+            key: '*kau*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/kiko.gif',
-            key: '*kiko*',
-            keywords: []
+            key: '*kiko*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/koi.gif',
-            key: '*koi*',
-            keywords: []
+            key: '*koi*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/korbat.gif',
-            key: '*korbat*',
-            keywords: []
+            key: '*korbat*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/kougra.gif',
-            key: '*kougra*',
-            keywords: []
+            key: '*kougra*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/krawk.gif',
-            key: '*krawk*',
-            keywords: []
+            key: '*krawk*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/kyrii.gif',
-            key: '*kyrii*',
-            keywords: []
+            key: '*kyrii*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/lenny.gif',
-            key: '*lenny*',
-            keywords: []
+            key: '*lenny*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/lupe.gif',
-            key: '*lupe*',
-            keywords: []
+            key: '*lupe*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/lutari.gif',
-            key: '*lutari*',
-            keywords: []
+            key: '*lutari*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/meerca.gif',
-            key: '*meerca*',
-            keywords: []
+            key: '*meerca*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/moehog.gif',
-            key: '*moehog*',
-            keywords: []
+            key: '*moehog*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/mynci.gif',
-            key: '*mynci*',
-            keywords: []
+            key: '*mynci*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/nimmo.gif',
-            key: '*nimmo*',
-            keywords: []
+            key: '*nimmo*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/ogrin.gif',
-            key: '*ogrin*',
-            keywords: []
+            key: '*ogrin*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/peophin.gif',
-            key: '*peophin*',
-            keywords: []
+            key: '*peophin*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/poogle.gif',
-            key: '*poogle*',
-            keywords: []
+            key: '*poogle*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/pteri.gif',
-            key: '*pteri*',
-            keywords: []
+            key: '*pteri*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/quiggle.gif',
-            key: '*quiggle*',
-            keywords: []
+            key: '*quiggle*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/ruki.gif',
-            key: '*ruki*',
-            keywords: []
+            key: '*ruki*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/scorchio.gif',
-            key: '*scorchio*',
-            keywords: []
+            key: '*scorchio*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/shoyru.gif',
-            key: '*shoyru*',
-            keywords: []
+            key: '*shoyru*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/skeith.gif',
-            key: '*skeith*',
-            keywords: []
+            key: '*skeith*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/techo.gif',
-            key: '*techo*',
-            keywords: []
+            key: '*techo*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/tonu.gif',
-            key: '*tonu*',
-            keywords: []
+            key: '*tonu*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/tuskaninny.gif',
-            key: '*tuskaninny*',
-            keywords: []
+            key: '*tuskaninny*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/uni.gif',
-            key: '*uni*',
-            keywords: []
+            key: '*uni*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/usul.gif',
-            key: '*usul*',
-            keywords: []
+            key: '*usul*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/vandagyre.gif',
-            key: '*vandagyre*',
-            keywords: []
+            key: '*vandagyre*'
+        },
+        {
+            src: 'https://images.neopets.com/neoboards/smilies/varwolf.gif',
+            key: '*varwolf*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/wocky.gif',
-            key: '*wocky*',
-            keywords: []
+            key: '*wocky*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/xweetok.gif',
-            key: '*xweetok*',
-            keywords: []
+            key: '*xweetok*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/yurble.gif',
-            key: '*yurble*',
-            keywords: []
+            key: '*yurble*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/zafara.gif',
-            key: '*zafara*',
-            keywords: []
+            key: '*zafara*'
         }
     ],
     petpets: [
         {
-            src: 'https://images.neopets.com/neoboards/smilies/weewoo.gif',
-            key: '*weewoo*',
-            keywords: []
+            src: 'https://images.neopets.com/neoboards/smilies/angelpuss.gif',
+            key: '*angelpuss*'
         },
         {
-            src: 'https://images.neopets.com/neoboards/smilies/angelpuss.gif',
-            key: '*angelpuss*',
-            keywords: []
+            src: 'https://images.neopets.com/neoboards/smilies/ditrey.gif',
+            key: '*ditrey*'
+        },
+        {
+            src: 'https://images.neopets.com/neoboards/smilies/doglefox.gif',
+            key: '*doglefox*'
+        },
+        {
+            src: 'https://images.neopets.com/neoboards/smilies/faellie.gif',
+            key: '*faellie*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/feepit.gif',
-            key: '*feepit*',
-            keywords: []
+            key: '*feepit*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/jimmi.gif',
-            key: '*jimmi*',
-            keywords: []
+            key: '*jimmi*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/jinjah.gif',
-            key: '*jinjah*',
-            keywords: []
+            key: '*jinjah*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/kadoatery.gif',
-            key: '*kadoatery*',
-            keywords: []
+            key: '*kadoatery*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/kadoatie.gif',
-            key: '*kadoatie*',
-            keywords: []
+            key: '*kadoatie*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/larnikin.gif',
-            key: '*larnikin*',
-            keywords: []
+            key: '*larnikin*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/meepit.gif',
-            key: '*meepit*',
-            keywords: []
+            key: '*meepit*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/meowclops.gif',
-            key: '*meowclops*',
-            keywords: []
+            key: '*meowclops*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/mootix.gif',
-            key: '*mootix*',
-            keywords: []
+            key: '*mootix*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/niptor.gif',
-            key: '*niptor*',
-            keywords: []
+            key: '*niptor*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/noil.gif',
-            key: '*noil*',
-            keywords: []
+            key: '*noil*'
+        },
+        {
+            src: 'https://images.neopets.com/neoboards/smilies/pebble.gif',
+            key: '*pebble*',
+            keywords: ['rock', 'stone']
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/pinchit.gif',
-            key: '*pinchit*',
-            keywords: []
+            key: '*pinchit*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/plumpy.gif',
-            key: '*plumpy*',
-            keywords: []
+            key: '*plumpy*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/purplebug.gif',
-            key: '*purplebug*',
-            keywords: []
+            key: '*purplebug*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/slorg.gif',
-            key: '*slorg*',
-            keywords: []
+            key: '*slorg*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/snowbunny.gif',
-            key: '*snowbunny*',
-            keywords: []
+            key: '*snowbunny*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/spyder.gif',
-            key: '*spyder*',
-            keywords: []
+            key: '*spyder*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/swipe.gif',
-            key: '*swipe*',
-            keywords: []
+            key: '*swipe*'
+        },
+        {
+            src: 'https://images.neopets.com/neoboards/smilies/talpidat.gif',
+            key: '*talpidat*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/warf.gif',
-            key: '*warf*',
-            keywords: []
+            key: '*warf*'
+        },
+        {
+            src: 'https://images.neopets.com/neoboards/smilies/weewoo.gif',
+            key: '*weewoo*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/woogy.gif',
-            key: '*woogy*',
-            keywords: []
+            key: '*woogy*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/yooyu.gif',
-            key: '*yooyu*',
-            keywords: []
+            key: '*yooyu*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/zomutt.gif',
-            key: '*zomutt*',
-            keywords: []
+            key: '*zomutt*'
         }
     ],
     items: [
@@ -964,13 +1035,11 @@ const smilies = {
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/book.gif',
-            key: '*book*',
-            keywords: []
+            key: '*book*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/codestone.gif',
-            key: '*codestone*',
-            keywords: []
+            key: '*codestone*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/cookie.gif',
@@ -989,8 +1058,7 @@ const smilies = {
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/dubloon.gif',
-            key: '*dubloon*',
-            keywords: []
+            key: '*dubloon*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/icecream.gif',
@@ -1094,13 +1162,11 @@ const smilies = {
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/scroll.gif',
-            key: '*scroll*',
-            keywords: []
+            key: '*scroll*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/sock.gif',
-            key: '*sock*',
-            keywords: []
+            key: '*sock*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/starberry.gif',
@@ -1136,28 +1202,23 @@ const smilies = {
     cup: [
         {
             src: 'https://images.neopets.com/neoboards/smilies/altador.gif',
-            key: '*altador*',
-            keywords: []
+            key: '*altador*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/brightvale.gif',
-            key: '*brightvale*',
-            keywords: []
+            key: '*brightvale*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/dacardia.gif',
-            key: '*dacardia*',
-            keywords: []
+            key: '*dacardia*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/darigan.gif',
-            key: '*darigan*',
-            keywords: []
+            key: '*darigan*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/faerieland.gif',
-            key: '*faerieland*',
-            keywords: []
+            key: '*faerieland*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/haunted.gif',
@@ -1176,8 +1237,7 @@ const smilies = {
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/kreludor.gif',
-            key: '*kreludor*',
-            keywords: []
+            key: '*kreludor*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/lostdesert.gif',
@@ -1186,13 +1246,11 @@ const smilies = {
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/maraqua.gif',
-            key: '*maraqua*',
-            keywords: []
+            key: '*maraqua*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/meridell.gif',
-            key: '*meridell*',
-            keywords: []
+            key: '*meridell*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/mystery.gif',
@@ -1201,18 +1259,20 @@ const smilies = {
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/moltara.gif',
-            key: '*moltara*',
-            keywords: []
+            key: '*moltara*'
+        },
+        {
+            src: 'https://images.neopets.com/neoboards/smilies/neopiacentral.gif',
+            key: '*neopiacentral*',
+            keywords: ['neopia', 'nc']
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/rooisland.gif',
-            key: '*rooisland*',
-            keywords: []
+            key: '*rooisland*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/shenkuu.gif',
-            key: '*shenkuu*',
-            keywords: []
+            key: '*shenkuu*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/terror.gif',
@@ -1221,8 +1281,7 @@ const smilies = {
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/tyrannia.gif',
-            key: '*tyrannia*',
-            keywords: []
+            key: '*tyrannia*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/virtupets.gif',
@@ -1233,38 +1292,31 @@ const smilies = {
     bd: [
         {
             src: 'https://images.neopets.com/neoboards/smilies/air.gif',
-            key: '*air*',
-            keywords: []
+            key: '*air*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/dark.gif',
-            key: '*dark*',
-            keywords: []
+            key: '*dark*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/earth.gif',
-            key: '*earth*',
-            keywords: []
+            key: '*earth*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/fire.gif',
-            key: '*fire*',
-            keywords: []
+            key: '*fire*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/light.gif',
-            key: '*light*',
-            keywords: []
+            key: '*light*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/physical.gif',
-            key: '*physical*',
-            keywords: []
+            key: '*physical*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/water.gif',
-            key: '*water*',
-            keywords: []
+            key: '*water*'
         }
     ],
     celebration: [
@@ -1280,13 +1332,11 @@ const smilies = {
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/holly.gif',
-            key: '*holly*',
-            keywords: []
+            key: '*holly*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/mistletoe.gif',
-            key: '*mistletoe*',
-            keywords: []
+            key: '*mistletoe*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/rednose.gif',
@@ -1300,18 +1350,20 @@ const smilies = {
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/snowflake.gif',
-            key: '*snowflake*',
-            keywords: []
+            key: '*snowflake*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/snowman.gif',
-            key: '*snowman*',
-            keywords: []
+            key: '*snowman*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/xmastree.gif',
             key: '*xmastree*',
             keywords: ['christmas', 'tree']
+        },
+        {
+            src: 'https://images.neopets.com/neoboards/smilies/firecrackers.gif',
+            key: '*firecrackers*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/present.gif',
@@ -1350,8 +1402,7 @@ const smilies = {
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/candle.gif',
-            key: '*candle*',
-            keywords: []
+            key: '*candle*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/creepyspyder.gif',
@@ -1365,13 +1416,11 @@ const smilies = {
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/fence.gif',
-            key: '*fence*',
-            keywords: []
+            key: '*fence*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/ghost.gif',
-            key: '*ghost*',
-            keywords: []
+            key: '*ghost*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/jackolantern.gif',
@@ -1405,13 +1454,11 @@ const smilies = {
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/flower.gif',
-            key: '*flower*',
-            keywords: []
+            key: '*flower*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/heart.gif',
-            key: '*heart*',
-            keywords: []
+            key: '*heart*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/jellykacheek.gif',
@@ -1470,8 +1517,7 @@ const smilies = {
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/negg.gif',
-            key: '*negg*',
-            keywords: []
+            key: '*negg*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/paperlantern.gif',
@@ -1480,8 +1526,7 @@ const smilies = {
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/rainbow.gif',
-            key: '*rainbow*',
-            keywords: []
+            key: '*rainbow*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/shamrock.gif',
@@ -1507,13 +1552,11 @@ const smilies = {
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/catfish.gif',
-            key: '*catfish*',
-            keywords: []
+            key: '*catfish*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/cloud.gif',
-            key: '*cloud*',
-            keywords: []
+            key: '*cloud*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/coffee.gif',
@@ -1547,18 +1590,20 @@ const smilies = {
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/map.gif',
-            key: '*map*',
-            keywords: []
+            key: '*map*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/monocle.gif',
-            key: '*monocle*',
-            keywords: []
+            key: '*monocle*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/moon.gif',
-            key: '*moon*',
-            keywords: []
+            key: '*moon*'
+        },
+        {
+            src: 'https://images.neopets.com/neoboards/smilies/pinkclouds.gif',
+            key: '*pinkclouds*',
+            keywords: ['cloud', 'pink']
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/raincloud.gif',
@@ -1567,13 +1612,11 @@ const smilies = {
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/star.gif',
-            key: '*star*',
-            keywords: []
+            key: '*star*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/sun.gif',
-            key: '*sun*',
-            keywords: []
+            key: '*sun*'
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/tea.gif',
@@ -1587,8 +1630,7 @@ const smilies = {
         },
         {
             src: 'https://images.neopets.com/neoboards/smilies/yarn.gif',
-            key: '*yarn*',
-            keywords: []
+            key: '*yarn*'
         }
     ]
 }
@@ -1792,7 +1834,7 @@ const css = `<style>
 }
 </style>`;
 
-(function() {
+(function () {
     'use strict';
     init();
 })();
