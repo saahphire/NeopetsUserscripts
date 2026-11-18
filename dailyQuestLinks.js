@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Neopets: Daily Quest Links
 // @namespace    https://github.com/saahphire/NeopetsUserscripts
-// @version      1.6.3
+// @version      1.7.0
 // @description  Adds links to quickly complete daily quests. Updated Oct 2026!
 // @author       saahphire
 // @homepageURL  https://github.com/saahphire/NeopetsUserscripts
@@ -61,7 +61,7 @@ const links = {
   "Play Wise Old King": "https://www.neopets.com/medieval/wiseking.phtml",
   "Play Grumpy Old King": "https://www.neopets.com/medieval/grumpyking.phtml",
   "Discard an Item": "https://www.neopets.com/inventory.phtml",
-  "Scratch a Scratchcard": "https://www.neopets.com/desert/sc/kiosk.phtml",
+  "Scratch a Scratchcard": "https://www.neopets.com/winter/kiosk.phtml",
   "Vote in Customisation Spotlight": "https://www.neopets.com/spotlights/custompet/?tab=vote",
   "Collect Bank Interest": "https://www.neopets.com/bank.phtml"
 };
